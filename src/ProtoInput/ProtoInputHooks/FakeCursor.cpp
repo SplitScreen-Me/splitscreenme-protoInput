@@ -43,26 +43,64 @@ BOOL CALLBACK EnumWindowsProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
 
 void FakeCursor::DrawCursor()
 {
-	//TODO: width/height probably needs to change
-    constexpr int cursorWidth = 40;
-    constexpr int cursorHeight = 40;
+    POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
     if (oldHadShowCursor)
     {
         RECT fill{ oldX, oldY, oldX + cursorWidth, oldY + cursorHeight };
         FillRect(hdc, &fill, transparencyBrush); // Note: window, not screen coordinates!
+
     }
 
     oldHadShowCursor = showCursor;
 
-    POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
     ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &pos);
     ScreenToClient(pointerWindow, &pos);
 
-	if (showCursor)
-	    DrawIcon(hdc, pos.x, pos.y, hCursor);
-	    // DrawIconEx(hdc, pos.x, pos.y, hCursor, 0, 0, 0, transparencyBrush, DI_NORMAL | DI_COMPAT | DI_DEFAULTSIZE);
-	
+    if (DrawFakeCursorFix)
+    {
+        pos.x -= cursoroffsetx;
+        pos.y -= cursoroffsety;
+        if (pos.x < 0) pos.x = 0;
+        if (pos.y < 0) pos.y = 0;
+        if (showCursor)// && hdc && hCursor
+        {
+            if (DrawIcon(hdc, pos.x, pos.y, hCursor))
+            {
+                if (offsetSET == false && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow))
+                {
+                    HDC hdcMem = CreateCompatibleDC(hdc);
+                    HBITMAP hbmScreen = CreateCompatibleBitmap(hdc, cursorWidth, cursorHeight);
+                    SelectObject(hdcMem, hbmScreen);
+                    BitBlt(hdcMem, 0, 0, cursorWidth, cursorHeight, hdc, pos.x, pos.y, SRCCOPY);
+                    // Scan within the cursor screenshot pixel area
+                    cursoroffsetx = -1;
+                    cursoroffsety = -1;
+                    for (int y = 0; y < cursorHeight; y++)
+                    {
+                        for (int x = 0; x < cursorWidth; x++)
+                        {
+                            COLORREF pixelColor = GetPixel(hdcMem, x, y); // Get copied pixel color
+                            if (pixelColor != transparencyKey)
+                            {
+                                cursoroffsetx = x;
+                                cursoroffsety = y;
+                                break;
+                            }
+                        }
+                        if (cursoroffsetx != -1) break;
+                    }
+                    if (cursoroffsetx < 2) cursoroffsetx = 0;
+                    if (cursoroffsety < 2) cursoroffsety = 0;
+                    offsetSET = true;
+                    DeleteDC(hdcMem);
+                    DeleteObject(hbmScreen);
+                }
+            }
+        }
+    }
+    if (showCursor && !DrawFakeCursorFix)
+        DrawIcon(hdc, pos.x, pos.y, hCursor);
     oldX = pos.x;
     oldY = pos.y;
 }
