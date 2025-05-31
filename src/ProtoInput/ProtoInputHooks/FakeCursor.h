@@ -37,11 +37,10 @@ class FakeCursor
 	
 public:
 	static FakeCursor state;
-	bool DrawFakeCursorFix;
+	bool DrawFakeCursorFix = true;
 	void StartInternal();
 	void StartDrawLoopInternal();
 
-	bool DrawFakeCursorFix = true;
 	static bool& GetToggleVisilbityShorcutEnabled()
 	{
 		return state.toggleVisilbityShorcutEnabled;
