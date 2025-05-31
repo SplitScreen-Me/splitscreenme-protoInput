@@ -16,12 +16,13 @@ class FakeCursor
 	HCURSOR hCursor;
 	static constexpr auto transparencyKey = RGB(0, 0, 1);
 	
-	int oldX, oldY, cursoroffsetx, cursoroffsety, cursorHeight = 40, cursorWidth = 40;
-
+	int oldX, oldY;
 	bool oldHadShowCursor = true;
-	bool offsetSET;
 
-
+	// This is used to fix the cursor drawing.
+	int cursoroffsetx;
+	int cursoroffsety;
+	bool offsetSET = false;
 
 	// This is either on or off for a given game (ie. it doesn't change)
 	bool drawingEnabled = false;
