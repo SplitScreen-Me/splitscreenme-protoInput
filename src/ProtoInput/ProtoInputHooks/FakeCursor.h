@@ -19,7 +19,7 @@ class FakeCursor
 	int oldX, oldY;
 	bool oldHadShowCursor = true;
 
-	// This is used to fix the cursor drawing.
+	// DrawFakeCursorFix. cursor offset scan
 	int cursoroffsetx;
 	int cursoroffsety;
 	bool offsetSET = false;
