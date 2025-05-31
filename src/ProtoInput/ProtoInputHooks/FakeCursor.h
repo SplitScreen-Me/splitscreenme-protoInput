@@ -16,9 +16,14 @@ class FakeCursor
 	HCURSOR hCursor;
 	static constexpr auto transparencyKey = RGB(0, 0, 1);
 	
-	int oldX, oldY, cursoroffsetx, cursoroffsety, cursorHeight = 40, cursorWidth = 40;
+	//cursor drawing
+	int oldX, oldY, cursorHeight = 40, cursorWidth = 40;
 	bool oldHadShowCursor = true;
+
+	//drawfakecursorfix
+	int cursoroffsetx, cursoroffsety;
 	bool offsetSET = false;
+
 
 	// This is either on or off for a given game (ie. it doesn't change)
 	bool drawingEnabled = false;
@@ -37,7 +42,7 @@ public:
 	void StartInternal();
 	void StartDrawLoopInternal();
 
-	bool DrawFakeCursorFix;
+	bool DrawFakeCursorFix = true;
 	static bool& GetToggleVisilbityShorcutEnabled()
 	{
 		return state.toggleVisilbityShorcutEnabled;
