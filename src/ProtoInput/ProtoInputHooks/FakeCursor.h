@@ -16,13 +16,11 @@ class FakeCursor
 	HCURSOR hCursor;
 	static constexpr auto transparencyKey = RGB(0, 0, 1);
 	
-	//cursor drawing
-	int oldX, oldY, cursorHeight = 40, cursorWidth = 40;
-	bool oldHadShowCursor = true;
+	int oldX, oldY, cursoroffsetx, cursoroffsety, cursorHeight = 40, cursorWidth = 40;
 
-	//drawfakecursorfix
-	int cursoroffsetx, cursoroffsety;
-	bool offsetSET = false;
+	bool oldHadShowCursor = true;
+	bool offsetSET;
+
 
 
 	// This is either on or off for a given game (ie. it doesn't change)
@@ -38,7 +36,7 @@ class FakeCursor
 	
 public:
 	static FakeCursor state;
-
+	bool DrawFakeCursorFix;
 	void StartInternal();
 	void StartDrawLoopInternal();
 

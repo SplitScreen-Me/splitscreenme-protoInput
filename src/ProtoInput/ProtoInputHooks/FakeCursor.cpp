@@ -45,10 +45,6 @@ void FakeCursor::DrawCursor()
 {
     POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
-    //TODO: width/height probably needs to change
-    constexpr int cursorWidth = 40;
-    constexpr int cursorHeight = 40;
-
     if (oldHadShowCursor)
     {
         RECT fill{ oldX, oldY, oldX + cursorWidth, oldY + cursorHeight };
@@ -70,7 +66,6 @@ void FakeCursor::DrawCursor()
         if (showCursor)// && hdc && hCursor
         {
             if (DrawIcon(hdc, pos.x, pos.y, hCursor))
-            { 
                 if (offsetSET == false && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow))
                 {
                     HDC hdcMem = CreateCompatibleDC(hdc);
