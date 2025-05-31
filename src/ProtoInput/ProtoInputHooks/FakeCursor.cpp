@@ -66,7 +66,6 @@ void FakeCursor::DrawCursor()
         if (showCursor)// && hdc && hCursor
         {
             if (DrawIcon(hdc, pos.x, pos.y, hCursor))
-            {
                 if (offsetSET == false && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow))
                 {
                     HDC hdcMem = CreateCompatibleDC(hdc);
