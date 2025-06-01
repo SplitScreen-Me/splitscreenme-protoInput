@@ -18,11 +18,13 @@ class FakeCursor
 	
 	int oldX, oldY;
 	bool oldHadShowCursor = true;
+	//TODO: width/height probably needs to change
+	int cursorWidth = 40;
+	int cursorHeight = 40;
 
-	// DrawFakeCursorFix. cursor offset scan
-	int cursoroffsetx;
-	int cursoroffsety;
-	bool offsetSET = false;
+	// DrawFakeCursorFix. cursor offset scan and cursor size fix
+	int cursoroffsetx, cursoroffsety; 
+	int offsetSET; //0:sizing 1:offset 2:done
 
 	// This is either on or off for a given game (ie. it doesn't change)
 	bool drawingEnabled = false;
@@ -37,7 +39,7 @@ class FakeCursor
 	
 public:
 	static FakeCursor state;
-	bool DrawFakeCursorFix = true;
+	bool DrawFakeCursorFix;
 	void StartInternal();
 	void StartDrawLoopInternal();
 

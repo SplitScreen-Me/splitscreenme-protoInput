@@ -45,9 +45,7 @@ void FakeCursor::DrawCursor()
 {
     POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
-    //TODO: width/height probably needs to change
-    constexpr int cursorWidth = 40;
-    constexpr int cursorHeight = 40;
+
 
     if (oldHadShowCursor)
     {
@@ -69,9 +67,33 @@ void FakeCursor::DrawCursor()
         if (pos.y < 0) pos.y = 0;
         if (showCursor)// && hdc && hCursor
         {
-            if (DrawIcon(hdc, pos.x, pos.y, hCursor))
+            if (DrawIconEx(hdc, pos.x, pos.y, hCursor, cursorWidth, cursorHeight, 0, transparencyBrush, DI_NORMAL | DI_DEFAULTSIZE))
             {
-                if (offsetSET == false && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow))
+                if (offsetSET == 0) //size setting
+                {
+                    ICONINFO ii;
+                    BITMAP bitmap;
+                    if (GetIconInfo(hCursor, &ii))
+                    {
+                        if (GetObject(ii.hbmMask, sizeof(BITMAP), &bitmap))
+                        {
+                            cursorWidth = bitmap.bmWidth;
+                            if (ii.hbmColor == NULL)
+                            {//For monochrome icons, the hbmMask is twice the height of the icon and hbmColor is NULL
+                                cursorHeight = bitmap.bmHeight / 2;
+                            }
+                            else
+                            {
+                                cursorHeight = bitmap.bmHeight;
+                            }
+                            DeleteObject(ii.hbmColor);
+                            DeleteObject(ii.hbmMask);
+                        }
+                    
+                    }
+                    offsetSET++; //size set, doing offset next run
+                }
+                if (offsetSET == 1 && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow)) //offset setting
                 {
                     HDC hdcMem = CreateCompatibleDC(hdc);
                     HBITMAP hbmScreen = CreateCompatibleBitmap(hdc, cursorWidth, cursorHeight);
@@ -96,14 +118,14 @@ void FakeCursor::DrawCursor()
                     }
                     if (cursoroffsetx < 2) cursoroffsetx = 0;
                     if (cursoroffsety < 2) cursoroffsety = 0;
-                    offsetSET = true;
+                    offsetSET ++; //offset set doing drawing only now
                     DeleteDC(hdcMem);
                     DeleteObject(hbmScreen);
                 }
             }
         }
     }
-    if (showCursor && !DrawFakeCursorFix)
+    else if (showCursor)
         DrawIcon(hdc, pos.x, pos.y, hCursor);
     oldX = pos.x;
     oldY = pos.y;
