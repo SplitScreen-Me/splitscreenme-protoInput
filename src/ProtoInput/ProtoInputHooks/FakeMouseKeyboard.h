@@ -56,6 +56,9 @@ public:
 	static bool IsKeyStatePressed(int vkey);
 	static bool IsAsyncKeyStatePressed(int vkey);
 
+	// Some games must use the exact window rect to determine the edge of the window.
+	static bool PutMouseInsideWindow;
+
 	static unsigned int GetMouseMkFlags()
 	{
 #define PROTO_MMFKEY(x, y) ((FakeMouseKeyboard::IsKeyStatePressed(x)) ? (y) : (0))

@@ -171,6 +171,15 @@
     <ClInclude Include="WindowStyleHook.h">
       <Filter>Source Files\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="MoveWindowHook.h">
+      <Filter>Source Files\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjustWindowRectHook.h">
+      <Filter>Source Files\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoveBorderHook.h">
+      <Filter>Source Files\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -303,6 +312,15 @@
       <Filter>Source Files\Hooks</Filter>
     </ClCompile>
     <ClCompile Include="WindowStyleHook.cpp">
+      <Filter>Source Files\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveWindowHook.cpp">
+      <Filter>Source Files\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjustWindowRectHook.cpp">
+      <Filter>Source Files\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="RemoveBorderHook.cpp">
       <Filter>Source Files\Hooks</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,9 +9,17 @@ int SetWindowPosHook::height = 0;
 int SetWindowPosHook::posx = 0;
 int SetWindowPosHook::posy = 0;
 
+bool SetWindowPosHook::SetWindowPosDontResize = false;
+bool SetWindowPosHook::SetWindowPosDontReposition = false;
+
 BOOL WINAPI Hook_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
-	return SetWindowPos(hWnd, hWndInsertAfter, SetWindowPosHook::posx, SetWindowPosHook::posy, SetWindowPosHook::width, SetWindowPosHook::height, uFlags);
+	int Width = SetWindowPosHook::SetWindowPosDontResize ? cx : SetWindowPosHook::width;
+	int Height = SetWindowPosHook::SetWindowPosDontResize ? cy : SetWindowPosHook::height;
+	int PosX = SetWindowPosHook::SetWindowPosDontReposition ? X : SetWindowPosHook::posx;
+	int PosY = SetWindowPosHook::SetWindowPosDontReposition ? Y : SetWindowPosHook::posy;
+
+	return SetWindowPos(hWnd, hWndInsertAfter, PosX, PosY, Width, Height, uFlags);
 }
 
 void SetWindowPosHook::ShowGuiStatus()

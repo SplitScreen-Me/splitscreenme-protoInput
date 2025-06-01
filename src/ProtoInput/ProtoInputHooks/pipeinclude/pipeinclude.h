@@ -26,12 +26,19 @@ enum class PipeMessageType
 	SetDinputDeviceGuid,
 	SetDinputHookGetDeviceState,
 	SetSetWindowPosSettings,
+	SetSetWindowPosDontResize,
+	SetSetWindowPosDontReposition,
 	SetCreateSingleHIDName,
 	SetClipCursorHookOptions,
 	SetAllowFakeCursorOutOfBounds,
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
-	SetShowCursorWhenImageUpdated
+	SetShowCursorWhenImageUpdated,
+	SetPutMouseInsideWindow,
+	SetMoveWindowSettings,
+	SetMoveWindowDontResize,
+	SetMoveWindowDontReposition,
+	SetAdjustWindowRectSettings
 };
 
 struct PipeMessageHeader
@@ -88,6 +95,7 @@ struct PipeMessageSetupMessagesToSend
 	bool sendMouseButtonMessages;
 	bool sendMouseMoveMessages;
 	bool sendKeyboardPressMessages;
+	bool sendMouseDblClkMessages;
 };
 
 struct PipeMessageSetDrawFakeCursor
@@ -153,6 +161,16 @@ struct PipeMessageSetSetWindowPosSettings
 	int height;
 };
 
+struct PipeMessageSetSetWindowPosDontResize
+{
+	bool SetWindowPosDontResize;
+};
+
+struct PipeMessageSetSetWindowPosDontReposition
+{
+	bool SetWindowPosDontReposition;
+};
+
 struct PipeMessageSetCreateSingleHIDName
 {
 	wchar_t buff[1000]{};
@@ -183,6 +201,37 @@ struct PipeMessageSetRawInputBypass
 struct PipeMessageShowCursorWhenImageUpdated
 {
 	bool ShowCursorWhenImageUpdated;
+};
+
+struct PipeMessagePutMouseInsideWindow
+{
+	bool PutMouseInsideWindow;
+};
+
+struct PipeMessageSetMoveWindowSettings
+{
+	int posx;
+	int posy;
+	int width;
+	int height;
+};
+
+struct PipeMessageSetMoveWindowDontResize
+{
+	bool MoveWindowDontResize;
+};
+
+struct PipeMessageSetMoveWindowDontReposition
+{
+	bool MoveWindowDontReposition;
+};
+
+struct PipeMessageSetAdjustWindowRectSettings
+{
+	int posx;
+	int posy;
+	int width;
+	int height;
 };
 
 }

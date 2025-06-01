@@ -189,6 +189,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AdjustWindowRectHook.h" />
     <ClInclude Include="BlockRawInputHook.h" />
     <ClInclude Include="Cleanup.h" />
     <ClInclude Include="ClipCursorHook.h" />
@@ -222,12 +223,14 @@
     <ClInclude Include="MouseButtonFilter.h" />
     <ClInclude Include="MouseMoveFilter.h" />
     <ClInclude Include="MouseWheelFilter.h" />
+    <ClInclude Include="MoveWindowHook.h" />
     <ClInclude Include="OpenXinputWrapper.h" />
     <ClInclude Include="PipeCommunication.h" />
     <ClInclude Include="pipeinclude\pipeinclude.h" />
     <ClInclude Include="RawInput.h" />
     <ClInclude Include="RawInputFilter.h" />
     <ClInclude Include="RegisterRawInputHook.h" />
+    <ClInclude Include="RemoveBorderHook.h" />
     <ClInclude Include="RenameHandlesHook.h" />
     <ClInclude Include="SetCursorPosHook.h" />
     <ClInclude Include="SetWindowPosHook.h" />
@@ -248,6 +251,7 @@
     <ClCompile Include="..\..\..\lib\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\..\lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\..\lib\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="AdjustWindowRectHook.cpp" />
     <ClCompile Include="BlockRawInputHook.cpp" />
     <ClCompile Include="Cleanup.cpp" />
     <ClCompile Include="ClipCursorHook.cpp" />
@@ -272,10 +276,12 @@
     <ClCompile Include="HwndSelector.cpp" />
     <ClCompile Include="MessageFilterHook.cpp" />
     <ClCompile Include="MessageList.cpp" />
+    <ClCompile Include="MoveWindowHook.cpp" />
     <ClCompile Include="OpenXinputWrapper.cpp" />
     <ClCompile Include="PipeCommunication.cpp" />
     <ClCompile Include="RawInput.cpp" />
     <ClCompile Include="RegisterRawInputHook.cpp" />
+    <ClCompile Include="RemoveBorderHook.cpp" />
     <ClCompile Include="RenameHandlesHook.cpp" />
     <ClCompile Include="SetCursorPosHook.cpp" />
     <ClCompile Include="SetWindowPosHook.cpp" />

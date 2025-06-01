@@ -76,6 +76,8 @@ struct Profile
 	bool useFakeClipCursor = true;
 
 	bool showCursorWhenImageUpdated = false;
+
+	bool PutMouseInsideWindow = false;
 	
 	bool drawFakeMouseCursor = true;
 	bool allowMouseOutOfBounds = false;
