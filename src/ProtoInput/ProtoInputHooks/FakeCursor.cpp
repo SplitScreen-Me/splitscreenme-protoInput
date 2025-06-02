@@ -40,14 +40,10 @@ BOOL CALLBACK EnumWindowsProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
     }
     return true;
 }
-
 void FakeCursor::DrawCursor()
 {
-    POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
-
-
-    if (oldHadShowCursor)
+    if (oldHadShowCursor) //erase cursor
     {
         RECT fill{ oldX, oldY, oldX + cursorWidth, oldY + cursorHeight };
         FillRect(hdc, &fill, transparencyBrush); // Note: window, not screen coordinates!
@@ -56,6 +52,7 @@ void FakeCursor::DrawCursor()
 
     oldHadShowCursor = showCursor;
 
+    POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y }; 
     ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &pos);
     ScreenToClient(pointerWindow, &pos);
 
@@ -63,13 +60,14 @@ void FakeCursor::DrawCursor()
     {
         pos.x -= cursoroffsetx;
         pos.y -= cursoroffsety;
+
         if (pos.x < 0) pos.x = 0;
         if (pos.y < 0) pos.y = 0;
+
         if (showCursor)// && hdc && hCursor
         {
-            if (DrawIconEx(hdc, pos.x, pos.y, hCursor, cursorWidth, cursorHeight, 0, transparencyBrush, DI_NORMAL | DI_DEFAULTSIZE))
+            if (DrawIconEx(hdc, pos.x, pos.y, hCursor, cursorWidth, cursorHeight, 0, transparencyBrush, DI_NORMAL))
             {
-
                 if (offsetSET == 1 && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow)) //offset setting
                 {
                     HDC hdcMem = CreateCompatibleDC(hdc);
@@ -99,7 +97,7 @@ void FakeCursor::DrawCursor()
                     DeleteDC(hdcMem);
                     DeleteObject(hbmScreen);
                 }
-                if (offsetSET == 0) //size setting
+                if (offsetSET == 0 && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow)) //size setting
                 {
                     ICONINFO ii;
                     BITMAP bitmap;
