@@ -1,4 +1,7 @@
 #include "RemoveBorderHook.h"
+#include "Gui.h"
+#include "HwndSelector.h"
+#include "FakeCursor.h"
 
 namespace Proto
 {
@@ -17,17 +20,20 @@ namespace Proto
 		style |= WS_VISIBLE | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 	}
 
-	BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+	BOOL CALLBACK EnumWindowsProc(HWND handle, LPARAM lParam)
 	{
 		DWORD processId = GetCurrentProcessId();
 		DWORD windowProcessId;
-		GetWindowThreadProcessId(hwnd, &windowProcessId);
+		GetWindowThreadProcessId(handle, &windowProcessId);
 
 		if (windowProcessId == processId &&
-			GetWindow(hwnd, GW_OWNER) == NULL &&
-			IsWindowVisible(hwnd))
+			GetWindow(handle, GW_OWNER) == (HWND)0 &&
+			IsWindowVisible(handle) &&
+			handle != (HWND)Proto::ConsoleHwnd &&
+			handle != Proto::ProtoGuiHwnd &&
+			handle != FakeCursor::GetPointerWindow())
 		{
-			*(HWND*)lParam = hwnd; // Store the found window handle
+			*(HWND*)lParam = handle; // Store the found window handle
 			return FALSE; // Stop enumeration
 		}
 		return TRUE; // Continue enumeration
