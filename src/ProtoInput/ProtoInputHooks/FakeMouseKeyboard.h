@@ -58,6 +58,9 @@ public:
 
 	// Some games must use the exact window rect to determine the edge of the window.
 	static bool PutMouseInsideWindow;
+	// IgnoreTopLeft and IgnoreBottomRight for PutMouseInsideWindow
+	static bool DefaultTopLeftMouseBounds;
+	static bool DefaultBottomRightMouseBounds;
 
 	static unsigned int GetMouseMkFlags()
 	{

@@ -561,6 +561,40 @@ void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled)
 	}
 }
 
+void SetDefaultTopLeftMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageDefaultTopLeftMouseBounds message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDefaultTopLeftMouseBounds, &message);
+	}
+}
+
+void SetDefaultBottomRightMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageDefaultBottomRightMouseBounds message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDefaultBottomRightMouseBounds, &message);
+	}
+}
+
 void SetMoveWindowSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())

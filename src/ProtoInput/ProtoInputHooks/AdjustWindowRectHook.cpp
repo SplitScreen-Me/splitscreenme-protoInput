@@ -9,8 +9,6 @@ namespace Proto
 	int AdjustWindowRectHook::posx = 0;
 	int AdjustWindowRectHook::posy = 0;
 
-	RECT AdjustWindowRectHook::wr;
-
 	BOOL WINAPI Hook_AdjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL bMenu)
 	{
 		lpRect->top = AdjustWindowRectHook::posy;

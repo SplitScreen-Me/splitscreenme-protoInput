@@ -135,6 +135,10 @@ extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanc
 
 extern "C" __declspec(dllexport) void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled);
 
+extern "C" __declspec(dllexport) void SetDefaultTopLeftMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetDefaultBottomRightMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled);
+
 extern "C" __declspec(dllexport) void SetMoveWindowSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
 
 extern "C" __declspec(dllexport) void SetMoveWindowDontResize(ProtoInstanceHandle instanceHandle, bool enabled);

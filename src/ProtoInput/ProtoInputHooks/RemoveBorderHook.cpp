@@ -41,6 +41,7 @@ namespace Proto
 
 	HWND GetMainWindow()
 	{
+		Sleep(1000);
 		HWND mainWindow = NULL;
 		EnumWindows(EnumWindowsProc, (LPARAM)&mainWindow);
 		return mainWindow;

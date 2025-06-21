@@ -21,7 +21,7 @@ namespace Proto
 			return
 				"Hooks SetWindowLong and SetWindowLongPtr. And maintain the window aspect after the border removal through EnumWindowsProc. ";
 		}
-		bool HasGuiStatus() const override { return false; }
+		bool HasGuiStatus() const override { return true; }
 
 		void InstallImpl() override;
 		void UninstallImpl() override;

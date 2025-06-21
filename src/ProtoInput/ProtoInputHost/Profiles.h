@@ -77,7 +77,7 @@ struct Profile
 
 	bool showCursorWhenImageUpdated = false;
 
-	bool PutMouseInsideWindow = false;
+	bool putMouseInsideWindow = false;
 	
 	bool drawFakeMouseCursor = true;
 	bool drawFakeCursorFix = false;
@@ -88,6 +88,7 @@ struct Profile
 	bool sendMouseButtonMessages = true;
 	bool sendMouseWheelMessages = true;
 	bool sendKeyboardButtonMessages = true;
+	bool sendMouseDblClkMessages = false;
 	
 	bool focusMessageLoop = true;
 	bool focusLoopSendWM_ACTIVATE = true;
@@ -125,6 +126,7 @@ struct Profile
 			cereal::make_nvp("sendMouseButtonMessages", sendMouseButtonMessages),
 			cereal::make_nvp("sendMouseWheelMessages", sendMouseWheelMessages),
 			cereal::make_nvp("sendKeyboardButtonMessages", sendKeyboardButtonMessages),
+			cereal::make_nvp("sendMouseDblClkMessages", sendMouseDblClkMessages),
 
 			cereal::make_nvp("focusMessageLoop", focusMessageLoop),
 			cereal::make_nvp("focusLoopSendWM_ACTIVATE", focusLoopSendWM_ACTIVATE),

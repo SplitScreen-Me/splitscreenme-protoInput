@@ -17,15 +17,13 @@ namespace Proto
 		static int posx;
 		static int posy;
 
-		static RECT wr;
-
 		const char* GetHookName() const override { return "Adjust Window Rectangle"; }
 		const char* GetHookDescription() const override
 		{
 			return
 				"Hooks AdjustWindowRect and AdjustWindowRectEx. And calculates the required size of the window rectangle. ";
 		}
-		bool HasGuiStatus() const override { return false; }
+		bool HasGuiStatus() const override { return true; }
 		void ShowGuiStatus() override;
 		void InstallImpl() override;
 		void UninstallImpl() override;
