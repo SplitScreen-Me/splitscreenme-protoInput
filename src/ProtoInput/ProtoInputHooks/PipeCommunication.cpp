@@ -499,6 +499,26 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				break;
 			}
+			case ProtoPipe::PipeMessageType::SetDefaultTopLeftMouseBounds:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageDefaultTopLeftMouseBounds*>(messageBuffer);
+
+				printf("Received DefaultTopLeftMouseBounds, enabled = %d\n", body->DefaultTopLeftMouseBounds);
+
+				FakeMouseKeyboard::DefaultTopLeftMouseBounds = body->DefaultTopLeftMouseBounds;
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetDefaultBottomRightMouseBounds:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageDefaultBottomRightMouseBounds*>(messageBuffer);
+
+				printf("Received DefaultBottomRightMouseBounds, enabled = %d\n", body->DefaultBottomRightMouseBounds);
+
+				FakeMouseKeyboard::DefaultBottomRightMouseBounds = body->DefaultBottomRightMouseBounds;
+
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetMoveWindowSettings:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetMoveWindowSettings*>(messageBuffer);

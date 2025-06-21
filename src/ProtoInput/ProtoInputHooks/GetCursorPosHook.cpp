@@ -17,14 +17,20 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 		{
 			int clientWidth = HwndSelector::windowWidth;
 			int clientHeight = HwndSelector::windowHeight;
-			if (lpPoint->y < 1)
-				lpPoint->y = 0;  // Top edge
-			if (lpPoint->x < 1)
-				lpPoint->x = 0;  // Left edge
-			if (lpPoint->y > clientHeight - 1)
-				lpPoint->y = clientHeight - 1;  // Bottom edge
-			if (lpPoint->x > clientWidth - 1)
-				lpPoint->x = clientWidth - 1;  // Right edge
+			if (!FakeMouseKeyboard::DefaultTopLeftMouseBounds)
+			{
+				if (lpPoint->y < 1)
+					lpPoint->y = 0;  // Top edge
+				if (lpPoint->x < 1)
+					lpPoint->x = 0;  // Left edge
+			}
+			if (!FakeMouseKeyboard::DefaultBottomRightMouseBounds)
+			{
+				if (lpPoint->y > clientHeight - 1)
+					lpPoint->y = clientHeight - 1;  // Bottom edge
+				if (lpPoint->x > clientWidth - 1)
+					lpPoint->x = clientWidth - 1;  // Right edge
+			}
 		}
 		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
 	}

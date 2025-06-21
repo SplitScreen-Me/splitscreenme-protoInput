@@ -36,6 +36,8 @@ enum class PipeMessageType
 	SetRawInputBypass,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
+	SetDefaultTopLeftMouseBounds,
+	SetDefaultBottomRightMouseBounds,
 	SetMoveWindowSettings,
 	SetMoveWindowDontResize,
 	SetMoveWindowDontReposition,
@@ -210,6 +212,16 @@ struct PipeMessageShowCursorWhenImageUpdated
 struct PipeMessagePutMouseInsideWindow
 {
 	bool PutMouseInsideWindow;
+};
+
+struct PipeMessageDefaultTopLeftMouseBounds
+{
+	bool DefaultTopLeftMouseBounds;
+};
+
+struct PipeMessageDefaultBottomRightMouseBounds
+{
+	bool DefaultBottomRightMouseBounds;
 };
 
 struct PipeMessageSetMoveWindowSettings
