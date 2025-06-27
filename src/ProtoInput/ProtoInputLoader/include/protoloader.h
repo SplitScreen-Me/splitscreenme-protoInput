@@ -146,3 +146,5 @@ extern "C" __declspec(dllexport) void SetMoveWindowDontResize(ProtoInstanceHandl
 extern "C" __declspec(dllexport) void SetMoveWindowDontReposition(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetAdjustWindowRectSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
+
+extern "C" __declspec(dllexport) void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled);

@@ -15,6 +15,8 @@ namespace Proto
 
 	public:
 
+		static bool DontWaitWindowBorder;
+
 		const char* GetHookName() const override { return "Remove Border"; }
 		const char* GetHookDescription() const override
 		{

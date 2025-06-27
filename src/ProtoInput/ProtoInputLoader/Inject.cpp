@@ -662,3 +662,20 @@ void SetAdjustWindowRectSettings(ProtoInstanceHandle instanceHandle, int posx, i
 		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetAdjustWindowRectSettings, &message);
 	}
 }
+
+void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetDontWaitWindowBorder message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDontWaitWindowBorder, &message);
+	}
+}

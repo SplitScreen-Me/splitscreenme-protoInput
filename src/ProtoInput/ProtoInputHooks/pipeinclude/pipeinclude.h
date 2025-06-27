@@ -41,7 +41,8 @@ enum class PipeMessageType
 	SetMoveWindowSettings,
 	SetMoveWindowDontResize,
 	SetMoveWindowDontReposition,
-	SetAdjustWindowRectSettings
+	SetAdjustWindowRectSettings,
+	SetDontWaitWindowBorder
 };
 
 struct PipeMessageHeader
@@ -248,6 +249,11 @@ struct PipeMessageSetAdjustWindowRectSettings
 	int posy;
 	int width;
 	int height;
+};
+
+struct PipeMessageSetDontWaitWindowBorder
+{
+	bool DontWaitWindowBorder;
 };
 
 }
