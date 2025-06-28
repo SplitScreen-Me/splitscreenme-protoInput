@@ -36,10 +36,13 @@ enum class PipeMessageType
 	SetRawInputBypass,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
+	SetDefaultTopLeftMouseBounds,
+	SetDefaultBottomRightMouseBounds,
 	SetMoveWindowSettings,
 	SetMoveWindowDontResize,
 	SetMoveWindowDontReposition,
-	SetAdjustWindowRectSettings
+	SetAdjustWindowRectSettings,
+	SetDontWaitWindowBorder
 };
 
 struct PipeMessageHeader
@@ -212,6 +215,16 @@ struct PipeMessagePutMouseInsideWindow
 	bool PutMouseInsideWindow;
 };
 
+struct PipeMessageDefaultTopLeftMouseBounds
+{
+	bool DefaultTopLeftMouseBounds;
+};
+
+struct PipeMessageDefaultBottomRightMouseBounds
+{
+	bool DefaultBottomRightMouseBounds;
+};
+
 struct PipeMessageSetMoveWindowSettings
 {
 	int posx;
@@ -236,6 +249,11 @@ struct PipeMessageSetAdjustWindowRectSettings
 	int posy;
 	int width;
 	int height;
+};
+
+struct PipeMessageSetDontWaitWindowBorder
+{
+	bool DontWaitWindowBorder;
 };
 
 }

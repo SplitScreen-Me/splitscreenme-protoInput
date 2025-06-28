@@ -561,6 +561,40 @@ void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled)
 	}
 }
 
+void SetDefaultTopLeftMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageDefaultTopLeftMouseBounds message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDefaultTopLeftMouseBounds, &message);
+	}
+}
+
+void SetDefaultBottomRightMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageDefaultBottomRightMouseBounds message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDefaultBottomRightMouseBounds, &message);
+	}
+}
+
 void SetMoveWindowSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
@@ -626,5 +660,22 @@ void SetAdjustWindowRectSettings(ProtoInstanceHandle instanceHandle, int posx, i
 		};
 
 		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetAdjustWindowRectSettings, &message);
+	}
+}
+
+void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetDontWaitWindowBorder message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDontWaitWindowBorder, &message);
 	}
 }

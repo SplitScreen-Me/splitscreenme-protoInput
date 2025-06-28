@@ -25,6 +25,7 @@
 #include "CursorVisibilityHook.h"
 #include "MoveWindowHook.h"
 #include "AdjustWindowRectHook.h"
+#include "RemoveBorderHook.h"
 
 namespace Proto
 {
@@ -499,6 +500,26 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				break;
 			}
+			case ProtoPipe::PipeMessageType::SetDefaultTopLeftMouseBounds:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageDefaultTopLeftMouseBounds*>(messageBuffer);
+
+				printf("Received DefaultTopLeftMouseBounds, enabled = %d\n", body->DefaultTopLeftMouseBounds);
+
+				FakeMouseKeyboard::DefaultTopLeftMouseBounds = body->DefaultTopLeftMouseBounds;
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetDefaultBottomRightMouseBounds:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageDefaultBottomRightMouseBounds*>(messageBuffer);
+
+				printf("Received DefaultBottomRightMouseBounds, enabled = %d\n", body->DefaultBottomRightMouseBounds);
+
+				FakeMouseKeyboard::DefaultBottomRightMouseBounds = body->DefaultBottomRightMouseBounds;
+
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetMoveWindowSettings:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetMoveWindowSettings*>(messageBuffer);
@@ -542,6 +563,16 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				AdjustWindowRectHook::posy = body->posy;
 				AdjustWindowRectHook::width = body->width;
 				AdjustWindowRectHook::height = body->height;
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetDontWaitWindowBorder:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDontWaitWindowBorder*>(messageBuffer);
+
+				printf("Received DontWaitWindowBorder, enabled = %d\n", body->DontWaitWindowBorder);
+
+				RemoveBorderHook::DontWaitWindowBorder = body->DontWaitWindowBorder;
 
 				break;
 			}
