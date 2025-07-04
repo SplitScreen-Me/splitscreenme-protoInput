@@ -24,7 +24,10 @@ enum ProtoHookIDs : unsigned int
 	BlockRawInputHookID,
 	FindWindowHookID,
 	CreateSingleHIDHookID,
-	WindowStyleHookID
+	WindowStyleHookID,
+	MoveWindowHookID,
+	AdjustWindowRectHookID,
+	RemoveBorderHookID
 };
 
 enum ProtoMessageFilterIDs : unsigned int
@@ -68,7 +71,7 @@ extern "C" __declspec(dllexport) void UpdateMainWindowHandle(ProtoInstanceHandle
 extern "C" __declspec(dllexport) void SetupState(ProtoInstanceHandle instanceHandle, int instanceIndex);
 
 extern "C" __declspec(dllexport) void SetupMessagesToSend(ProtoInstanceHandle instanceHandle,
-														  bool sendMouseWheelMessages = true, bool sendMouseButtonMessages = true, bool sendMouseMoveMessages = true, bool sendKeyboardPressMessages = true);
+														  bool sendMouseWheelMessages = true, bool sendMouseButtonMessages = true, bool sendMouseMoveMessages = true, bool sendKeyboardPressMessages = true, bool sendMouseDblClkMessages = false);
 
 extern "C" __declspec(dllexport) void StartFocusMessageLoop(ProtoInstanceHandle instanceHandle, int milliseconds = 5,
 															bool wm_activate = true, bool wm_activateapp = true, bool wm_ncactivate = true, bool wm_setfocus = true, bool wm_mouseactivate = true);
@@ -76,6 +79,8 @@ extern "C" __declspec(dllexport) void StartFocusMessageLoop(ProtoInstanceHandle 
 extern "C" __declspec(dllexport) void StopFocusMessageLoop(ProtoInstanceHandle instanceHandle);
 
 extern "C" __declspec(dllexport) void SetDrawFakeCursor(ProtoInstanceHandle instanceHandle, bool enable);
+
+extern "C" __declspec(dllexport) void SetDrawFakeCursorFix(ProtoInstanceHandle instanceHandle, bool enable);
 
 extern "C" __declspec(dllexport) void SetExternalFreezeFakeInput(ProtoInstanceHandle instanceHandle, bool enableFreeze);
 
@@ -112,6 +117,10 @@ extern "C" __declspec(dllexport) void DinputHookAlsoHooksGetDeviceState(ProtoIns
 
 extern "C" __declspec(dllexport) void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
 
+extern "C" __declspec(dllexport) void SetSetWindowPosDontResize(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetSetWindowPosDontReposition(ProtoInstanceHandle instanceHandle, bool enabled);
+
 extern "C" __declspec(dllexport) void SetCreateSingleHIDName(ProtoInstanceHandle instanceHandle, const wchar_t* name);
 
 extern "C" __declspec(dllexport) void SetCursorClipOptions(ProtoInstanceHandle instanceHandle, bool useFakeClipCursor);
@@ -123,3 +132,19 @@ extern "C" __declspec(dllexport) void SetToggleFakeCursorVisibilityShortcut(Prot
 extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetDefaultTopLeftMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetDefaultBottomRightMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetMoveWindowSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
+
+extern "C" __declspec(dllexport) void SetMoveWindowDontResize(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetMoveWindowDontReposition(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetAdjustWindowRectSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
+
+extern "C" __declspec(dllexport) void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled);

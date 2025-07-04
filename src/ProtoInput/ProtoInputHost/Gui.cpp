@@ -137,6 +137,8 @@ bool Launch()
         if (hookEnabled(RegisterRawInputHookID))        InstallHook(instanceHandle, RegisterRawInputHookID);
         if (hookEnabled(GetRawInputDataHookID))         InstallHook(instanceHandle, GetRawInputDataHookID);
         if (hookEnabled(MessageFilterHookID))           InstallHook(instanceHandle, MessageFilterHookID);
+
+		SetPutMouseInsideWindow(instanceHandle, currentProfile.putMouseInsideWindow);
         if (hookEnabled(GetCursorPosHookID))            InstallHook(instanceHandle, GetCursorPosHookID);
         if (hookEnabled(SetCursorPosHookID))            InstallHook(instanceHandle, SetCursorPosHookID);
         if (hookEnabled(GetKeyStateHookID))             InstallHook(instanceHandle, GetKeyStateHookID);
@@ -179,7 +181,8 @@ bool Launch()
                             currentProfile.sendMouseWheelMessages,
                             currentProfile.sendMouseButtonMessages,
                             currentProfile.sendMouseMovementMessages,
-                            currentProfile.sendKeyboardButtonMessages);
+                            currentProfile.sendKeyboardButtonMessages,
+                            currentProfile.sendMouseDblClkMessages);
 
         if (currentProfile.focusMessageLoop)
             StartFocusMessageLoop(instanceHandle,
@@ -191,6 +194,8 @@ bool Launch()
                                   currentProfile.focusLoopSendWM_MOUSEACTIVATE);
 
         SetDrawFakeCursor(instanceHandle, currentProfile.drawFakeMouseCursor);
+
+        SetDrawFakeCursorFix(instanceHandle, currentProfile.drawFakeCursorFix);
     	
         AllowFakeCursorOutOfBounds(instanceHandle, currentProfile.allowMouseOutOfBounds, currentProfile.extendMouseBounds);
 
@@ -868,6 +873,8 @@ void OptionsMenu()
 	
     ImGui::Checkbox("Show fake cursor when image updated", &currentProfile.showCursorWhenImageUpdated);
 
+    ImGui::Checkbox("Put Mouse Inside Window", &currentProfile.putMouseInsideWindow);
+
     if (ImGui::CollapsingHeader("Message Filters", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Leaf))
     {
         for (auto& filter : currentProfile.messageFilters)
@@ -880,6 +887,8 @@ void OptionsMenu()
     {
         ImGui::Checkbox("Draw fake mouse cursor", &currentProfile.drawFakeMouseCursor);
     	
+        ImGui::Checkbox("Fake cursor offset fix", &currentProfile.drawFakeCursorFix);
+
         ImGui::Checkbox("Allow fake cursor to go out of bounds", &currentProfile.allowMouseOutOfBounds);
         ImGui::Checkbox("Extend fake cursor boundaries", &currentProfile.extendMouseBounds);
 
@@ -891,6 +900,7 @@ void OptionsMenu()
         ImGui::Checkbox("Send mouse button messages", &currentProfile.sendMouseButtonMessages);
         ImGui::Checkbox("Send mouse wheel messages", &currentProfile.sendMouseWheelMessages);
         ImGui::Checkbox("Send keyboard button messages", &currentProfile.sendKeyboardButtonMessages);
+        ImGui::Checkbox("Send mouse double click messages", &currentProfile.sendMouseDblClkMessages);
 
     }
 

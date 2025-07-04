@@ -1,0 +1,35 @@
+#pragma once
+#include "Hook.h"
+#include "InstallHooks.h"
+
+namespace Proto
+{
+
+	class MoveWindowHook final : public Hook
+	{
+	private:
+		HookInfo hookInfo{};
+
+	public:
+		static int width;
+		static int height;
+		static int posx;
+		static int posy;
+
+		static bool MoveWindowDontResize;
+		static bool MoveWindowDontReposition;
+
+		const char* GetHookName() const override { return "Move Window"; }
+		const char* GetHookDescription() const override
+		{
+			return
+				"When the game tries to reposition/resize its game window, this hook forces it to a fixed position and size. ";
+		}
+		bool HasGuiStatus() const override { return false; }
+		void ShowGuiStatus() override;
+		void InstallImpl() override;
+		void UninstallImpl() override;
+	};
+
+}
+

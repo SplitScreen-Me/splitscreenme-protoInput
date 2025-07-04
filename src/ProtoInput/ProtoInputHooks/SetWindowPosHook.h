@@ -15,6 +15,9 @@ public:
 	static int height;
 	static int posx;
 	static int posy;
+
+	static bool SetWindowPosDontResize;
+	static bool SetWindowPosDontReposition;
 	
 	const char* GetHookName() const override { return "Set Window Position"; }
 	const char* GetHookDescription() const override

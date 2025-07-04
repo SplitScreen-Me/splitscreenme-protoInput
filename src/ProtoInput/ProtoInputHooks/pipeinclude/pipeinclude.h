@@ -16,6 +16,7 @@ enum class PipeMessageType
 	SetupState,
 	SetupMessagesToSend,
 	SetDrawFakeCursor,
+	SetDrawFakeCursorFix,
 	SetExternalFreezeFakeInput,
 	AddSelectedMouseOrKeyboard,
 	AddHandleToRename,
@@ -26,12 +27,22 @@ enum class PipeMessageType
 	SetDinputDeviceGuid,
 	SetDinputHookGetDeviceState,
 	SetSetWindowPosSettings,
+	SetSetWindowPosDontResize,
+	SetSetWindowPosDontReposition,
 	SetCreateSingleHIDName,
 	SetClipCursorHookOptions,
 	SetAllowFakeCursorOutOfBounds,
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
-	SetShowCursorWhenImageUpdated
+	SetShowCursorWhenImageUpdated,
+	SetPutMouseInsideWindow,
+	SetDefaultTopLeftMouseBounds,
+	SetDefaultBottomRightMouseBounds,
+	SetMoveWindowSettings,
+	SetMoveWindowDontResize,
+	SetMoveWindowDontReposition,
+	SetAdjustWindowRectSettings,
+	SetDontWaitWindowBorder
 };
 
 struct PipeMessageHeader
@@ -88,13 +99,17 @@ struct PipeMessageSetupMessagesToSend
 	bool sendMouseButtonMessages;
 	bool sendMouseMoveMessages;
 	bool sendKeyboardPressMessages;
+	bool sendMouseDblClkMessages;
 };
 
 struct PipeMessageSetDrawFakeCursor
 {
 	bool enable;
 };
-
+struct PipeMessageSetDrawFakeCursorFix
+{
+	bool enable;
+};
 struct PipeMessageSetExternalFreezeFakeInput
 {
 	bool freezeEnabled;
@@ -153,6 +168,16 @@ struct PipeMessageSetSetWindowPosSettings
 	int height;
 };
 
+struct PipeMessageSetSetWindowPosDontResize
+{
+	bool SetWindowPosDontResize;
+};
+
+struct PipeMessageSetSetWindowPosDontReposition
+{
+	bool SetWindowPosDontReposition;
+};
+
 struct PipeMessageSetCreateSingleHIDName
 {
 	wchar_t buff[1000]{};
@@ -183,6 +208,52 @@ struct PipeMessageSetRawInputBypass
 struct PipeMessageShowCursorWhenImageUpdated
 {
 	bool ShowCursorWhenImageUpdated;
+};
+
+struct PipeMessagePutMouseInsideWindow
+{
+	bool PutMouseInsideWindow;
+};
+
+struct PipeMessageDefaultTopLeftMouseBounds
+{
+	bool DefaultTopLeftMouseBounds;
+};
+
+struct PipeMessageDefaultBottomRightMouseBounds
+{
+	bool DefaultBottomRightMouseBounds;
+};
+
+struct PipeMessageSetMoveWindowSettings
+{
+	int posx;
+	int posy;
+	int width;
+	int height;
+};
+
+struct PipeMessageSetMoveWindowDontResize
+{
+	bool MoveWindowDontResize;
+};
+
+struct PipeMessageSetMoveWindowDontReposition
+{
+	bool MoveWindowDontReposition;
+};
+
+struct PipeMessageSetAdjustWindowRectSettings
+{
+	int posx;
+	int posy;
+	int width;
+	int height;
+};
+
+struct PipeMessageSetDontWaitWindowBorder
+{
+	bool DontWaitWindowBorder;
 };
 
 }

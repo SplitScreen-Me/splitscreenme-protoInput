@@ -8,6 +8,10 @@ namespace Proto
 FakeMouseState FakeMouseKeyboard::mouseState{};
 FakeKeyboardState FakeMouseKeyboard::keyboardState{};
 
+bool FakeMouseKeyboard::PutMouseInsideWindow = false;
+bool FakeMouseKeyboard::DefaultTopLeftMouseBounds = false;
+bool FakeMouseKeyboard::DefaultBottomRightMouseBounds = false;
+
 void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
 {
 	mouseState.x += dx;
@@ -15,17 +19,60 @@ void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
 
 	if (!mouseState.ignoreMouseBounds)
 	{
-		int min = mouseState.extendMouseBounds ? -100 : -1;
-		if (mouseState.x < min)
-			mouseState.x = min;
-		if (mouseState.y < min)
-			mouseState.y = min;
+		if (!PutMouseInsideWindow)
+		{
+			int min = mouseState.extendMouseBounds ? -100 : -1;
+			if (mouseState.x < min)
+				mouseState.x = min;
+			if (mouseState.y < min)
+				mouseState.y = min;
+		}
+		else if (PutMouseInsideWindow)
+		{
+			if (!DefaultTopLeftMouseBounds)
+			{
+				int min = mouseState.extendMouseBounds ? -100 : 0;
+				if (mouseState.x < min)
+					mouseState.x = min;
+				if (mouseState.y < min)
+					mouseState.y = min;
+			}
+			else if (DefaultTopLeftMouseBounds)
+			{
+				int min = mouseState.extendMouseBounds ? -100 : -1;
+				if (mouseState.x < min)
+					mouseState.x = min;
+				if (mouseState.y < min)
+					mouseState.y = min;
+			}
+		}
 
-		if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 100 : HwndSelector::windowWidth; mouseState.x > max)
-			mouseState.x = max;
+		if (!PutMouseInsideWindow)
+		{
+			if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 100 : HwndSelector::windowWidth; mouseState.x > max)
+				mouseState.x = max;
 
-		if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 100 : HwndSelector::windowHeight; mouseState.y > max)
-			mouseState.y = max;
+			if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 100 : HwndSelector::windowHeight; mouseState.y > max)
+				mouseState.y = max;
+		}
+		else if (PutMouseInsideWindow)
+		{
+			if (!DefaultBottomRightMouseBounds)
+			{
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 1100 : HwndSelector::windowWidth; mouseState.x > max)
+					mouseState.x = max - 1;
+
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 700 : HwndSelector::windowHeight; mouseState.y > max)
+					mouseState.y = max - 1;
+			}
+			else if (DefaultBottomRightMouseBounds)
+			{
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 1100 : HwndSelector::windowWidth; mouseState.x > max)
+					mouseState.x = max;
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 700 : HwndSelector::windowHeight; mouseState.y > max)
+					mouseState.y = max;
+			}
+		}
 		
 		if (mouseState.hasClipCursor)
 		{
@@ -50,17 +97,60 @@ void FakeMouseKeyboard::SetMousePos(int x, int y)
 
 	if (!mouseState.ignoreMouseBounds)
 	{
-		int min = mouseState.extendMouseBounds ? -100 : -1;
-		if (mouseState.x < min)
-			mouseState.x = min;
-		if (mouseState.y < min)
-			mouseState.y = min;
+		if (!PutMouseInsideWindow)
+		{
+			int min = mouseState.extendMouseBounds ? -100 : -1;
+			if (mouseState.x < min)
+				mouseState.x = min;
+			if (mouseState.y < min)
+				mouseState.y = min;
+		}
+		else if (PutMouseInsideWindow)
+		{
+			if (!DefaultTopLeftMouseBounds)
+			{
+				int min = mouseState.extendMouseBounds ? -100 : 0;
+				if (mouseState.x < min)
+					mouseState.x = min;
+				if (mouseState.y < min)
+					mouseState.y = min;
+			}
+			else if (DefaultTopLeftMouseBounds)
+			{
+				int min = mouseState.extendMouseBounds ? -100 : -1;
+				if (mouseState.x < min)
+					mouseState.x = min;
+				if (mouseState.y < min)
+					mouseState.y = min;
+			}
+		}
 
-		if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 100 : HwndSelector::windowWidth; mouseState.x > max)
-			mouseState.x = max;
+		if (!PutMouseInsideWindow)
+		{
+			if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 100 : HwndSelector::windowWidth; mouseState.x > max)
+				mouseState.x = max;
 
-		if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 100 : HwndSelector::windowHeight; mouseState.y > max)
-			mouseState.y = max;
+			if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 100 : HwndSelector::windowHeight; mouseState.y > max)
+				mouseState.y = max;
+		}
+		else if (PutMouseInsideWindow)
+		{
+			if (!DefaultBottomRightMouseBounds)
+			{
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 1100 : HwndSelector::windowWidth; mouseState.x > max)
+					mouseState.x = max - 1;
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 700 : HwndSelector::windowHeight; mouseState.y > max)
+					mouseState.y = max - 1;
+			}
+			else if (DefaultBottomRightMouseBounds)
+			{
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth + 1100 : HwndSelector::windowWidth; mouseState.x > max)
+					mouseState.x = max;
+
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight + 700 : HwndSelector::windowHeight; mouseState.y > max)
+					mouseState.y = max;
+			}
+		}
 
 		if (mouseState.hasClipCursor)
 		{
