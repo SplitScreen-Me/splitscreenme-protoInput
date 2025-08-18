@@ -14,6 +14,7 @@ class FakeCursor
 	HDC hdc;
 	HBRUSH transparencyBrush;
 	HCURSOR hCursor;
+	
 	static constexpr auto transparencyKey = RGB(0, 0, 1);
 	
 	int oldX, oldY;
@@ -23,9 +24,11 @@ class FakeCursor
 
 	// DrawFakeCursorFix. cursor offset scan and cursor size fix
 	int cursoroffsetx, cursoroffsety; 
-	int offsetSET; //0:sizing 1:offset 2:done
+	int offsetSET = 0; //0:sizing 1:offset 2:done
 	int cursorWidth = 40;
 	int cursorHeight = 40;
+	bool nochange = false; //if offset was found at first then no need to scan again
+	HCURSOR oldhCursor = NULL;
 
 	// This is either on or off for a given game (ie. it doesn't change)
 	bool drawingEnabled = false;
