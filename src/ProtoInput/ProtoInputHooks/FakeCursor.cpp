@@ -56,13 +56,6 @@ void FakeCursor::DrawCursor()
     ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &pos);
     ScreenToClient(pointerWindow, &pos);
 
-
-
-    char message[256];
-
-
-
-
     if (DrawFakeCursorFix)
     {
         pos.x -= cursoroffsetx;
@@ -78,7 +71,6 @@ void FakeCursor::DrawCursor()
                 if (hCursor != oldhCursor && offsetSET > 1 && nochange == false)
                 {
                     offsetSET = 0;
-					//MessageBoxA(NULL, "Cursor changed, resetting offset and size", "ProtoInput", MB_OK | MB_ICONINFORMATION);
                 }
                 if (offsetSET == 1 && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow)) //offset setting
                 {
@@ -121,11 +113,6 @@ void FakeCursor::DrawCursor()
                     {
                         cursoroffsety = cursorHeight / 2;
                         cursoroffsetx = cursorWidth / 2;
-                      //  snprintf(message, sizeof(message),
-                      //      "symmetric offset on (%d, %d)",
-                       //     cursorWidth / 2, cursorHeight / 2);
-                      //  MessageBoxA(NULL, message, "Pixel Info", MB_OK | MB_ICONINFORMATION);
-
                     }
                     else if (leftcursoroffsety > 2 || leftcursoroffsetx > 2) //is there any other offsets?
                     { 
@@ -134,10 +121,9 @@ void FakeCursor::DrawCursor()
 						nochange = true;   
                     }
 
-                    else { //okay no offsets
+                    else { //no offsets
                         cursoroffsetx = 0;
                         cursoroffsety = 0;
-                  //      MessageBoxA(NULL, " message no offset", "Pixel Info", MB_OK | MB_ICONINFORMATION);
                     }
                     offsetSET ++; //offset set to 2 should do drawing only now
                     DeleteDC(hdcMem);
