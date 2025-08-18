@@ -114,14 +114,21 @@ void RawInput::ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle)
 	// Send mouse wheel
 	if (rawInputState.sendMouseWheelMessages)
 	{
-		if((data.usButtonFlags & RI_MOUSE_WHEEL) != 0)
+		if ((data.usButtonFlags & RI_MOUSE_WHEEL) != 0)
 		{
+			//mousewheel messages use screen coordinates instead of client coordinates?
+			POINT screen;
+
+			screen.x = FakeMouseKeyboard::GetMouseState().x;
+			screen.y = FakeMouseKeyboard::GetMouseState().y;
+			ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &screen);
+
+			LPARAM newmousePoint = MAKELPARAM(screen.x, screen.y);
 			const unsigned int wparam = (data.usButtonData << 16)
 				| MouseWheelFilter::protoInputSignature
 				| mouseMkFlags;
-						
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MOUSEWHEEL, wparam, mousePointLparam);
 
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MOUSEWHEEL, wparam, newmousePoint);
 		}
 	}
 
