@@ -116,9 +116,7 @@ extern "C" __declspec(dllexport) void SetDinputDeviceGUID(ProtoInstanceHandle in
 extern "C" __declspec(dllexport) void DinputHookAlsoHooksGetDeviceState(ProtoInstanceHandle instanceHandle, bool enable);
 
 extern "C" __declspec(dllexport) void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
-
 extern "C" __declspec(dllexport) void SetSetWindowPosDontResize(ProtoInstanceHandle instanceHandle, bool enabled);
-
 extern "C" __declspec(dllexport) void SetSetWindowPosDontReposition(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetCreateSingleHIDName(ProtoInstanceHandle instanceHandle, const wchar_t* name);
@@ -134,17 +132,15 @@ extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle inst
 extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled);
-
 extern "C" __declspec(dllexport) void SetDefaultTopLeftMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled);
-
 extern "C" __declspec(dllexport) void SetDefaultBottomRightMouseBounds(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetMoveWindowSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
-
 extern "C" __declspec(dllexport) void SetMoveWindowDontResize(ProtoInstanceHandle instanceHandle, bool enabled);
-
 extern "C" __declspec(dllexport) void SetMoveWindowDontReposition(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetAdjustWindowRectSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
 
 extern "C" __declspec(dllexport) void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void DisableGuiWindow(ProtoInstanceHandle instanceHandle, bool enabled);

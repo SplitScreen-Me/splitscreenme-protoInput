@@ -15,6 +15,7 @@
 //TODO: default to hidden
 constexpr bool defaultGuiToHidden = true;
 constexpr bool defaultConsoleToHidden = true;
+bool Proto::DisableGuiWindow = false;
 
 HGLRC   g_GLRenderContext;
 HDC     g_HDCDeviceContext;
@@ -139,6 +140,9 @@ void Proto::SetConsoleVisible(bool visible)
 
 int Proto::ShowGuiImpl()
 {
+    if (Proto::DisableGuiWindow)
+        return 0;
+
     auto hInstance = GetModuleHandle(NULL);
 
     WNDCLASS wc = { 0 };

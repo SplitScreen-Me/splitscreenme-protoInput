@@ -3,6 +3,7 @@
 #include "PipeCommunication.h"
 #include <iostream>
 #include "HookManager.h"
+#include "Gui.h"
 
 #include "pipeinclude/pipeinclude.h"
 #include <imgui.h>
@@ -573,6 +574,16 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				printf("Received DontWaitWindowBorder, enabled = %d\n", body->DontWaitWindowBorder);
 
 				RemoveBorderHook::DontWaitWindowBorder = body->DontWaitWindowBorder;
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::DisableGuiWindow:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageDisableGuiWindow*>(messageBuffer);
+
+				printf("Received DisableGuiWindow, enabled = %d\n", body->DisableGuiWindow);
+
+				Proto::DisableGuiWindow = body->DisableGuiWindow;
 
 				break;
 			}

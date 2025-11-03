@@ -213,6 +213,29 @@ void FakeMouseKeyboard::ClearAsyncKeyState(int vkey)
 	}
 }
 
+bool FakeMouseKeyboard::IsExtendedKey(int vkey)
+{
+	switch (vkey)
+	{
+	case VK_UP:
+	case VK_DOWN:
+	case VK_LEFT:
+	case VK_RIGHT:
+	case VK_HOME:
+	case VK_END:
+	case VK_PRIOR:
+	case VK_NEXT:
+	case VK_INSERT:
+	case VK_DELETE:
+	case VK_RCONTROL:
+	case VK_RMENU:
+	case VK_SEPARATOR:
+		return true;
+	default:
+		return false;
+	}
+}
+
 bool FakeMouseKeyboard::IsKeyStatePressed(int vkey)
 {
 	if (vkey >= 0 && vkey < keyboardState.keysState.size())

@@ -32,12 +32,12 @@ namespace Proto
 	void AdjustWindowRectHook::ShowGuiStatus()
 	{
 		int pos[2] = { posx, posy };
-		ImGui::SliderInt2("Position", &pos[0], -5000, 5000);
+		ImGui::InputInt2("Position", &pos[0]);
 		posx = pos[0];
 		posy = pos[1];
 
 		int size[2] = { width, height };
-		ImGui::SliderInt2("Size", &size[0], 0, 5000);
+		ImGui::InputInt2("Size", &size[0]);
 		width = size[0];
 		height = size[1];
 	}

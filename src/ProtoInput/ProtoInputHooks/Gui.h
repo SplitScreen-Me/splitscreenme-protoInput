@@ -8,6 +8,7 @@ namespace Proto
 extern unsigned long GuiThreadID;
 extern intptr_t ConsoleHwnd;
 extern HWND ProtoGuiHwnd;
+extern bool DisableGuiWindow;
 
 int ShowGuiImpl();
 

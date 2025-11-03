@@ -25,6 +25,16 @@ DWORD WINAPI GuiThread(LPVOID lpParameter)
 
 	Proto::AddThreadToACL(GetCurrentThreadId());
 
+    //TODO: Find a better way to wait for `DisableGuiWindow`?
+    for (int i = 0; i < 10; ++i)
+    {
+        if (Proto::DisableGuiWindow)
+        {
+            break;
+        }
+        Sleep(100);
+    }
+
     Proto::ShowGuiImpl();
 
     return 0;
@@ -52,13 +62,13 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     Proto::FakeCursor::Initialise();
 	
     Proto::AddThreadToACL(GetCurrentThreadId());
+
+    Proto::StartPipeCommunication();
 	
     HANDLE hGuiThread = CreateThread(nullptr, 0,
                                   (LPTHREAD_START_ROUTINE)GuiThread, dll_hModule, CREATE_SUSPENDED, &Proto::GuiThreadID);
   
     Proto::RawInput::InitialiseRawInput();
-    	
-    Proto::StartPipeCommunication();
 
     ResumeThread(hGuiThread);
 
