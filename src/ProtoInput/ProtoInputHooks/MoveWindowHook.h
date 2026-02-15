@@ -25,7 +25,7 @@ namespace Proto
 			return
 				"When the game tries to reposition/resize its game window, this hook forces it to a fixed position and size. ";
 		}
-		bool HasGuiStatus() const override { return false; }
+		bool HasGuiStatus() const override { return true; }
 		void ShowGuiStatus() override;
 		void InstallImpl() override;
 		void UninstallImpl() override;
