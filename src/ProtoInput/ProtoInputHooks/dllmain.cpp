@@ -16,6 +16,7 @@
 #include "FocusMessageLoop.h"
 #include "Gui.h"
 #include "FakeCursor.h"
+#include "INISettings.h"
 
 HMODULE dll_hModule;
 
@@ -45,6 +46,9 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 	// Useful to add a pause if we need to attach a debugger
     // MessageBoxW(NULL, L"Press OK to start", L"", MB_OK);
     	
+	// LoadConfig is an alternative way of setting the configuration values instead of using the pipe communication.
+	Proto::LoadConfig();
+
     Proto::HwndSelector::UpdateMainHwnd();
 
     Proto::FocusMessageLoop::SetupThread();

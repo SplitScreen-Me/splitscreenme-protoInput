@@ -11,6 +11,7 @@
 #include "RawInput.h"
 #include "FontData.h"
 #include "Cleanup.h"
+#include "INISettings.h"
 
 //TODO: default to hidden
 constexpr bool defaultGuiToHidden = true;
@@ -139,6 +140,9 @@ void Proto::SetConsoleVisible(bool visible)
 
 int Proto::ShowGuiImpl()
 {
+    if (Proto::DisableGuiWindow)
+        return 0;
+
     auto hInstance = GetModuleHandle(NULL);
 
     WNDCLASS wc = { 0 };

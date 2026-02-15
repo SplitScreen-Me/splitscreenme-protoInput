@@ -1,16 +1,32 @@
 #include "FocusHook.h"
 #include <imgui.h>
 #include "HwndSelector.h"
+#include "INISettings.h"
 
 namespace Proto
 {
 
 inline HWND GetHwnd()
 {	
-	if (HwndSelector::GetSelectedHwnd() == 0)
-		HwndSelector::UpdateMainHwnd();
+	if (Proto::fixWindowFocus)
+	{
+		HWND current = (HWND)HwndSelector::GetSelectedHwnd();
 
-	return (HWND)HwndSelector::GetSelectedHwnd();
+		// Check if the handle is 0 OR if the window no longer exists (e.g. after resolution change)
+		if (current == 0 || !IsWindow(current))
+		{
+			HwndSelector::UpdateMainHwnd();
+			current = (HWND)HwndSelector::GetSelectedHwnd();
+		}
+		return current;
+	}
+	else // Default
+	{
+		if (HwndSelector::GetSelectedHwnd() == 0)
+			HwndSelector::UpdateMainHwnd();
+
+		return (HWND)HwndSelector::GetSelectedHwnd();
+	}
 }
 
 HWND WINAPI Hook_GetForegroundWindow()
