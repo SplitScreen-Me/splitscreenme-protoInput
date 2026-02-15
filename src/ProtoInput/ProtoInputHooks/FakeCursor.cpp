@@ -9,11 +9,15 @@ namespace Proto
 {
 
 FakeCursor FakeCursor::state{};
+#define WM_MOVE_pointerWindow (WM_APP + 1)
 
 LRESULT WINAPI FakeCursorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
+    case WM_MOVE_pointerWindow:
+        FakeCursor::state.GetWindowDimensions(hWnd);
+        break;
     case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
@@ -40,6 +44,34 @@ BOOL CALLBACK EnumWindowsProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
     }
     return true;
 }
+
+void FakeCursor::GetWindowDimensions(HWND pointerWindow)
+{
+
+	HWND tHwnd = (HWND)HwndSelector::GetSelectedHwnd();
+    if (pointerWindow == tHwnd)
+    {
+        SetWindowPos(pointerWindow, /*HWND_TOP*/HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        return;
+    }
+
+    if (IsWindow(tHwnd))
+    {
+        RECT cRect;
+        GetClientRect(tHwnd, &cRect);
+
+        POINT topLeft = { cRect.left, cRect.top };
+        ClientToScreen(tHwnd, &topLeft);
+
+        SetWindowPos(pointerWindow, /*HWND_TOP*/HWND_TOPMOST,
+            topLeft.x,
+            topLeft.y,
+            cRect.right - cRect.left,
+            cRect.bottom - cRect.top,
+            SWP_NOACTIVATE);
+    }
+}
+
 void FakeCursor::DrawCursor()
 {
 
@@ -139,6 +171,31 @@ DWORD WINAPI FakeCursorDrawLoopThread(LPVOID lpParameter)
     return 0;
 }
 
+DWORD WINAPI PointerWindowLoopThread(LPVOID lpParameter)
+{
+    printf("Pointer window loop thread start");
+    FakeCursor::state.UpdatePointerWindowLoopInternal();
+
+    return 0;
+}
+
+void FakeCursor::UpdatePointerWindowLoopInternal()
+{
+    while (true)
+    {
+		HWND tHwnd = (HWND)HwndSelector::GetSelectedHwnd();
+        if (!IsWindow(tHwnd))
+        {
+            Sleep(2000);
+            continue;
+        }
+
+        PostMessage(pointerWindow, WM_MOVE_pointerWindow, 0, 0);
+
+        Sleep(5000);
+    }
+}
+
 void FakeCursor::StartDrawLoopInternal()
 {
     int tick = 0;
@@ -153,17 +210,20 @@ void FakeCursor::StartDrawLoopInternal()
         //TODO: is this ok? (might eat cpu)
         Sleep(drawingEnabled ? 12 : 500);
 
-        tick = (tick + 1) % 200;
+        if (!FakeMouseKeyboard::PutMouseInsideWindow)
+        {
+            tick = (tick + 1) % 200;
 
-        if (tick == 0)
-            // Nucleus can put the game window above the pointer without this
-            SetWindowPos(pointerWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
+            if (tick == 0)
+                // Nucleus can put the game window above the pointer without this
+                SetWindowPos(pointerWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
+        }
 	}
 }
 
 void FakeCursor::StartInternal()
 {
-    Proto::AddThreadToACL(GetCurrentThreadId());
+	Sleep(1000);
 
     const auto hInstance = GetModuleHandle(NULL);
 
@@ -182,6 +242,13 @@ void FakeCursor::StartInternal()
     wc.lpszClassName = className;
     wc.style = CS_OWNDC | CS_NOCLOSE;
 
+    DWORD ws_POPUP;
+
+    if (FakeMouseKeyboard::PutMouseInsideWindow)
+        ws_POPUP = WS_POPUP;
+    else
+        ws_POPUP = 0;
+
     if (!RegisterClass(&wc))
     {
         fprintf(stderr, "Failed to open fake cursor window\n");
@@ -190,34 +257,51 @@ void FakeCursor::StartInternal()
     {
         pointerWindow = CreateWindowExW(WS_EX_NOACTIVATE | WS_EX_NOINHERITLAYOUT | WS_EX_NOPARENTNOTIFY |
                                                           WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_LAYERED,
-                                                          wc.lpszClassName, classNameStr.c_str(), 0,
-                                                          0, 0, 200, 200,
-                                                          nullptr, nullptr, hInstance, nullptr);
+                                                          wc.lpszClassName, classNameStr.c_str(), ws_POPUP,
+            0, 0, 200, 200,
+            nullptr, nullptr, hInstance, nullptr);
 
-        SetWindowLongW(pointerWindow, GWL_STYLE, WS_VISIBLE | WS_DISABLED);
+        if (!FakeMouseKeyboard::PutMouseInsideWindow)
+            SetWindowLongW(pointerWindow, GWL_STYLE, WS_VISIBLE | WS_DISABLED);
+
         SetLayeredWindowAttributes(pointerWindow, transparencyKey, 0, LWA_COLORKEY);
 
-        // Nucleus can put the game window above the pointer without this
-        SetWindowPos(pointerWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
+        if (!FakeMouseKeyboard::PutMouseInsideWindow)
+        {
+            // Nucleus can put the game window above the pointer without this
+            SetWindowPos(pointerWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
 
-        // ShowWindow(pointerWindow, SW_SHOWDEFAULT);
-        // UpdateWindow(pointerWindow);
-        EnableDisableFakeCursor(drawingEnabled);
+            // ShowWindow(pointerWindow, SW_SHOWDEFAULT);
+            // UpdateWindow(pointerWindow);
+            EnableDisableFakeCursor(drawingEnabled);
 
-    	// Over every screen
-        EnumDisplayMonitors(nullptr, nullptr, &EnumWindowsProc, 0);
-        MoveWindow(pointerWindow, fakeCursorMinX, fakeCursorMinY, fakeCursorMaxX - fakeCursorMinX, fakeCursorMaxY - fakeCursorMinY, TRUE);
+            // Over every screen
+            EnumDisplayMonitors(nullptr, nullptr, &EnumWindowsProc, 0);
+            MoveWindow(pointerWindow, fakeCursorMinX, fakeCursorMinY, fakeCursorMaxX - fakeCursorMinX, fakeCursorMaxY - fakeCursorMinY, TRUE);
+        }
 
         hdc = GetDC(pointerWindow);
 
-        //TODO: configurable cursor
-        hCursor = LoadCursorW(NULL, IDC_ARROW);
+        if (FakeMouseKeyboard::PutMouseInsideWindow)
+            hCursor = LoadCursorW(NULL, MAKEINTRESOURCEW(32512));
+        else
+            hCursor = LoadCursorW(NULL, IDC_ARROW); //TODO: configurable cursor
 
         const auto threadHandle = CreateThread(nullptr, 0,
                               (LPTHREAD_START_ROUTINE)FakeCursorDrawLoopThread, GetModuleHandle(0), 0, 0);
 
         if (threadHandle != nullptr)
             CloseHandle(threadHandle);
+
+        if (FakeMouseKeyboard::PutMouseInsideWindow)
+        {
+            const auto pointerThreadHandle = CreateThread(nullptr, 0,
+                (LPTHREAD_START_ROUTINE)PointerWindowLoopThread, GetModuleHandle(0), 0, 0);
+
+            if (pointerThreadHandle != nullptr)
+                CloseHandle(pointerThreadHandle);
+            FakeCursor::EnableDisableFakeCursor(true);
+        }
 
     	// Want to avoid doing anything in the message loop that might cause it to not respond, as the entire screen will say not responding...
         MSG msg;
@@ -246,7 +330,8 @@ void FakeCursor::EnableDisableFakeCursor(bool enable)
 {
     state.drawingEnabled = enable;
 	
-    ShowWindow(state.pointerWindow, enable ? SW_SHOWDEFAULT : SW_HIDE);
+    auto showWindow = FakeMouseKeyboard::PutMouseInsideWindow ? SW_SHOWNOACTIVATE : SW_SHOWDEFAULT;
+    ShowWindow(state.pointerWindow, enable ? showWindow : SW_HIDE);
     UpdateWindow(state.pointerWindow);
 }
 
