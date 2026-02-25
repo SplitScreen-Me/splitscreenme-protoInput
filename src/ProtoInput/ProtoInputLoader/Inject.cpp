@@ -396,7 +396,7 @@ void DinputHookAlsoHooksGetDeviceState(ProtoInstanceHandle instanceHandle, bool 
 	}
 }
 
-void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height)
+void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height, bool scale)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
 	{
@@ -406,7 +406,7 @@ void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int p
 
 		ProtoPipe::PipeMessageSetSetWindowPosSettings message
 		{
-			posx, posy, width, height
+			posx, posy, width, height, scale
 		};
 
 		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetSetWindowPosSettings, &message);

@@ -11,6 +11,7 @@
 #include "RawInput.h"
 #include "HookManager.h"
 #include "protoloader.h"
+#include "Scaler.h"
 #include "PipeCommunication.h"
 #include "HwndSelector.h"
 #include "FocusMessageLoop.h"
@@ -18,6 +19,7 @@
 #include "FakeCursor.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
+
 
 HMODULE dll_hModule;
 
@@ -60,6 +62,8 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     
 
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);
+    Sleep(1000);
+    Proto::Scaler::Install(); //or not
 
     HANDLE hGuiThread = CreateThread(nullptr, 0,
         (LPTHREAD_START_ROUTINE)GuiThread, dll_hModule, CREATE_SUSPENDED, &Proto::GuiThreadID);

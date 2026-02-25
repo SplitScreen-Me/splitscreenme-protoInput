@@ -1,6 +1,7 @@
 #include "GetCursorPosHook.h"
 #include "FakeMouseKeyboard.h"
 #include "HwndSelector.h"
+#include "Scaler.h"
 
 namespace Proto
 {
@@ -32,6 +33,12 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 					lpPoint->x = clientWidth - 1;  // Right edge
 			}
 		}
+		//any scaling?
+		POINT clientPos = { lpPoint->x, lpPoint->y };
+		clientPos = Scaler::getfactor(clientPos);
+
+		lpPoint->x = clientPos.x;
+		lpPoint->y = clientPos.y;
 		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
 	}
 	

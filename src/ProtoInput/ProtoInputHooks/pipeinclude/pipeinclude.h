@@ -176,6 +176,7 @@ struct PipeMessageSetSetWindowPosSettings
 	int posy;
 	int width;
 	int height;
+	bool scale;
 };
 
 struct PipeMessageSetSetWindowPosDontResize

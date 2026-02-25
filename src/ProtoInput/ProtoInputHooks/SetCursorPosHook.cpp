@@ -3,6 +3,7 @@
 #include "HwndSelector.h"
 #include "FakeMouseKeyboard.h"
 #include "FakeCursor.h"
+#include "Scaler.h"
 
 namespace Proto
 {
@@ -16,6 +17,9 @@ BOOL WINAPI Hook_SetCursorPos(int X, int Y)
 		POINT p;
 		p.x = X;
 		p.y = Y;
+
+		//any scaling here?
+		//p = WndProcHook::getfactor(p);
 
 		//SetCursorPos require screen coordinates (relative to 0,0 of monitor)
 		ScreenToClient((HWND)HwndSelector::GetSelectedHwnd(), &p);

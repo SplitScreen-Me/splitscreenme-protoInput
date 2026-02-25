@@ -28,6 +28,7 @@
 #include "RemoveBorderHook.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
+#include "Scaler.h"
 
 namespace Proto
 {
@@ -441,7 +442,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				SetWindowPosHook::posy = body->posy;
 				SetWindowPosHook::width = body->width;
 				SetWindowPosHook::height = body->height;
-
+				Proto::Scaler::Settings(body->scale, body->width, body->height);
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetSetWindowPosDontResize:
@@ -693,10 +694,9 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 	}
 	endPipe:
 
-	printf("End of pipe thread\n");
-	
-	CloseHandle(pipe);
 
+	printf("End of pipe thread\n");
+	CloseHandle(pipe);
 	return 0;
 }
 
