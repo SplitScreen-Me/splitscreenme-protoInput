@@ -697,6 +697,25 @@ void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled)
 		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDontWaitWindowBorder, &message);
 	}
 }
+void SetManualScaling(ProtoInstanceHandle instanceHandle, int oldX, int oldY, int newX, int newY)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetManualScaling message
+		{
+			oldX, 
+			oldY,
+			newX,
+			newY
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetManualScaling, &message);
+	}
+}
 void SetXinputtoMKBkeys(ProtoInstanceHandle instanceHandle, int XinputtoMKBAkey, int XinputtoMKBBkey, int XinputtoMKBXkey, int XinputtoMKBYkey, int XinputtoMKBRSkey, int XinputtoMKBLSkey, int XinputtoMKBrightkey, int XinputtoMKBleftkey, int XinputtoMKBupkey, int XinputtoMKBdownkey, int XinputtoMKBstickR, int XinputtoMKBstickL, int XinputtoMKBstickright, int XinputtoMKBstickleft, int XinputtoMKBstickup, int XinputtoMKBstickdown, int XinputtoMKBoption, int XinputtoMKBstart, int XinputtoMKBsens, int XinputtoMKBsensmult)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())

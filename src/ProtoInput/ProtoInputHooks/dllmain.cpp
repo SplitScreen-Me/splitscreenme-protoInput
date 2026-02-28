@@ -46,24 +46,20 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     std::cout << "Hooks DLL loaded\n";
 
-    Proto::StartPipeCommunication();
-
-    Sleep(50); //let pipe finish
-    Proto::AddThreadToACL(GetCurrentThreadId());
-
-    Proto::RawInput::InitialiseRawInput();
-	// Useful to add a pause if we need to attach a debugger
-    // MessageBoxW(NULL, L"Press OK to start", L"", MB_OK);
     Proto::HwndSelector::UpdateMainHwnd();
 
     Proto::FocusMessageLoop::SetupThread();
 
     Proto::FakeCursor::Initialise(dll_hModule);
-    
 
+    Proto::AddThreadToACL(GetCurrentThreadId());
+
+    Proto::StartPipeCommunication(); //must be placed before InitialiseRawInput
+    Sleep(50);
+    Proto::RawInput::InitialiseRawInput();
+	// Useful to add a pause if we need to attach a debugger
+    // MessageBoxW(NULL, L"Press OK to start", L"", MB_OK);
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);
-    Sleep(1000);
-    Proto::Scaler::Install(); //or not
 
     HANDLE hGuiThread = CreateThread(nullptr, 0,
         (LPTHREAD_START_ROUTINE)GuiThread, dll_hModule, CREATE_SUSPENDED, &Proto::GuiThreadID);
@@ -74,7 +70,6 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
         CloseHandle(hGuiThread);
 
     std::cout << "Reached end of startup thread\n";
-
     return 0;
 }
  

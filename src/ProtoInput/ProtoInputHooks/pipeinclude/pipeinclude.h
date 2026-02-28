@@ -44,6 +44,7 @@ enum class PipeMessageType
 	SetMoveWindowDontReposition,
 	SetAdjustWindowRectSettings,
 	SetDontWaitWindowBorder,
+	SetManualScaling,
 	SetXinputtoMKBkeys,
 	SetXinputtoMKBCFG
 };
@@ -265,6 +266,14 @@ struct PipeMessageSetAdjustWindowRectSettings
 struct PipeMessageSetDontWaitWindowBorder
 {
 	bool DontWaitWindowBorder;
+};
+
+struct PipeMessageSetManualScaling
+{
+	int oldX;
+	int oldY;
+	int newX;
+	int newY;
 };
 
 struct PipeMessageSetXinputtoMKBkeys

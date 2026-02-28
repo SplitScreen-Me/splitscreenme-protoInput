@@ -7,10 +7,14 @@ namespace Proto
 
 	class Scaler
 	{
+	private:
+		static void Install();
+		static void Uninstall();
+
 	public:
 		static POINT getfactor(POINT pp);
-		static void Install();
-		static void Settings(bool enabled, int scaletoX, int scaletoY);
+		
+		static void Settings(int oldX, int oldY, int newX, int newY);
 	};
 
 }

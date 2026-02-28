@@ -21,7 +21,7 @@ namespace Proto
     WNDPROC g_OldWndProc = nullptr;
 
     POINT Scaler::getfactor(POINT pp){
-        if (pp.x != 0 && pp.y != 0 && Enableornot && origwidth != 0 && scalewidth != 0)
+        if (pp.x != 0 && pp.y != 0 && Enableornot)
         { 
             float scalex = float(origwidth) / float(scalewidth);
             float scaley = float(origheight) / float(scaleheight);
@@ -106,10 +106,6 @@ namespace Proto
         if (Enableornot && !onlyonetimethis)
         { 
 			//MessageBoxA(NULL, "Ohyea", "Scaler enabled", MB_OK);
-            Proto::HwndSelector::UpdateMainHwnd();
-            Proto::HwndSelector::UpdateWindowBounds();
-            origwidth = Proto::HwndSelector::windowWidth;
-            origheight = Proto::HwndSelector::windowHeight;
         
             g_OldWndProc = (WNDPROC)SetWindowLongPtr(
                 (HWND)Proto::HwndSelector::GetSelectedHwnd(),
@@ -119,13 +115,34 @@ namespace Proto
             onlyonetimethis = true; //or else crash
         }
 	}
-    void Scaler::Settings(bool enabled, int scaletoX, int scaletoY)
+    void Scaler::Uninstall()
     {
-        if (enabled)
-        { 
-		    Enableornot = true;
-		    scalewidth = scaletoX;
-		    scaleheight = scaletoY;
+        if (onlyonetimethis)
+        {
+            HWND hwnd = (HWND)Proto::HwndSelector::GetSelectedHwnd();
+
+            SetWindowLongPtr(
+                hwnd,
+                GWLP_WNDPROC,
+                (LONG_PTR)g_OldWndProc
+            );
+
+            onlyonetimethis = false;
         }
+    }
+
+    void Scaler::Settings(int oldX, int oldY, int newX, int newY)
+    {
+		Enableornot = true;
+		scalewidth = newX;
+	    scaleheight = newY;
+        origwidth = oldX;
+        origheight = oldY;
+        if (scalewidth > 5 && scaleheight > 5 && origwidth > 5 && origheight > 5)
+            Enableornot = true;
+        else Enableornot = false;
+        if (Enableornot)
+            Scaler::Install();
+        else Scaler::Uninstall();
     }
 }

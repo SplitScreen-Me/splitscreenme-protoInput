@@ -164,6 +164,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 					else printf("Enabling TranslateXtoMKB");
 				}
 				else printf("TranslateXtoMKB is set to false");
+				SetEvent(evt);
 				break;
 			}
 
@@ -442,7 +443,6 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				SetWindowPosHook::posy = body->posy;
 				SetWindowPosHook::width = body->width;
 				SetWindowPosHook::height = body->height;
-				Proto::Scaler::Settings(body->scale, body->width, body->height);
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetSetWindowPosDontResize:
@@ -613,6 +613,16 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				break;
 			}
+			case ProtoPipe::PipeMessageType::SetManualScaling:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetManualScaling*>(messageBuffer);
+
+				printf("Received SetManualScaling with settings.from res (%d, %d), to (%d,%d)\n", body->oldX, body->oldY, body->newX, body->newY);
+
+				Scaler::Settings(body->oldX, body->oldY, body->newX, body->newY);
+
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetXinputtoMKBkeys:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetXinputtoMKBkeys*>(messageBuffer);
@@ -681,12 +691,13 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 					ScreenshotInput::ScanThread::scanYtype = 1;
 				else if (body->yclick)
 					ScreenshotInput::ScanThread::scanYtype = 2;
-
+				
 				break;
 			}
 			default:
 				{
 					fprintf(stderr, "Unrecongnised message type, exiting pipe\n");
+					//MessageBoxA(NULL, "ukjent message", "quit pipe", MB_OK);
 					goto endPipe;
 				}
 			}
@@ -694,7 +705,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 	}
 	endPipe:
 
-
+	MessageBoxA(NULL, "pipe ferdig", "rulle en", MB_OK);
 	printf("End of pipe thread\n");
 	CloseHandle(pipe);
 	return 0;
@@ -702,10 +713,14 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 void StartPipeCommunication()
 {
+	evt = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	
 	HANDLE hThread = CreateThread(nullptr, 0,
 								  (LPTHREAD_START_ROUTINE)PipeThread, GetModuleHandle(0), 0, 0);
+	WaitForSingleObject(evt, INFINITE); //waits on TranslateXtoMKB and input devices settings
 	if (hThread != nullptr)
 		CloseHandle(hThread);
+	
 }
 
 }
