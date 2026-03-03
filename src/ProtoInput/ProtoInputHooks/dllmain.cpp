@@ -20,8 +20,7 @@
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
 
-
-HMODULE dll_hModule;
+HMODULE Proto::hmodule;
 
 DWORD WINAPI GuiThread(LPVOID lpParameter)
 {
@@ -36,6 +35,7 @@ DWORD WINAPI GuiThread(LPVOID lpParameter)
 
 DWORD WINAPI StartThread(LPVOID lpParameter)
 {
+    
     AllocConsole();
     FILE* f = new FILE();
     freopen_s(&f, "CONOUT$", "w", stdout);
@@ -50,22 +50,22 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     Proto::FocusMessageLoop::SetupThread();
 
-    Proto::FakeCursor::Initialise(dll_hModule);
+    Proto::FakeCursor::Initialise(Proto::hmodule);
 
     Proto::AddThreadToACL(GetCurrentThreadId());
 
-    Proto::StartPipeCommunication(); //must be placed before InitialiseRawInput
-    Sleep(50);
+    Proto::StartPipeCommunication(); 
+    InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
     Proto::RawInput::InitialiseRawInput();
 	// Useful to add a pause if we need to attach a debugger
     // MessageBoxW(NULL, L"Press OK to start", L"", MB_OK);
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);
 
     HANDLE hGuiThread = CreateThread(nullptr, 0,
-        (LPTHREAD_START_ROUTINE)GuiThread, dll_hModule, CREATE_SUSPENDED, &Proto::GuiThreadID);
+        (LPTHREAD_START_ROUTINE)GuiThread, Proto::hmodule, CREATE_SUSPENDED, &Proto::GuiThreadID);
 
     ResumeThread(hGuiThread);
-      
+
     if (hGuiThread != nullptr)
         CloseHandle(hGuiThread);
 
@@ -97,7 +97,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        dll_hModule = hModule;
+        Proto::hmodule = hModule;
     		
          HANDLE hThread = CreateThread(nullptr, 0,
                                       (LPTHREAD_START_ROUTINE)StartThread, hModule, 0, 0);

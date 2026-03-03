@@ -88,6 +88,10 @@ struct PipeMessageWakeUpProcess
 {
 };
 
+//struct PipeMessageSetNoGUI
+//{
+//	bool SetNoGUI;
+//};
 struct PipeMesasgeUpdateMainWindowHandle
 {
 	uint64_t hwnd = 0;
@@ -177,7 +181,6 @@ struct PipeMessageSetSetWindowPosSettings
 	int posy;
 	int width;
 	int height;
-	bool scale;
 };
 
 struct PipeMessageSetSetWindowPosDontResize

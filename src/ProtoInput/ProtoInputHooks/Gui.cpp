@@ -19,7 +19,6 @@
 
 namespace Proto
 {
-	bool TranslateXisenabled = false;
 intptr_t ConsoleHwnd;
 
 static void HelpMarker(const char* desc)
@@ -1029,5 +1028,24 @@ void RenderImgui()
     }
     ImGui::End();
 }
+DWORD WINAPI GuiThread(LPVOID lpParameter)
+{
+    std::cout << "Starting gui thread\n";
 
+    Proto::AddThreadToACL(GetCurrentThreadId());
+
+    Proto::ShowGuiImpl();
+
+    return 0;
+}
+void StartGUIThread()
+{ 
+    HANDLE hGuiThread = CreateThread(nullptr, 0,
+        (LPTHREAD_START_ROUTINE)GuiThread, Proto::hmodule, CREATE_SUSPENDED, &Proto::GuiThreadID);
+
+    ResumeThread(hGuiThread);
+
+    if (hGuiThread != nullptr)
+    CloseHandle(hGuiThread);
+}
 }

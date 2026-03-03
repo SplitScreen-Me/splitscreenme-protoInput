@@ -119,7 +119,7 @@ extern "C" __declspec(dllexport) void SetDinputDeviceGUID(ProtoInstanceHandle in
 // This MUST be called before calling InstallHook on the Dinput order hook
 extern "C" __declspec(dllexport) void DinputHookAlsoHooksGetDeviceState(ProtoInstanceHandle instanceHandle, bool enable);
 
-extern "C" __declspec(dllexport) void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height, bool scale);
+extern "C" __declspec(dllexport) void SetSetWindowPosSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
 
 extern "C" __declspec(dllexport) void SetSetWindowPosDontResize(ProtoInstanceHandle instanceHandle, bool enabled);
 
