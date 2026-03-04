@@ -22,17 +22,6 @@
 
 HMODULE Proto::hmodule;
 
-DWORD WINAPI GuiThread(LPVOID lpParameter)
-{
-    std::cout << "Starting gui thread\n";
-
-	Proto::AddThreadToACL(GetCurrentThreadId());
-
-    Proto::ShowGuiImpl();
-
-    return 0;
-}
-
 DWORD WINAPI StartThread(LPVOID lpParameter)
 {
     
@@ -58,16 +47,8 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
     Proto::RawInput::InitialiseRawInput();
 	// Useful to add a pause if we need to attach a debugger
-    // MessageBoxW(NULL, L"Press OK to start", L"", MB_OK);
+    
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);
-
-    HANDLE hGuiThread = CreateThread(nullptr, 0,
-        (LPTHREAD_START_ROUTINE)GuiThread, Proto::hmodule, CREATE_SUSPENDED, &Proto::GuiThreadID);
-
-    ResumeThread(hGuiThread);
-
-    if (hGuiThread != nullptr)
-        CloseHandle(hGuiThread);
 
     std::cout << "Reached end of startup thread\n";
     return 0;
