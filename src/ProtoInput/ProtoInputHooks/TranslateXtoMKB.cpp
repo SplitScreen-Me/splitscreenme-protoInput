@@ -481,17 +481,17 @@ namespace ScreenshotInput
                 bool rightPressed = IsTriggerPressed(state.Gamepad.bRightTrigger);
 
                 if (TranslateXtoMKB::lefthanded == 1) {
-                    Xaxis = state.Gamepad.sThumbRX;
-                    Yaxis = state.Gamepad.sThumbRY;
-                    scrollXaxis = state.Gamepad.sThumbLX;
-                    scrollYaxis = state.Gamepad.sThumbLY;
-                }
-                else
-                {
                     Xaxis = state.Gamepad.sThumbLX;
                     Yaxis = state.Gamepad.sThumbLY;
                     scrollXaxis = state.Gamepad.sThumbRX;
                     scrollYaxis = state.Gamepad.sThumbRY;
+                }
+                else
+                {
+                    Xaxis = state.Gamepad.sThumbRX;
+                    Yaxis = state.Gamepad.sThumbRY;
+                    scrollXaxis = state.Gamepad.sThumbLX;
+                    scrollYaxis = state.Gamepad.sThumbLY;
                 }
 
                 delta = CalculateUltimateCursorMove(
@@ -789,38 +789,7 @@ namespace ScreenshotInput
                 }
 
 
-                if (oldup)
-                {
-                    if (buttons & XINPUT_GAMEPAD_DPAD_UP)
-                    {
-                    }
-                    else {
-                        oldup = false;
-                        ButtonStateImpulse(TranslateXtoMKB::upmapping, false, 99);//release
-                    }
-                }
-                else if (buttons & XINPUT_GAMEPAD_DPAD_UP)
-                {
-                    oldup = true;
-                    ButtonStateImpulse(TranslateXtoMKB::upmapping, true, 99);//down
-                }
-
-
-                if (olddown)
-                {
-                    if (buttons & XINPUT_GAMEPAD_DPAD_DOWN)
-                    {
-                    }
-                    else {
-                        olddown = false;
-                        ButtonStateImpulse(TranslateXtoMKB::downmapping, false, 99);//release
-                    }
-                }
-                else if (buttons & XINPUT_GAMEPAD_DPAD_DOWN)
-                {
-                    olddown = true;
-                    ButtonStateImpulse(TranslateXtoMKB::downmapping, true, 99);//down
-                }
+ 
 
                 if (oldstartoptions) //toggle fake cursor
                 {
@@ -844,8 +813,12 @@ namespace ScreenshotInput
                 {
                     if (buttons & XINPUT_GAMEPAD_START)
                     {
+                        Proto::FakeCursor::Showmessage = 7; //adjust sensitivity
+                        TranslateXtoMKB::RefreshPoint = 1;
                     }
                     else {
+                        Proto::FakeCursor::Showmessage = 0; //adjust sensitivity
+                        TranslateXtoMKB::RefreshPoint = 1;
                         oldstart = false;
                         ButtonStateImpulse(TranslateXtoMKB::startmapping, false, 99);//release
                     }
@@ -854,14 +827,19 @@ namespace ScreenshotInput
                 {
                     oldstart = true;
                     ButtonStateImpulse(TranslateXtoMKB::startmapping, true, 99);//down
+
                 }
 
                 if (oldoptions)
                 {
                     if (buttons & XINPUT_GAMEPAD_BACK)
                     {
+                        Proto::FakeCursor::Showmessage = 6; //adjust sensitivity
+                        TranslateXtoMKB::RefreshPoint = 1;
                     }
                     else {
+                        Proto::FakeCursor::Showmessage = 0; //adjust sensitivity
+                        TranslateXtoMKB::RefreshPoint = 1;
                         oldoptions = false;
                         ButtonStateImpulse(TranslateXtoMKB::optionmapping, false, 99);//release
                     }
@@ -871,7 +849,75 @@ namespace ScreenshotInput
                     oldoptions = true;
                     ButtonStateImpulse(TranslateXtoMKB::optionmapping, true, 99);//down
                 }
+                if (oldup)
+                {
+                    if (buttons & XINPUT_GAMEPAD_DPAD_UP)
+                    {
+                    }
+                    else {
+                        if (Proto::FakeCursor::Showmessage == 6)
+                        {
+                            if (TranslateXtoMKB::Sens < 50)
+                            {
+                                TranslateXtoMKB::Sens++;
+                                Proto::FakeCursor::Showmessage = 0;
+                                ScreenshotInput::TranslateXtoMKB::RefreshPoint = 1;
+                            }
+                        }
+                        if (Proto::FakeCursor::Showmessage == 7)
+                        {
+                            if (TranslateXtoMKB::Sensmult < 50)
+                            {
+                                TranslateXtoMKB::Sensmult++;
+                                Proto::FakeCursor::Showmessage = 0;
+                                ScreenshotInput::TranslateXtoMKB::RefreshPoint = 1;
+                            }
+                        }
+                        oldup = false;
+                        ButtonStateImpulse(TranslateXtoMKB::upmapping, false, 99);//release
+                    }
+                }
+                else if (buttons & XINPUT_GAMEPAD_DPAD_UP)
+                {
+                    oldup = true;
+                    ButtonStateImpulse(TranslateXtoMKB::upmapping, true, 99);//down
+                }
 
+
+                if (olddown)
+                {
+                    if (buttons & XINPUT_GAMEPAD_DPAD_DOWN)
+                    {
+                    }
+                    else
+                    {
+                        if (Proto::FakeCursor::Showmessage == 6)
+                        {
+                            if (TranslateXtoMKB::Sens > 1)
+                            {
+                                TranslateXtoMKB::Sens--;
+                                Proto::FakeCursor::Showmessage = 0;
+                                ScreenshotInput::TranslateXtoMKB::RefreshPoint = 1;
+                            }
+                        }
+                        if (Proto::FakeCursor::Showmessage == 7)
+                        {
+                            if (TranslateXtoMKB::Sensmult > 1)
+                            {
+                                TranslateXtoMKB::Sensmult--;
+                                Proto::FakeCursor::Showmessage = 0;
+                                ScreenshotInput::TranslateXtoMKB::RefreshPoint = 1;
+                            }
+                        }
+                        olddown = false;
+                        ButtonStateImpulse(TranslateXtoMKB::downmapping, false, 99);//release
+                    }
+                }
+                else if (buttons & XINPUT_GAMEPAD_DPAD_DOWN)
+                {
+                    olddown = true;
+                    ButtonStateImpulse(TranslateXtoMKB::downmapping, true, 99);//down
+                }
             } //if mode above 0
         } //if controller
         else { //no controller
@@ -889,8 +935,8 @@ namespace ScreenshotInput
             tick = 0;
         }
 
-        if (Proto::FakeCursor::Showmessage != 0) { //drawing messages or something
-            if (counter < 500) {
+        if (Proto::FakeCursor::Showmessage != 0 && Proto::FakeCursor::Showmessage != 6 && Proto::FakeCursor::Showmessage != 7) { //drawing messages or something
+            if (counter < 1000) {
                 counter++;
             }
             else {

@@ -10,6 +10,8 @@ namespace Proto
     intptr_t HwndSelector::selectedHwnd = 0;
     int HwndSelector::windowWidth, HwndSelector::windowHeight;
 
+    bool HwndSelector::RemoteHwndEnabled = false;
+
     struct HandleData
     {
         unsigned long pid;
@@ -45,7 +47,12 @@ namespace Proto
     void HwndSelector::UpdateMainHwnd(bool logOutput)
     {
         // Go through all the top level windows, select the first that's visible & belongs to the process
-
+		if (HwndSelector::RemoteHwndEnabled)
+		{
+			if (logOutput)
+				printf("Remote hwnd enabled, skipping search for main window\n");
+			return;
+		}
         HandleData data{ GetCurrentProcessId(), nullptr };
         EnumWindows(EnumWindowsCallback, (LPARAM)&data);
 

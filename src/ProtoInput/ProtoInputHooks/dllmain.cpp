@@ -35,7 +35,7 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     std::cout << "Hooks DLL loaded\n";
 
-    Proto::HwndSelector::UpdateMainHwnd();
+
 
     Proto::FocusMessageLoop::SetupThread();
 
@@ -44,6 +44,9 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     Proto::AddThreadToACL(GetCurrentThreadId());
 
     Proto::StartPipeCommunication(); 
+
+    Proto::HwndSelector::UpdateMainHwnd();
+
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
     Proto::RawInput::InitialiseRawInput();
 	// Useful to add a pause if we need to attach a debugger

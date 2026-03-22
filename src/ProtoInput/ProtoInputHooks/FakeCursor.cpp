@@ -158,6 +158,26 @@ void FakeCursor::DrawMessage(HDC hdc, HWND window, HBRUSH Brush, int message)
             TextOutW(hdc, here.x + 20, here.y + 20, TEXT("LOCK TOGGLED!"), 13); //14
             messageshown = true;
         }
+        if (message == 5) {
+            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
+            TextOutW(hdc, here.x + 20, here.y + 20, TEXT("Window top!"), 11); //14
+            messageshown = true;
+        }
+        if (message == 6) {
+            wchar_t buffer[25];
+            swprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), L"Sens Flat Adjust! (%d)", ScreenshotInput::TranslateXtoMKB::Sens);
+            TextOutW(hdc, here.x + 20, here.y + 20, buffer, (int)wcslen(buffer));
+            TextOutW(hdc, here.x + 20, here.y + 40, TEXT("Press Up or Down!"), 17); //14
+            messageshown = true;
+        }
+        if (message == 7) {
+            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
+            wchar_t buffer[25];
+            swprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), L"Sens Curve Adjust! (%d)", ScreenshotInput::TranslateXtoMKB::Sensmult);
+            TextOutW(hdc, here.x + 20, here.y + 20, buffer, (int)wcslen(buffer));
+            TextOutW(hdc, here.x + 20, here.y + 40, TEXT("Press Up or Down!"), 17);
+            messageshown = true;
+        }
         if (ScreenshotInput::TranslateXtoMKB::SaveBmps) {
             //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 0, TEXT("BMP SAVE MODE!"), 14); //14
@@ -278,7 +298,7 @@ void FakeCursor::DrawFoundSpots(HDC hdc, POINT spotA, POINT spotB, POINT spotX, 
 	OldTestpos = testpos;
 }
 
-void FakeCursor::DrawPointsandMessages()
+void FakeCursor::DrawPointsandMessages() //only on Xtranslate
 {
     if (ScreenshotInput::ScanThread::scanoption)
     {
@@ -440,7 +460,7 @@ DWORD WINAPI FakeCursorDrawLoopThread(LPVOID lpParameter)
 
 void FakeCursor::StartDrawLoopInternal()
 {
-    int tick = 0;
+    int tick = 1;
 
     if (Proto::RawInput::TranslateXinputtoMKB)
         ScreenshotInput::TranslateXtoMKB::Initialize(GetModuleHandle(NULL));
@@ -456,8 +476,10 @@ void FakeCursor::StartDrawLoopInternal()
 
             //TODO: is this ok? (might eat cpu)
             Sleep(drawingEnabled ? 12 : 500);
+            tick = (tick + 1) % 200;
         }
-        else {
+        else 
+        {
             ScreenshotInput::TranslateXtoMKB::ThreadFunction();
             if (ScreenshotInput::TranslateXtoMKB::RefreshPoint > 0)
             {
@@ -469,16 +491,14 @@ void FakeCursor::StartDrawLoopInternal()
                 DrawCursor();
                 ScreenshotInput::TranslateXtoMKB::RefreshWindow--;
             }
+            tick = (tick + 1) % 2000; //guess this run about 10-12 times faster
         }
-        tick = (tick + 1) % 200;
 
-        if (tick == 0 && pointerWindow != GetForegroundWindow())
+        if (tick == 0)
         { 
             // Nucleus can put the game window above the pointer without this
             SetWindowPos(pointerWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
         }
-
-        
 	}
 }
 

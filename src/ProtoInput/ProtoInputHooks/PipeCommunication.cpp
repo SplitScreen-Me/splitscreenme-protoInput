@@ -256,6 +256,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 					printf("Received message to set main window handle to hwnd %lld (0x%llX)\n", body->hwnd, body->hwnd);
 					// HwndSelector::selectedHwnd = body->hwnd;
 					HwndSelector::SetSelectedHwnd((intptr_t)body->hwnd);
+					HwndSelector::RemoteHwndEnabled = true;
 				}
 					
 				break;
