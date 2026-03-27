@@ -16,6 +16,7 @@
 #include "TranslateXtoMKB.h" 
 #include "ScanThread.h" 
 #include "GtoMnK_RawInput.h" 
+#include "XinputHook.h" 
 
 namespace Proto
 {
@@ -669,22 +670,25 @@ void XTranslateMenu()
     ImGui::Checkbox("Lefthanded Stick. moves mouse with left stick and button map on right stick. or opposite if disabled", &ScreenshotInput::TranslateXtoMKB::lefthanded); //
     ImGui::Separator();
     ImGui::Separator();
-    ImGui::Checkbox("Shoulder Swap BMPs", &ScreenshotInput::ScanThread::ShoulderNextBMP); //
-    ImGui::Separator();
-    ImGui::Text("Input actions for Scanoption. 0 is move+click. 1 is only move. 2 is only click");
-    ImGui::SliderInt("A coordinate", (int*)&ScreenshotInput::ScanThread::scanAtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::SliderInt("B coordinate", (int*)&ScreenshotInput::ScanThread::scanBtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::SliderInt("X coordinate", (int*)&ScreenshotInput::ScanThread::scanXtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::SliderInt("Y coordinate", (int*)&ScreenshotInput::ScanThread::scanYtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
-    ImGui::Separator();
-    ImGui::Text("Save BMP mode. buttons XYAB will save a bmp on press at fake cursor coordinate when enabled. This option also force ScanOption to deactivate");
-    ImGui::Checkbox("Save BMP mode:", &ScreenshotInput::TranslateXtoMKB::SaveBmps); //
-    ImGui::Separator();
-    ImGui::Text("Scanoption will need a restart to discover new bmps.");
-    ImGui::Checkbox("ScanOption:", &ScreenshotInput::ScanThread::scanoption); //
-    ImGui::Separator();
-    if (!ScreenshotInput::ScanThread::scanoption)
-		ScreenshotInput::ScanThread::scanloop = false;
+    if (RawInput::TranslateXinputtoMKB)
+    { 
+        ImGui::Checkbox("Shoulder Swap BMPs", &ScreenshotInput::ScanThread::ShoulderNextBMP); //
+        ImGui::Separator();
+        ImGui::Text("Input actions for Scanoption. 0 is move+click. 1 is only move. 2 is only click");
+        ImGui::SliderInt("A coordinate", (int*)&ScreenshotInput::ScanThread::scanAtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderInt("B coordinate", (int*)&ScreenshotInput::ScanThread::scanBtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderInt("X coordinate", (int*)&ScreenshotInput::ScanThread::scanXtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderInt("Y coordinate", (int*)&ScreenshotInput::ScanThread::scanYtype, 0, 2, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::Separator();
+        ImGui::Text("Save BMP mode. buttons XYAB will save a bmp on press at fake cursor coordinate when enabled. This option also force ScanOption to deactivate");
+        ImGui::Checkbox("Save BMP mode:", &ScreenshotInput::TranslateXtoMKB::SaveBmps); //
+        ImGui::Separator();
+        ImGui::Text("Scanoption will need a restart to discover new bmps.");
+        ImGui::Checkbox("ScanOption:", &ScreenshotInput::ScanThread::scanoption); //
+        ImGui::Separator();
+        if (!ScreenshotInput::ScanThread::scanoption)
+		    ScreenshotInput::ScanThread::scanloop = false;
+    }
 }
 void HooksMenu()
 {
@@ -933,9 +937,9 @@ void RenderImgui()
                 HooksMenu();
                 ImGui::EndTabItem();
             }
-            if (RawInput::TranslateXinputtoMKB)
+            if (RawInput::TranslateXinputtoMKB || XinputHook::TranslateMKBtoXinput)
             { 
-                if (ImGui::BeginTabItem("TranslateXtoMKB options"))
+                if (ImGui::BeginTabItem("Translation options"))
                 {
                     XTranslateMenu();
                     ImGui::EndTabItem();

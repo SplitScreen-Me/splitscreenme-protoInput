@@ -19,7 +19,7 @@ namespace Proto
 		static unsigned int controllerIndex4;
 
 		static bool useOpenXinput;
-
+		static bool TranslateMKBtoXinput;
 		const char* GetHookName() const override { return "Xinput"; }
 		const char* GetHookDescription() const override {
 			return

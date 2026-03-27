@@ -31,6 +31,9 @@
     <Filter Include="Source Files\TranslateXtoMKB">
       <UniqueIdentifier>{a0d1a945-2bce-40dd-88b8-54724cf1b678}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\TranslateMKBtoX">
+      <UniqueIdentifier>{2852b253-94b1-4a59-954e-55b28a17010b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">

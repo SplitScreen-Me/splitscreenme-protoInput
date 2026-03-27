@@ -98,6 +98,8 @@ extern "C" __declspec(dllexport) void SetUseDinputRedirection(ProtoInstanceHandl
 
 extern "C" __declspec(dllexport) void SetUseOpenXinput(ProtoInstanceHandle instanceHandle, bool useOpenXinput);
 
+extern "C" __declspec(dllexport) void SetTranslateMKBtoXinput(ProtoInstanceHandle instanceHandle, bool TranslateMKBtoXinput);
+
 // Both of these functions require RenameHandlesHookHookID hook
 extern "C" __declspec(dllexport) void AddHandleToRename(ProtoInstanceHandle instanceHandle, const wchar_t* name);
 

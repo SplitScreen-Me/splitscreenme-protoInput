@@ -73,6 +73,7 @@ struct Profile
 
 	bool dinputToXinputRedirection = false;
 	bool useOpenXinput = false;
+	bool TranslateMKBtoXinput = false;
 	bool TranslateXinputtoMKB = false;
 
 	bool XinputtoMKBstickinvert = false;
@@ -153,6 +154,7 @@ struct Profile
 
 			cereal::make_nvp("dinputToXinputRedirection", dinputToXinputRedirection),
 			cereal::make_nvp("useOpenXinput", useOpenXinput),
+			cereal::make_nvp("TranslateMKBtoXinput", TranslateMKBtoXinput),
 			cereal::make_nvp("TranslateXinputtoMKB", TranslateXinputtoMKB),
 			cereal::make_nvp("XinputtoMKBstickinvert", XinputtoMKBstickinvert),
 			cereal::make_nvp("ScanOption", ScanOption),

@@ -201,6 +201,7 @@ bool Launch()
         if (hookEnabled(BlockRawInputHookID))           InstallHook(instanceHandle, BlockRawInputHookID);
     	
         SetUseOpenXinput(instanceHandle, currentProfile.useOpenXinput);
+        SetTranslateMKBtoXinput(instanceHandle, currentProfile.TranslateMKBtoXinput);
 
         SetUseDinputRedirection(instanceHandle, currentProfile.dinputToXinputRedirection);
         if (hookEnabled(XinputHookID))                  InstallHook(instanceHandle, XinputHookID);
@@ -1448,6 +1449,8 @@ void OptionsMenu()
         }
     }
     ImGui::Checkbox("Use OpenXinput", &currentProfile.useOpenXinput);	
+
+    ImGui::Checkbox("Translate MKB to fake Xinput", &currentProfile.TranslateMKBtoXinput);
 
     ImGui::Checkbox("Dinput to Xinput redirection", &currentProfile.dinputToXinputRedirection);
 

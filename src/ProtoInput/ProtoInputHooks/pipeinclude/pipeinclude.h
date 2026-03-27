@@ -25,6 +25,7 @@ enum class PipeMessageType
 	SetUseDinput,
 	StopFocusMessageLoop,
 	SetUseOpenXinput,
+	TranslateMKBtoXinput,
 	SetDinputDeviceGuid,
 	SetDinputHookGetDeviceState,
 	SetSetWindowPosSettings,
@@ -163,6 +164,11 @@ struct PipeMessageStopFocusMessageLoop
 struct PipeMessageSetUseOpenXinput
 {
 	bool useOpenXinput;
+};
+
+struct PipeMessageSetTranslateMKBtoXinput
+{
+	bool TranslateMKBtoXinput;
 };
 
 struct PipeMessageSetDinputDeviceGuid

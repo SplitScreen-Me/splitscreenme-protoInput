@@ -16,6 +16,7 @@
 #include "KeyboardButtonFilter.h"
 #include "MessageFilterHook.h"
 #include "TranslateXtoMKB.h"
+#include "XinputHook.h"
 
 namespace Proto
 {
@@ -213,7 +214,9 @@ void RawInput::ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle)
 		FakeMouseKeyboard::ReceivedKeyPressOrRelease(VK_XBUTTON2, true);
 	if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_UP) != 0)
 		FakeMouseKeyboard::ReceivedKeyPressOrRelease(VK_XBUTTON2, false);
-	RawInput::SendInputMessages(data);
+
+	if (!XinputHook::TranslateMKBtoXinput)
+		RawInput::SendInputMessages(data);
 }
 
 void RawInput::SendKeyMessage(const RAWKEYBOARD& data, bool pressed)
@@ -261,7 +264,8 @@ void RawInput::ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle
 	const bool released = (data.Flags & RI_KEY_BREAK) != 0;
 	const bool pressed = !released;
 
-	RawInput::SendKeyMessage(data, pressed);
+	if (!XinputHook::TranslateMKBtoXinput)
+		RawInput::SendKeyMessage(data, pressed);
 	
 	FakeMouseKeyboard::ReceivedKeyPressOrRelease(data.VKey, pressed);
 }
@@ -403,7 +407,8 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 					inputBuffer[inputBufferCounter] = rawinput;
 	
 					const LPARAM x = (inputBufferCounter) | 0xAB000000;
-					PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
+					if (!XinputHook::TranslateMKBtoXinput)
+						PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
 				}
 			}
 		}

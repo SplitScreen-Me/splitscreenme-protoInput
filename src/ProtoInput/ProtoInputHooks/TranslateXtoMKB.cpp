@@ -51,6 +51,11 @@ namespace ScreenshotInput
     bool TranslateXtoMKB::rawinputhook; //registerrawinputhook
     bool TranslateXtoMKB::registerrawinputhook; //registerrawinputhook
 
+
+    int TranslateXtoMKB::stickrightmapping;
+    int TranslateXtoMKB::stickleftmapping;
+    int TranslateXtoMKB::stickupmapping;
+    int TranslateXtoMKB::stickdownmapping;
     int TranslateXtoMKB::Amapping;
     int TranslateXtoMKB::Bmapping;
     int TranslateXtoMKB::Xmapping;
@@ -63,10 +68,6 @@ namespace ScreenshotInput
     int TranslateXtoMKB::downmapping;
     int TranslateXtoMKB::stickRpressmapping;
     int TranslateXtoMKB::stickLpressmapping;
-    int TranslateXtoMKB::stickrightmapping;
-    int TranslateXtoMKB::stickleftmapping;
-    int TranslateXtoMKB::stickupmapping;
-    int TranslateXtoMKB::stickdownmapping;
     int TranslateXtoMKB::optionmapping;
     int TranslateXtoMKB::startmapping;
     bool TranslateXtoMKB::lefthanded;
@@ -89,7 +90,7 @@ namespace ScreenshotInput
     const float curve_exponent = 5.00f; // The exponential portion of the curve (1.0 to 10.0)
     //float sensitivity = 9.00f; // Base sensitivity / max speed (1.0 to 30.0)
     //float accel_multiplier = 1.90f; // Look Acceleration Multiplier (1.0 to 3.0)
-
+    int startbuttontimer, backbuttontimer;
     /////////////////
 
     bool leftPressedold = false;
@@ -811,10 +812,16 @@ namespace ScreenshotInput
                 }
                 if (oldstart)
                 {
+
                     if (buttons & XINPUT_GAMEPAD_START)
                     {
-                        Proto::FakeCursor::Showmessage = 7; //adjust sensitivity
-                        TranslateXtoMKB::RefreshPoint = 1;
+                        if (startbuttontimer < 1500) //delay setting menu. hold button to show
+                            startbuttontimer++;
+                        else 
+                        { 
+                            Proto::FakeCursor::Showmessage = 7; //adjust sensitivity
+                            TranslateXtoMKB::RefreshPoint = 1;
+                        }
                     }
                     else {
                         Proto::FakeCursor::Showmessage = 0; //adjust sensitivity
@@ -825,6 +832,7 @@ namespace ScreenshotInput
                 }
                 else if (buttons & XINPUT_GAMEPAD_START)
                 {
+                    startbuttontimer = 0;
                     oldstart = true;
                     ButtonStateImpulse(TranslateXtoMKB::startmapping, true, 99);//down
 
@@ -834,8 +842,13 @@ namespace ScreenshotInput
                 {
                     if (buttons & XINPUT_GAMEPAD_BACK)
                     {
-                        Proto::FakeCursor::Showmessage = 6; //adjust sensitivity
-                        TranslateXtoMKB::RefreshPoint = 1;
+                        if (backbuttontimer < 1500)
+                            backbuttontimer ++;
+                        else 
+                        {
+                            Proto::FakeCursor::Showmessage = 6; //adjust sensitivity
+                            TranslateXtoMKB::RefreshPoint = 1;
+                        }
                     }
                     else {
                         Proto::FakeCursor::Showmessage = 0; //adjust sensitivity
@@ -846,6 +859,7 @@ namespace ScreenshotInput
                 }
                 else if (buttons & XINPUT_GAMEPAD_BACK)
                 {
+                    backbuttontimer = 0;
                     oldoptions = true;
                     ButtonStateImpulse(TranslateXtoMKB::optionmapping, true, 99);//down
                 }

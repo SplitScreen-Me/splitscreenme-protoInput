@@ -410,6 +410,17 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				break;
 			}
+			case ProtoPipe::PipeMessageType::TranslateMKBtoXinput:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetTranslateMKBtoXinput*>(messageBuffer);
+
+				printf("Received set translate MKB to Xinput. also extended mousestate bounds. remember Xinputhook also%d\n", body->TranslateMKBtoXinput);
+
+				XinputHook::TranslateMKBtoXinput = body->TranslateMKBtoXinput;
+				FakeMouseKeyboard::SetIgnoreMouseBounds(true);
+
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetDinputDeviceGuid:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDinputDeviceGuid*>(messageBuffer);
@@ -494,7 +505,8 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				FakeMouseKeyboard::SetIgnoreMouseBounds(body->allowOutOfBounds);
 				FakeMouseKeyboard::SetExtendMouseBounds(body->extendBounds);
-
+				if(XinputHook::TranslateMKBtoXinput) //override
+					FakeMouseKeyboard::SetIgnoreMouseBounds(true);
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetToggleCursorVisibilityShortcut:
