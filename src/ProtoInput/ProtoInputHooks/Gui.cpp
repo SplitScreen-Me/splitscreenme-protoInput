@@ -259,7 +259,7 @@ void XTranslateMenu()
         if (waitingKeyPressX)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##B"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##X"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -311,7 +311,7 @@ void XTranslateMenu()
         if (waitingKeyPressRS)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##RS"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -322,7 +322,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::RSmapping = X_RS;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##RS1"))//these need unique IDs or text
         {
             waitingKeyPressRS = true;
             lastVKkey = -1;
@@ -337,7 +337,7 @@ void XTranslateMenu()
         if (waitingKeyPressLS)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##LS"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -348,7 +348,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::LSmapping = X_LS;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##LS1"))//these need unique IDs or text
         {
             waitingKeyPressLS = true;
             lastVKkey = -1;
@@ -363,7 +363,7 @@ void XTranslateMenu()
         if (waitingKeyPressright)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##DR"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -374,7 +374,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::rightmapping = X_right;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##DR1"))//these need unique IDs or text
         {
             waitingKeyPressright = true;
             lastVKkey = -1;
@@ -389,7 +389,7 @@ void XTranslateMenu()
         if (waitingKeyPressleft)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##DL"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -400,7 +400,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::leftmapping = X_left;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##DL1"))//these need unique IDs or text
         {
             waitingKeyPressleft = true;
             lastVKkey = -1;
@@ -415,7 +415,7 @@ void XTranslateMenu()
         if (waitingKeyPressup)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##DU"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -426,7 +426,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::upmapping = X_up;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##DU1"))//these need unique IDs or text
         {
             waitingKeyPressup = true;
             lastVKkey = -1;
@@ -441,7 +441,7 @@ void XTranslateMenu()
         if (waitingKeyPressdown)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##DD"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -452,7 +452,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::downmapping = X_down;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##DD1"))//these need unique IDs or text
         {
             waitingKeyPressdown = true;
             lastVKkey = -1;
@@ -467,7 +467,7 @@ void XTranslateMenu()
         if (waitingKeyPressstickRpress)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##RSP"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -478,7 +478,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::stickRpressmapping = X_stickRpress;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##RSP1"))//these need unique IDs or text
         {
             waitingKeyPressstickRpress = true;
             lastVKkey = -1;
@@ -493,7 +493,7 @@ void XTranslateMenu()
         if (waitingKeyPressstickLpress)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##LSP"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -504,7 +504,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::stickLpressmapping = X_stickLpress;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##LSP1"))//these need unique IDs or text
         {
             waitingKeyPressstickLpress = true;
             lastVKkey = -1;
@@ -519,7 +519,7 @@ void XTranslateMenu()
         if (waitingKeyPressstickright)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##SRA"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -530,7 +530,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::stickrightmapping = X_stickright;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##SRA1"))//these need unique IDs or text
         {
             waitingKeyPressstickright = true;
             lastVKkey = -1;
@@ -545,7 +545,7 @@ void XTranslateMenu()
         if (waitingKeyPressstickleft)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##SLA"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -556,7 +556,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::stickleftmapping = X_stickleft;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##SLA1"))//these need unique IDs or text
         {
             waitingKeyPressstickleft = true;
             lastVKkey = -1;
@@ -571,7 +571,7 @@ void XTranslateMenu()
         if (waitingKeyPressstickup)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##SUA"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -582,7 +582,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::stickupmapping = X_stickup;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##SUA1"))//these need unique IDs or text
         {
             waitingKeyPressstickup = true;
             lastVKkey = -1;
@@ -597,7 +597,7 @@ void XTranslateMenu()
         if (waitingKeyPressstickdown)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##SDA"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -608,7 +608,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::stickdownmapping = X_stickdown;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##SDA1"))//these need unique IDs or text
         {
             waitingKeyPressstickdown = true;
             lastVKkey = -1;
@@ -623,7 +623,7 @@ void XTranslateMenu()
         if (waitingKeyPressoption)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##OPT"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -634,7 +634,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::optionmapping = X_option;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##OPT1"))//these need unique IDs or text
         {
             waitingKeyPressoption = true;
             lastVKkey = -1;
@@ -649,7 +649,7 @@ void XTranslateMenu()
         if (waitingKeyPressstart)
         {
             //PushDisabled();
-            ImGui::Button("Press Keyboard button...##Y"); //these need unique IDs or text
+            ImGui::Button("Press Keyboard button...##STA"); //these need unique IDs or text
             GetVK();
             //PopDisabled();
            // Sleep(100);
@@ -660,7 +660,7 @@ void XTranslateMenu()
                 ScreenshotInput::TranslateXtoMKB::startmapping = X_start;
             }
         }
-        else if (ImGui::Button("Click to change##Y1"))//these need unique IDs or text
+        else if (ImGui::Button("Click to change##STA1"))//these need unique IDs or text
         {
             waitingKeyPressstart = true;
             lastVKkey = -1;
