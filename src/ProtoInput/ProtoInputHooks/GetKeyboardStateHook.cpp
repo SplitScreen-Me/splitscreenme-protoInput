@@ -1,5 +1,6 @@
 #include "GetKeyboardStateHook.h"
 #include "FakeMouseKeyboard.h"
+#include "XinputHook.h"
 
 namespace Proto
 {
@@ -12,7 +13,9 @@ BOOL WINAPI Hook_GetKeyboardState(PBYTE lpKeyState)
 
 		for (int vkey = 0; vkey < 256; ++vkey)
 		{
-			lpKeyState[vkey] = FakeMouseKeyboard::IsKeyStatePressed(vkey) ? 0b10000000 : 0;
+			if (!XinputHook::TranslateMKBtoXinput)
+				lpKeyState[vkey] = FakeMouseKeyboard::IsKeyStatePressed(vkey) ? 0b10000000 : 0;
+			else lpKeyState[vkey] = 0;
 		}
 	}
 

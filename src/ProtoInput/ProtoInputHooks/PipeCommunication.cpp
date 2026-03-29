@@ -417,7 +417,6 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				printf("Received set translate MKB to Xinput. also extended mousestate bounds. remember Xinputhook also%d\n", body->TranslateMKBtoXinput);
 
 				XinputHook::TranslateMKBtoXinput = body->TranslateMKBtoXinput;
-				FakeMouseKeyboard::SetIgnoreMouseBounds(true);
 
 				break;
 			}
@@ -505,8 +504,6 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				FakeMouseKeyboard::SetIgnoreMouseBounds(body->allowOutOfBounds);
 				FakeMouseKeyboard::SetExtendMouseBounds(body->extendBounds);
-				if(XinputHook::TranslateMKBtoXinput) //override
-					FakeMouseKeyboard::SetIgnoreMouseBounds(true);
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetToggleCursorVisibilityShortcut:
@@ -718,7 +715,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 	}
 	endPipe:
 
-	MessageBoxA(NULL, "pipe ferdig", "rulle en", MB_OK);
+	MessageBoxA(NULL, "report this error: Pipe ended", "Pipe ended", MB_OK);
 	printf("End of pipe thread\n");
 	CloseHandle(pipe);
 	return 0;

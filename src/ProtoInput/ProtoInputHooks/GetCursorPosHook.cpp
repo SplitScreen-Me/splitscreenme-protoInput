@@ -2,6 +2,8 @@
 #include "FakeMouseKeyboard.h"
 #include "HwndSelector.h"
 #include "Scaler.h"
+#include "XinputHook.h"
+#include "SetCursorPosHook.h"
 
 namespace Proto
 {
@@ -10,10 +12,17 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 {	
 	if (lpPoint)
 	{
-		const auto& state = FakeMouseKeyboard::GetMouseState();
-		lpPoint->x = state.x;
-		lpPoint->y = state.y;
-
+		if (!XinputHook::TranslateMKBtoXinput)
+		{
+			const auto& state = FakeMouseKeyboard::GetMouseState();
+			lpPoint->x = state.x;
+			lpPoint->y = state.y;
+		}
+		else
+		{
+			lpPoint->x = SetCursorPosHook::mousesethere.x;
+			lpPoint->y = SetCursorPosHook::mousesethere.y;
+		}
 		if (FakeMouseKeyboard::PutMouseInsideWindow)
 		{
 			int clientWidth = HwndSelector::windowWidth;

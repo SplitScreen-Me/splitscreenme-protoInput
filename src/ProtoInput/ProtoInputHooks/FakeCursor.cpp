@@ -6,6 +6,8 @@
 #include "ScanThread.h"
 #include "TranslateXtoMKB.h"
 #include "RawInput.h"
+#include "SetCursorPosHook.h"
+#include "XinputHook.h"
 #include <string>
 
 namespace Proto
@@ -322,6 +324,11 @@ void FakeCursor::DrawCursor()
 
     POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
+    if (XinputHook::TranslateMKBtoXinput)
+    {
+        pos.x = SetCursorPosHook::mousesethere.x;
+        pos.y = SetCursorPosHook::mousesethere.y;
+    }
     ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &pos);
     ScreenToClient(pointerWindow, &pos);
 

@@ -397,19 +397,20 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 			if ((allowMouse && usages[HID_USAGE_GENERIC_MOUSE]) || (allowKeyboard && usages[HID_USAGE_GENERIC_KEYBOARD]))
 			// if ((allowMouse) || (allowKeyboard))
 			{
-				for (const auto& hwnd : forwardingWindows)
-				{
-					static size_t inputBufferCounter = 0;
+
+					for (const auto& hwnd : forwardingWindows)
+					{
+						static size_t inputBufferCounter = 0;
 	
-					// The game is going to lag behind the data we get by a few times, so store in an array and pass the index as a message parameter
+						// The game is going to lag behind the data we get by a few times, so store in an array and pass the index as a message parameter
 					
-					inputBufferCounter = (inputBufferCounter + 1) % RawInputBufferSize;
-					inputBuffer[inputBufferCounter] = rawinput;
+						inputBufferCounter = (inputBufferCounter + 1) % RawInputBufferSize;
+						inputBuffer[inputBufferCounter] = rawinput;
 	
-					const LPARAM x = (inputBufferCounter) | 0xAB000000;
-					if (!XinputHook::TranslateMKBtoXinput)
-						PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
-				}
+						const LPARAM x = (inputBufferCounter) | 0xAB000000;
+						if (!XinputHook::TranslateMKBtoXinput)
+							PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
+					}
 			}
 		}
 	}
