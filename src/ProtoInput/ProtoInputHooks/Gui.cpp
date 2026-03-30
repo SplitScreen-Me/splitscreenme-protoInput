@@ -197,6 +197,8 @@ void XTranslateMenu()
     ImGui::Separator();
     ImGui::SliderInt("Sensitivity exponential", (int*)&ScreenshotInput::TranslateXtoMKB::Sensmult, 1, 20, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::Separator();
+    ImGui::SliderInt("Deadzone", (int*)&ScreenshotInput::TranslateXtoMKB::Deadzone, 0, 20, "%d", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::Separator();
     {
         const auto XAString = VkToKeyName(X_A);
         ImGui::TextWrapped("A is mapped to: %s", (XAString.c_str()));
@@ -406,6 +408,7 @@ void XTranslateMenu()
             lastVKkey = -1;
         }
     }
+
     ImGui::Separator();
     {
         const auto XupString = VkToKeyName(X_up);

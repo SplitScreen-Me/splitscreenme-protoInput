@@ -82,8 +82,6 @@ bool IsKeyPressed(int Vkey)
 }
 POINT deltaL;
 POINT deltaR;
-POINT olddeltaL;
-POINT olddeltaR;
 bool oldA, oldB, oldX, oldY, oldtriggerleft, oldtriggerright, oldLS, oldRS, oldup, olddown, oldleft, oldright;
 bool oldstart, oldback, oldstickRB, oldstickLB;
 bool firstcall = false;
@@ -91,8 +89,6 @@ DWORD fakedwpacketnumber = 0;
 bool changed;
 SHORT LaxisX, LaxisY, RaxisX, RaxisY;
 SHORT deadzone = 14000;
-SHORT negativedeadzone = -14000;
-SHORT oldcurrentX, oldcurrentY;
 POINT axisvaluemouse(SHORT currentX, SHORT currentY)
 {
 	const auto& mousestate = FakeMouseKeyboard::GetMouseState();
@@ -124,8 +120,8 @@ SHORT axisvaluebutton(SHORT currentvalue, BOOL upkey, BOOL downkey)
 	if (upkey && !downkey)
 	{ 
 		//jump to above deadzone
-		if (currentvalue < 12000)
-			currentvalue = 12000;
+		if (currentvalue < deadzone)
+			currentvalue = deadzone;
 
 		//increase or stall at max
 		if (currentvalue + (7 * ScreenshotInput::TranslateXtoMKB::Sens) < 32767)
@@ -135,8 +131,8 @@ SHORT axisvaluebutton(SHORT currentvalue, BOOL upkey, BOOL downkey)
 	if (downkey && !upkey)
 	{ 
 		//jump to above dead
-		if (currentvalue > -12000)
-			currentvalue = -12000;
+		if (currentvalue > -deadzone)
+			currentvalue = -deadzone;
 
 		//increase or stall
 		if (currentvalue - (7 * ScreenshotInput::TranslateXtoMKB::Sens) > -32767)
@@ -148,57 +144,24 @@ SHORT axisvaluebutton(SHORT currentvalue, BOOL upkey, BOOL downkey)
 	{ 
 		if (currentvalue > 0 + (7 * ScreenshotInput::TranslateXtoMKB::Sens))
 			currentvalue = currentvalue - (7 * ScreenshotInput::TranslateXtoMKB::Sens);
+		else currentvalue = 0;
 
 		if (currentvalue < 0 - (7 * ScreenshotInput::TranslateXtoMKB::Sens))
 			currentvalue = currentvalue + (7 * ScreenshotInput::TranslateXtoMKB::Sens);
+		else currentvalue = 0;
 	}
 	if (diditchange != currentvalue)
 		changed = true;
 	return currentvalue;
 }
-
-inline DWORD WINAPI XInputfromkbm(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+void FillXbuttons(XINPUT_STATE* pState)
 {
-
-	if (extended)
-		getStateExCounter++;
-	else
-		getStateCounter++;
-
-	pState->Gamepad.wButtons = 0;
-
-	if (!firstcall)
-	{
-		FakeMouseKeyboard::SetMousePos(100, 100);
-		pState->Gamepad.sThumbLY = 0;
-		pState->Gamepad.sThumbLX = 0;
-		pState->Gamepad.sThumbRY = 0;
-		pState->Gamepad.sThumbRX = 0;
-		if (ScreenshotInput::TranslateXtoMKB::upmapping == VK_UP || ScreenshotInput::TranslateXtoMKB::upmapping == VK_DOWN)
-			ScreenshotInput::TranslateXtoMKB::upmapping = VK_NUMPAD8;
-		if (ScreenshotInput::TranslateXtoMKB::downmapping == VK_UP || ScreenshotInput::TranslateXtoMKB::downmapping == VK_DOWN)
-			ScreenshotInput::TranslateXtoMKB::downmapping = VK_NUMPAD5;
-		if (ScreenshotInput::TranslateXtoMKB::leftmapping == VK_LEFT || ScreenshotInput::TranslateXtoMKB::leftmapping == VK_RIGHT)
-			ScreenshotInput::TranslateXtoMKB::leftmapping = VK_NUMPAD4;
-		if (ScreenshotInput::TranslateXtoMKB::rightmapping == VK_LEFT || ScreenshotInput::TranslateXtoMKB::rightmapping == VK_RIGHT)
-			ScreenshotInput::TranslateXtoMKB::rightmapping = VK_NUMPAD6;
-		firstcall = true;
-	}
-
-	RaxisX = axisvaluebutton(RaxisX, IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickleftmapping), IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickrightmapping));
-	RaxisY = axisvaluebutton(RaxisY, IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickupmapping), IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickdownmapping));
-
-	POINT mouseaxis = axisvaluemouse(LaxisX, LaxisY);
-	LaxisX = mouseaxis.x;
-	LaxisY = mouseaxis.y;
-
+	//triggers
 	if (IsKeyPressed(VK_RBUTTON)) {
 		pState->Gamepad.bLeftTrigger = 255;
-		//changed = true;
 	}
 	else {
 		pState->Gamepad.bLeftTrigger = 0;
-		//changed = true;
 	}
 
 	if (IsKeyPressed(VK_LBUTTON)) {
@@ -208,10 +171,7 @@ inline DWORD WINAPI XInputfromkbm(DWORD dwUserIndex, XINPUT_STATE* pState, bool 
 		pState->Gamepad.bRightTrigger = 0;
 	}
 
-
-
-
-	//normal buttons 
+	//bool buttons
 	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Amapping))
 		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_A;
 
@@ -247,6 +207,41 @@ inline DWORD WINAPI XInputfromkbm(DWORD dwUserIndex, XINPUT_STATE* pState, bool 
 
 	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::optionmapping))
 		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_BACK;
+}
+inline DWORD WINAPI XInputfromkbm(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+{
+	deadzone = 1000 + (ScreenshotInput::TranslateXtoMKB::Deadzone * 3000);
+	if (extended)
+		getStateExCounter++;
+	else
+		getStateCounter++;
+
+	pState->Gamepad.wButtons = 0;
+
+	if (!firstcall)
+	{
+		FakeMouseKeyboard::SetMousePos(100, 100);
+		pState->Gamepad.sThumbLY = 0;
+		pState->Gamepad.sThumbLX = 0;
+		pState->Gamepad.sThumbRY = 0;
+		pState->Gamepad.sThumbRX = 0;
+		firstcall = true;
+	}
+
+	RaxisX = axisvaluebutton(RaxisX, IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickleftmapping), IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickrightmapping));
+	RaxisY = axisvaluebutton(RaxisY, IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickupmapping), IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickdownmapping));
+
+	POINT mouseaxis = axisvaluemouse(LaxisX, LaxisY);
+	LaxisX = mouseaxis.x;
+	LaxisY = mouseaxis.y;
+
+
+
+	FillXbuttons(pState);
+
+
+	//normal buttons 
+
 
 
 	if (ScreenshotInput::TranslateXtoMKB::lefthanded)
@@ -289,6 +284,7 @@ inline DWORD WINAPI XInputfromkbm(DWORD dwUserIndex, XINPUT_STATE* pState, bool 
 	if (changed)
 	{
 		pState->dwPacketNumber++;
+		changed = false;
 	}
 
 	oldA = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Amapping);

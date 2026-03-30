@@ -661,6 +661,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				ScreenshotInput::TranslateXtoMKB::startmapping = body->XinputtoMKBstart;
 				ScreenshotInput::TranslateXtoMKB::Sens = body->XinputtoMKBsens;
 				ScreenshotInput::TranslateXtoMKB::Sensmult = body->XinputtoMKBsensmult;
+				ScreenshotInput::TranslateXtoMKB::Deadzone = body->XinputtoMKBDeadzone;
 				break;
 			} //PipeMessageSetXinputtoMKBCFG
 			case ProtoPipe::PipeMessageType::SetXinputtoMKBCFG:

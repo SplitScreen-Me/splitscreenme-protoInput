@@ -307,6 +307,7 @@ struct PipeMessageSetXinputtoMKBkeys
 	int XinputtoMKBstart;
 	int XinputtoMKBsens;
 	int XinputtoMKBsensmult;
+	int XinputtoMKBDeadzone;
 };
 struct PipeMessageSetXinputtoMKBCFG
 {

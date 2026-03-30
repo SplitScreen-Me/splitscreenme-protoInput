@@ -37,13 +37,13 @@ struct ProfileOption
 	}
 };
 
-struct Profile
+struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 {
 	std::vector<ProfileOption> hooks
 	{
-		{ "Register Raw Input", true, "Register Raw Input", ProtoHookIDs::RegisterRawInputHookID },
-		{ "Get Raw Input Data", true, "Get Raw Input Data", ProtoHookIDs::GetRawInputDataHookID },
-		{ "Message Filter", true, "Message Filter", ProtoHookIDs::MessageFilterHookID },
+		{ "Register Raw Input", true, "Register Raw Input", ProtoHookIDs::RegisterRawInputHookID }, //0
+		{ "Get Raw Input Data", true, "Get Raw Input Data", ProtoHookIDs::GetRawInputDataHookID }, //1
+		{ "Message Filter", true, "Message Filter", ProtoHookIDs::MessageFilterHookID }, //2
 		{ "Get Cursor Position", true, "Get Cursor Position", ProtoHookIDs::GetCursorPosHookID },
 		{ "Set Cursor Position", true, "Set Cursor Position", ProtoHookIDs::SetCursorPosHookID },
 		{ "Get Key State", true, "Get Key State", ProtoHookIDs::GetKeyStateHookID },
@@ -111,6 +111,7 @@ struct Profile
 	int XinputtoMKBstart = 0x0D;
 	int XinputtoMKBsens = 15;
 	int XinputtoMKBsensmult = 4;
+	int XinputtoMKBDeadzone = 2;
 	
 
 	bool useFakeClipCursor = true;
@@ -196,6 +197,7 @@ struct Profile
 			cereal::make_nvp("XinputtoMKBstart", XinputtoMKBstart),
 			cereal::make_nvp("XinputtoMKBsens", XinputtoMKBsens),
 			cereal::make_nvp("XinputtoMKBsensmult", XinputtoMKBsensmult),
+			cereal::make_nvp("XinputtoMKBDeadzone", XinputtoMKBDeadzone),
 
 			cereal::make_nvp("useFakeClipCursor", useFakeClipCursor),
 			cereal::make_nvp("showCursorWhenImageUpdated", showCursorWhenImageUpdated),

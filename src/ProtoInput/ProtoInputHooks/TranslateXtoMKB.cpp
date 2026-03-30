@@ -1,10 +1,7 @@
-//#include "XinputHook.h"
-//#include <Xinput.h>
 #include <OpenXinput.h>
 #include "Gui.h"
 #include <string>
 #include <map>
-//#include "OpenXinputWrapper.h"
 #include "TranslateXtoMKB.h"
 #include "RawInput.h"
 #include <imgui.h>
@@ -30,13 +27,8 @@
 #include "FakeMouseKeyboard.h"
 #include "ScanThread.h"
 #include "StateInfo.h"
-//#include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 #include <unordered_map>
-
-
-//#include "dllmain.h"
-//#include "PostKeyFunction.cpp"
 
 #pragma comment(lib, "Xinput.lib")
 
@@ -46,12 +38,11 @@ namespace ScreenshotInput
 
     int TranslateXtoMKB::RefreshWindow;
     int TranslateXtoMKB::RefreshPoint;
+
     //from tunnell
     int TranslateXtoMKB::controllerID;
     bool TranslateXtoMKB::rawinputhook; //registerrawinputhook
     bool TranslateXtoMKB::registerrawinputhook; //registerrawinputhook
-
-
     int TranslateXtoMKB::stickrightmapping;
     int TranslateXtoMKB::stickleftmapping;
     int TranslateXtoMKB::stickupmapping;
@@ -76,29 +67,21 @@ namespace ScreenshotInput
 
     int TranslateXtoMKB::Sens = 12;
     int TranslateXtoMKB::Sensmult = 4;
+    int TranslateXtoMKB::Deadzone = 2;
+
     int updatewindowtick = 300;
 
-    int AxisLeftsens = -9000;
-    int AxisRightsens = 9000;
-    int AxisUpsens = 9000;
-    int AxisDownsens = -9000;
-    int scrollspeed3;
-    float radial_deadzone = 0.10f; // Circular/Radial Deadzone (0.0 to 0.3)
     float axial_deadzone = 0.00f; // Square/Axial Deadzone (0.0 to 0.3)
     const float max_threshold = 0.03f; // Max Input Threshold, an "outer deadzone" (0.0 to 0.15)
     const float curve_slope = 0.16f; // The linear portion of the response curve (0.0 to 1.0)
     const float curve_exponent = 5.00f; // The exponential portion of the curve (1.0 to 10.0)
-    //float sensitivity = 9.00f; // Base sensitivity / max speed (1.0 to 30.0)
-    //float accel_multiplier = 1.90f; // Look Acceleration Multiplier (1.0 to 3.0)
-    int startbuttontimer, backbuttontimer;
-    /////////////////
 
-    bool leftPressedold = false;
-    bool rightPressedold = false;
+    int startbuttontimer, backbuttontimer;
+
+
     HMODULE g_hModule = nullptr;
 
     bool loop = true;
-    //CRITICAL_SECTION critical; //window thread
     //int TranslateXtoMKB::showmessage = 0; //0 = no message, 1 = initializing, 2 = bmp mode, 3 = bmp and cursor mode, 4 = edit mode   
 
     int counter = 0;
@@ -112,15 +95,14 @@ namespace ScreenshotInput
 
 
     //fake cursor
-
     int Xf = 0;
     int Yf = 0;
 
 
     int tick = 0;
 
-    bool rawmouseWu = false;
-    bool rawmouseWd = false;
+    bool leftPressedold = false;
+    bool rightPressedold = false;
     bool oldA = false;
     bool oldB = false;
     bool oldX = false;
@@ -242,7 +224,6 @@ namespace ScreenshotInput
             RAWKEYBOARD data{};
             data.MakeCode = MapVirtualKey(vk, MAPVK_VK_TO_VSC);
             data.VKey = vk;
-          //  MessageBoxA(NULL, path.c_str(), "1", MB_OK);
             data.ExtraInformation = 0;
             data.Flags = state ? 0 : RI_KEY_BREAK;
             data.Message = state ? WM_KEYDOWN : WM_KEYUP;
@@ -345,10 +326,6 @@ namespace ScreenshotInput
         if (v > 1.0f) return 1.0f;
         return v;
     }
-    // #define DEADZONE 8000
-    // #define MAX_SPEED 30.0f        // Maximum pixels per poll
-    // #define ACCELERATION 2.0f      // Controls non-linear ramp (higher = more acceleration)
-
 
     POINT CalculateUltimateCursorMove(
         SHORT stickX, SHORT stickY,
@@ -421,7 +398,8 @@ namespace ScreenshotInput
         }
         float sensitivity = static_cast<float>(TranslateXtoMKB::Sens);
         float accel_multiplier = static_cast<float>(TranslateXtoMKB::Sensmult) / 2.0f;
-
+        float radial_deadzone = static_cast<float>(TranslateXtoMKB::Deadzone) / 20.0f;
+		int deadzonelimit = 7000 + (TranslateXtoMKB::Deadzone * 1300);
         EnterCriticalSection(&ScanThread::critical);
         if (ScanThread::UpdateWindow)
             TranslateXtoMKB::RefreshPoint = 1;
@@ -547,7 +525,7 @@ namespace ScreenshotInput
                 //buttons
                 if (oldscrollleft)
                 {
-                    if (scrollXaxis < AxisLeftsens) //left
+                    if (scrollXaxis < -deadzonelimit) //left
                     {
                     }
                     else {
@@ -555,7 +533,7 @@ namespace ScreenshotInput
                         ButtonStateImpulse(TranslateXtoMKB::stickrightmapping, false, 99);//down
                     }
                 }
-                else if (scrollXaxis < AxisLeftsens) //left
+                else if (scrollXaxis < -deadzonelimit) //left
                 {
                     oldscrollleft = true;
 
@@ -564,7 +542,7 @@ namespace ScreenshotInput
 
                 if (oldscrollright)
                 {
-                    if (scrollXaxis > AxisRightsens) //left
+                    if (scrollXaxis > deadzonelimit) //left
                     {
                     }
                     else {
@@ -572,7 +550,7 @@ namespace ScreenshotInput
                         ButtonStateImpulse(TranslateXtoMKB::stickleftmapping, false, 99);//down
                     }
                 }
-                else if (scrollXaxis > AxisRightsens) //left
+                else if (scrollXaxis > deadzonelimit) //left
                 {
                     oldscrollright = true;
                     ButtonStateImpulse(TranslateXtoMKB::stickleftmapping, true, 99);//down
@@ -580,7 +558,7 @@ namespace ScreenshotInput
 
                 if (oldscrollup)
                 {
-                    if (scrollYaxis > AxisUpsens) //left
+                    if (scrollYaxis > deadzonelimit) //left
                     {
                     }
                     else {
@@ -588,7 +566,7 @@ namespace ScreenshotInput
                         ButtonStateImpulse(TranslateXtoMKB::stickupmapping, false, 99);//down
                     }
                 }
-                else if (scrollYaxis > AxisUpsens) //left
+                else if (scrollYaxis > deadzonelimit) //left
                 {
                     oldscrollup = true;
                     ButtonStateImpulse(TranslateXtoMKB::stickupmapping, true, 99);//down
@@ -596,7 +574,7 @@ namespace ScreenshotInput
 
                 if (oldscrolldown)
                 {
-                    if (scrollYaxis < AxisDownsens) //left
+                    if (scrollYaxis < -deadzonelimit) //left
                     {
                     }
                     else {
@@ -604,7 +582,7 @@ namespace ScreenshotInput
                         ButtonStateImpulse(TranslateXtoMKB::stickdownmapping, false, 99);//down
                     }
                 }
-                else if (scrollYaxis < AxisDownsens) //left
+                else if (scrollYaxis < -deadzonelimit) //left
                 {
                     oldscrolldown = true;
                     ButtonStateImpulse(TranslateXtoMKB::stickdownmapping, true, 99);//down

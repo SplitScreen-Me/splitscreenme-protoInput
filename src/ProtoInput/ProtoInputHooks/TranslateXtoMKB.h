@@ -42,6 +42,7 @@ namespace ScreenshotInput
 		static bool lefthanded;
 		static int Sens;
 		static int Sensmult;
+		static int Deadzone;
 		static bool SaveBmps;
 	};
 
