@@ -183,6 +183,8 @@ bool Launch()
         if (hookEnabled(MessageFilterHookID))           InstallHook(instanceHandle, MessageFilterHookID);
 
 		SetPutMouseInsideWindow(instanceHandle, currentProfile.putMouseInsideWindow);
+
+        SetReregisterinput(instanceHandle, currentProfile.Reregisterinput);
         if (hookEnabled(GetCursorPosHookID))            InstallHook(instanceHandle, GetCursorPosHookID);
         if (hookEnabled(SetCursorPosHookID))            InstallHook(instanceHandle, SetCursorPosHookID);
         if (hookEnabled(GetKeyStateHookID))             InstallHook(instanceHandle, GetKeyStateHookID);
@@ -1459,6 +1461,8 @@ void OptionsMenu()
     ImGui::Checkbox("Show fake cursor when image updated", &currentProfile.showCursorWhenImageUpdated);
 
     ImGui::Checkbox("Put Mouse Inside Window", &currentProfile.putMouseInsideWindow);
+
+    ImGui::Checkbox("Reregister Rawinput Devices", &currentProfile.Reregisterinput);
 
     if (ImGui::CollapsingHeader("Message Filters", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Leaf))
     {

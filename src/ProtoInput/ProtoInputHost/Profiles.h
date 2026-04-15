@@ -73,6 +73,10 @@ struct Profile
 
 	bool dinputToXinputRedirection = false;
 	bool useOpenXinput = false;
+
+	//reregister devices to game after hooking
+	bool Reregisterinput = false;
+
 	bool TranslateMKBtoXinput = false;
 	bool TranslateXinputtoMKB = false;
 

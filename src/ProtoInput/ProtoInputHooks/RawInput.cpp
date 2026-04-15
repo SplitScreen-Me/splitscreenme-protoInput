@@ -17,6 +17,7 @@
 #include "MessageFilterHook.h"
 #include "TranslateXtoMKB.h"
 #include "XinputHook.h"
+#include "HwndSelector.h"
 
 namespace Proto
 {
@@ -24,7 +25,8 @@ namespace Proto
 RawInputState RawInput::rawInputState{};
 std::bitset<9> RawInput::usages{};
 std::vector<HWND> RawInput::forwardingWindows{};
-bool RawInput::forwardRawInput = true;
+bool RawInput::forwardRawInput = true; //ReRegisterInput
+bool RawInput::Reregisterinput; //ReRegisterInput
 bool RawInput::lockInputToggleEnabled = false;
 bool RawInput::rawInputBypass = false;
 RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
@@ -626,24 +628,56 @@ void RawInput::InitialiseRawInput()
 	return;
 }
 
+void RawInput::Registergameinput()
+{
+	HWND hwnd = (HWND)Proto::HwndSelector::GetSelectedHwnd();
+	std::vector<RAWINPUTDEVICE> devicess;
+
+	// Mouse
+	{
+		RAWINPUTDEVICE dev{};
+		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
+		dev.usUsage = 0x02;                     // Mouse
+		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
+		dev.hwndTarget = hwnd;
+		devicess.push_back(dev);
+	}
+
+	// Keyboard
+	{
+		RAWINPUTDEVICE dev{};
+		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
+		dev.usUsage = 0x06;                     // Keyboard
+		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
+		dev.hwndTarget = hwnd;
+		devicess.push_back(dev);
+	}
+
+	if (!RegisterRawInputDevices(devicess.data(), devicess.size(), sizeof(RAWINPUTDEVICE)))
+	{
+		MessageBoxA(NULL, "Failed to register raw input", "Error", MB_OK | MB_ICONERROR);
+	}
+}
+
 void RawInput::UnregisterGameFromRawInput()
 {
 	printf("Unregistering game from raw input\n");
 
-	std::vector<RAWINPUTDEVICE> devices{};
+		std::vector<RAWINPUTDEVICE> devices{};
 
-	for (const auto& usage : usageTypesOfInterest)
-	{
-		RAWINPUTDEVICE dev;
-		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;
-		dev.usUsage = usage;
-		dev.dwFlags = RIDEV_REMOVE;
-		dev.hwndTarget = NULL;
-		devices.push_back(dev);
+		for (const auto& usage : usageTypesOfInterest)
+		{
+			RAWINPUTDEVICE dev;
+			dev.usUsagePage = HID_USAGE_PAGE_GENERIC;
+			dev.usUsage = usage;
+			dev.dwFlags = RIDEV_REMOVE;
+			dev.hwndTarget = NULL;
+			devices.push_back(dev);
 
-		auto res = RegisterRawInputDevices(&dev, 1, sizeof(RAWINPUTDEVICE));
-		printf("Deregister usage 0x%X: Result 0x%X\n", usage, res);
-	}
+			auto res = RegisterRawInputDevices(&dev, 1, sizeof(RAWINPUTDEVICE));
+			printf("Deregister usage 0x%X: Result 0x%X\n", usage, res);
+		}
+	return;
 }
 
 void RawInput::RegisterProtoForRawInput()

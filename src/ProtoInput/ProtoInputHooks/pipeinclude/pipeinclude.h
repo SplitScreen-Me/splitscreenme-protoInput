@@ -36,6 +36,7 @@ enum class PipeMessageType
 	SetAllowFakeCursorOutOfBounds,
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
+	SetReregisterinput,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
 	SetDefaultTopLeftMouseBounds,
@@ -224,6 +225,11 @@ struct PipeMessageSetToggleCursorVisibilityShortcut
 struct PipeMessageSetRawInputBypass
 {
 	bool bypassEnabled;
+};
+
+struct PipeMessageSetReregisterinput
+{
+	bool enabled;
 };
 
 struct PipeMessageShowCursorWhenImageUpdated

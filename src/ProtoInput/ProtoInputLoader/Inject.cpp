@@ -561,6 +561,23 @@ void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled)
 	}
 }
 
+void SetReregisterinput(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetReregisterinput message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetReregisterinput, &message);
+	}
+}
+
 void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())

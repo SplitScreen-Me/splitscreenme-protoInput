@@ -52,11 +52,15 @@ public:
 	static RawInputState rawInputState;
 	static HWND rawInputHwnd;
 	static bool forwardRawInput;
+
 	static bool TranslateXinputtoMKB;
 	static bool TranslateMKBtoXinput;
 
 	// Passes input from all devices to the game. Proto Input doesn't process anything
 	static bool rawInputBypass;
+
+	//Reregisters devices to game then reactivates registerinput hook. called from dllmain
+	static bool Reregisterinput;
 	
 	static std::vector<RAWINPUT> rawinputs;
 	static RAWINPUT inputBuffer[RawInputBufferSize];
@@ -64,6 +68,7 @@ public:
 	static bool lockInputToggleEnabled;
 	
 	static void RefreshDevices();
+	static void Registergameinput();
 
 	static void AddSelectedMouseHandle(unsigned int handle);
 	static void AddSelectedKeyboardHandle(unsigned int handle);

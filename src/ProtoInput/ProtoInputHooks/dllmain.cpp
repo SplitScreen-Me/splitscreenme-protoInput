@@ -15,7 +15,6 @@
 #include "PipeCommunication.h"
 #include "HwndSelector.h"
 #include "FocusMessageLoop.h"
-#include "Gui.h"
 #include "FakeCursor.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
@@ -50,10 +49,16 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
     Proto::RawInput::InitialiseRawInput();
 	// Useful to add a pause if we need to attach a debugger
-    
-    InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);
 
-    std::cout << "Reached end of startup thread\n";
+    Sleep(5000);
+    if (Proto::RawInput::Reregisterinput)
+    { 
+        Proto::RawInput::Registergameinput(); //reregistering devices to game
+        Sleep(1);
+        Proto::HookManager::UninstallHook(ProtoHookIDs::RegisterRawInputHookID);
+        Sleep(1);
+        Proto::HookManager::InstallHook(ProtoHookIDs::RegisterRawInputHookID);
+    }
     return 0;
 }
  

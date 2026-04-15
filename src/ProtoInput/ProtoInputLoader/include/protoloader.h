@@ -137,6 +137,8 @@ extern "C" __declspec(dllexport) void SetToggleFakeCursorVisibilityShortcut(Prot
 
 extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled);
 
+extern "C" __declspec(dllexport) void SetReregisterinput(ProtoInstanceHandle instanceHandle, bool enabled);
+
 extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled);
