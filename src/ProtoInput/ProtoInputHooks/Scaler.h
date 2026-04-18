@@ -13,8 +13,9 @@ namespace Proto
 
 	public:
 		static POINT getfactor(POINT pp);
-		
-		static void Settings(int oldX, int oldY, int newX, int newY);
+
+		static void PointerInMouse(bool enable); //convert mouse message to pointer message
+		static void Settings(int oldX, int oldY, int newX, int newY); //scale up or down messages
 	};
 
 }

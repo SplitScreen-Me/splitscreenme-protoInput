@@ -2,6 +2,7 @@
 #include "Gui.h"
 #include <cassert>
 #include <windows.h>
+#include <windowsx.h>
 #include <iostream>
 #include <vector>
 #include "HookManager.h"
@@ -17,7 +18,7 @@
 #include "MessageFilterHook.h"
 #include "TranslateXtoMKB.h"
 #include "XinputHook.h"
-#include "HwndSelector.h"
+#include "Scaler.h"
 
 namespace Proto
 {
@@ -27,6 +28,7 @@ std::bitset<9> RawInput::usages{};
 std::vector<HWND> RawInput::forwardingWindows{};
 bool RawInput::forwardRawInput = true; //ReRegisterInput
 bool RawInput::Reregisterinput; //ReRegisterInput
+bool RawInput::PointerInMouse; //ReRegisterInput
 bool RawInput::lockInputToggleEnabled = false;
 bool RawInput::rawInputBypass = false;
 RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
@@ -34,6 +36,8 @@ std::vector<RAWINPUT> RawInput::rawinputs{};
 bool RawInput::TranslateXinputtoMKB;
 bool RawInput::locked = false;
 bool RawInput::alreadyAddToACL = false;
+
+
 const std::vector<USAGE> RawInput::usageTypesOfInterest
 {
 		HID_USAGE_GENERIC_POINTER,
@@ -52,7 +56,6 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 	// This is used a lot in sending messages
 	const unsigned int mouseMkFlags = FakeMouseKeyboard::GetMouseMkFlags();
 	const unsigned int mousePointLparam = MAKELPARAM(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y);
-
 
 	// Send mouse wheel
 	if (rawInputState.sendMouseWheelMessages)
@@ -142,9 +145,7 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
 		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_UP) != 0)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
-	}
-
-
+		}
 
 	// WM_MOUSEMOVE
 	if (rawInputState.sendMouseMoveMessages)

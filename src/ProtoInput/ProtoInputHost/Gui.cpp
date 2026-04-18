@@ -185,6 +185,7 @@ bool Launch()
 		SetPutMouseInsideWindow(instanceHandle, currentProfile.putMouseInsideWindow);
 
         SetReregisterinput(instanceHandle, currentProfile.Reregisterinput);
+        SetPointerInMouse(instanceHandle, currentProfile.PointerInMouse);
         if (hookEnabled(GetCursorPosHookID))            InstallHook(instanceHandle, GetCursorPosHookID);
         if (hookEnabled(SetCursorPosHookID))            InstallHook(instanceHandle, SetCursorPosHookID);
         if (hookEnabled(GetKeyStateHookID))             InstallHook(instanceHandle, GetKeyStateHookID);
@@ -1463,6 +1464,8 @@ void OptionsMenu()
     ImGui::Checkbox("Put Mouse Inside Window", &currentProfile.putMouseInsideWindow);
 
     ImGui::Checkbox("Reregister Rawinput Devices", &currentProfile.Reregisterinput);
+
+    ImGui::Checkbox("Use Pointer mouse messages", &currentProfile.PointerInMouse);
 
     if (ImGui::CollapsingHeader("Message Filters", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Leaf))
     {

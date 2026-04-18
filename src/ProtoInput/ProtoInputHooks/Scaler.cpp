@@ -17,6 +17,7 @@ namespace Proto
 
 	bool Enableornot = false;
     bool onlyonetimethis = false;
+	bool scalenotpointer = false;
 
     WNDPROC g_OldWndProc = nullptr;
 
@@ -30,67 +31,156 @@ namespace Proto
         }
 		return pp;
     }
+	bool leftdown, rightdown = false;
     LRESULT CALLBACK SubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         switch (msg)
         {
-        case WM_MOUSEHOVER: // + MOVE // + click 
-        {
-            const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
-            POINT clientPos = { state.x, state.y };
-            clientPos = Scaler::getfactor(clientPos);
-            LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
-            
-            return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
-            break;
-        }
+     //   case WM_MOUSEHOVER: // + MOVE // + click 
+    //    {
+     //       const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+     //       POINT clientPos = { state.x, state.y };
+     //       clientPos = Scaler::getfactor(clientPos);
+     //       LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+     //       
+     //       return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+     //       break;
+     //   }
         case WM_MOUSEMOVE:
         {
-            const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
-            POINT clientPos = { state.x, state.y };
-            clientPos = Scaler::getfactor(clientPos);
-            LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+            if (scalenotpointer)
+            {
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                clientPos = Scaler::getfactor(clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
 
-            return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
-            break;
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
+            else
+            {
+                msg = WM_POINTERUPDATE;
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                ClientToScreen(hwnd, &clientPos);
+
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+
+                    //move
+                if (!leftdown && !rightdown)
+                        wParam = 0x20020001;
+                    //secondary
+                else if (!leftdown && rightdown)wParam = 0x00200022; //0x00160004
+                    //primary
+                else if (leftdown && !rightdown)wParam = 0x00160014;
+                    //both
+                else if (leftdown && rightdown)wParam = 0x00360034; //0x00200020
+
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
         }
         case WM_LBUTTONDOWN:
         {
-            const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
-            POINT clientPos = { state.x, state.y };
-            clientPos = Scaler::getfactor(clientPos);
-            LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
-            return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            if (scalenotpointer)
+            {
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                clientPos = Scaler::getfactor(clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
+            else
+            { 
+			    leftdown = true;
+                wParam = 0x20160001;
+                msg = WM_POINTERDOWN;
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                ClientToScreen(hwnd, &clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            }
 
             break;
         }
         case WM_LBUTTONUP:
         {
-            const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
-            POINT clientPos = { state.x, state.y };
-            clientPos = Scaler::getfactor(clientPos);
-            LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
-            return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            if (scalenotpointer)
+            {
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                clientPos = Scaler::getfactor(clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
 
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
+            else
+            {
+                leftdown = false;
+                wParam = 0x00020001;
+                msg = WM_POINTERUP;
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                ClientToScreen(hwnd, &clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            }
             break;
         }
         case WM_RBUTTONDOWN:
         {
-            const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
-            POINT clientPos = { state.x, state.y };
-            clientPos = Scaler::getfactor(clientPos);
-            LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
-            return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            if (scalenotpointer)
+            {
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                clientPos = Scaler::getfactor(clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
+            else
+            {
+                rightdown = true;
+                wParam = 0x20260001;
+                msg = WM_POINTERDOWN;
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                ClientToScreen(hwnd, &clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            }
 
             break;
         }
         case WM_RBUTTONUP:
         {
-            const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
-            POINT clientPos = { state.x, state.y };
-            clientPos = Scaler::getfactor(clientPos);
-            LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
-            return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            if (scalenotpointer)
+            {
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                clientPos = Scaler::getfactor(clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
+            else
+            {
+                rightdown = false;
+                wParam = 0x00020001;
+                msg = WM_POINTERUP;
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                ClientToScreen(hwnd, &clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            }
 
             break;
         }
@@ -134,6 +224,7 @@ namespace Proto
     void Scaler::Settings(int oldX, int oldY, int newX, int newY)
     {
 		Enableornot = true;
+        scalenotpointer = true;
 		scalewidth = newX;
 	    scaleheight = newY;
         origwidth = oldX;
@@ -142,6 +233,14 @@ namespace Proto
             Enableornot = true;
         else Enableornot = false;
         if (Enableornot)
+            Scaler::Install();
+        else Scaler::Uninstall();
+    }
+    void Scaler::PointerInMouse( bool enable)
+    {
+        scalenotpointer = false;
+        Enableornot = enable;
+        if (enable)
             Scaler::Install();
         else Scaler::Uninstall();
     }

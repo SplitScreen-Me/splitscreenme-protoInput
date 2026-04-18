@@ -59,6 +59,8 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
         Sleep(1);
         Proto::HookManager::InstallHook(ProtoHookIDs::RegisterRawInputHookID);
     }
+    if (Proto::RawInput::PointerInMouse)
+        Proto::Scaler::PointerInMouse(true);
     return 0;
 }
  

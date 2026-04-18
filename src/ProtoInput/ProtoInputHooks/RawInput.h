@@ -61,6 +61,7 @@ public:
 
 	//Reregisters devices to game then reactivates registerinput hook. called from dllmain
 	static bool Reregisterinput;
+	static bool PointerInMouse;
 	
 	static std::vector<RAWINPUT> rawinputs;
 	static RAWINPUT inputBuffer[RawInputBufferSize];

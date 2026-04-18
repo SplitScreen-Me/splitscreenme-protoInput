@@ -537,6 +537,16 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				break;
 			}
+			case ProtoPipe::PipeMessageType::SetPointerInMouse:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetReregisterinput*>(messageBuffer);
+
+				printf("Received ReregisterInput, ReregisterInput enabled = %d\n", body->enabled);
+
+				RawInput::PointerInMouse = body->enabled;
+
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageShowCursorWhenImageUpdated*>(messageBuffer);

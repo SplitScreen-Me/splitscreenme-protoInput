@@ -76,6 +76,7 @@ struct Profile
 
 	//reregister devices to game after hooking
 	bool Reregisterinput = false;
+	bool PointerInMouse = false;
 
 	bool TranslateMKBtoXinput = false;
 	bool TranslateXinputtoMKB = false;
