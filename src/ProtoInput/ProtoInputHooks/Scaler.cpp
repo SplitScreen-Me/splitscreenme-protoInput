@@ -71,11 +71,11 @@ namespace Proto
                 if (!leftdown && !rightdown)
                         wParam = 0x20020001;
                     //secondary
-                else if (!leftdown && rightdown)wParam = 0x00200022; //0x00160004
+                else if (!leftdown && rightdown)wParam = 0x00100022;// 0x00200022
                     //primary
                 else if (leftdown && !rightdown)wParam = 0x00160014;
                     //both
-                else if (leftdown && rightdown)wParam = 0x00360034; //0x00200020
+                else if (leftdown && rightdown)wParam = 0x00160034;// 0x00360034
 
                 return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
 
@@ -180,6 +180,28 @@ namespace Proto
                 ClientToScreen(hwnd, &clientPos);
                 LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
                 return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+            }
+
+            break;
+        }
+        case WM_MOUSEWHEEL:
+        {
+            if (scalenotpointer)
+            {
+                const auto& state = Proto::FakeMouseKeyboard::GetMouseState();
+                POINT clientPos = { state.x, state.y };
+                clientPos = Scaler::getfactor(clientPos);
+                ClientToScreen(hwnd, &clientPos);
+                LPARAM newLParam = MAKELPARAM(clientPos.x, clientPos.y);
+
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, newLParam);
+
+            }
+            else
+            {
+                msg = WM_POINTERWHEEL;
+
+                return CallWindowProc(g_OldWndProc, hwnd, msg, wParam, lParam);
             }
 
             break;

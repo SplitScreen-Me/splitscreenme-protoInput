@@ -539,9 +539,9 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 			}
 			case ProtoPipe::PipeMessageType::SetPointerInMouse:
 			{
-				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetReregisterinput*>(messageBuffer);
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetPointerInMouse*>(messageBuffer);
 
-				printf("Received ReregisterInput, ReregisterInput enabled = %d\n", body->enabled);
+				printf("Received PointerInMouse, PointerInMouse enabled = %d\n", body->enabled);
 
 				RawInput::PointerInMouse = body->enabled;
 
