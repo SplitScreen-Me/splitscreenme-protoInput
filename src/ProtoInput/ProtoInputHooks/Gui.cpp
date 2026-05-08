@@ -17,10 +17,14 @@
 #include "ScanThread.h" 
 #include "GtoMnK_RawInput.h" 
 #include "XinputHook.h" 
+#include "WindowMsgHook.h" 
+
 
 namespace Proto
 {
 intptr_t ConsoleHwnd;
+
+bool PointerInMouseold = false;
 
 static void HelpMarker(const char* desc)
 {
@@ -806,7 +810,12 @@ void RawInputMenu()
     ImGui::InputInt("Toggle visibility keyboard VKey", (int*)&FakeCursor::GetToggleVisibilityVkey(), 1, 100);
 	
     ImGui::Separator();
-	
+    
+    ImGui::Checkbox("Translate mouse messages to Pointermessages", &RawInput::PointerInMouse);
+
+    if (PointerInMouseold != RawInput::PointerInMouse)
+        WindowMsgHook::PointerInMouse(RawInput::PointerInMouse);
+    PointerInMouseold = RawInput::PointerInMouse;
     ImGui::Checkbox("Send mouse movement messages", &RawInput::rawInputState.sendMouseMoveMessages);
     ImGui::Checkbox("Send mouse button messages", &RawInput::rawInputState.sendMouseButtonMessages);
     ImGui::Checkbox("Send mouse wheel messages", &RawInput::rawInputState.sendMouseWheelMessages);

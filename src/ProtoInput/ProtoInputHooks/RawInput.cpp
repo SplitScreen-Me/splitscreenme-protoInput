@@ -18,7 +18,7 @@
 #include "MessageFilterHook.h"
 #include "TranslateXtoMKB.h"
 #include "XinputHook.h"
-#include "Scaler.h"
+#include "WindowMsgHook.h"
 
 namespace Proto
 {
@@ -158,6 +158,7 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 
 void RawInput::ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle)
 {	
+
 	// Update fake mouse position
 	if ((data.usFlags & MOUSE_MOVE_ABSOLUTE) == MOUSE_MOVE_ABSOLUTE)
 	{
@@ -653,11 +654,12 @@ void RawInput::Registergameinput()
 		dev.hwndTarget = hwnd;
 		devicess.push_back(dev);
 	}
-
 	if (!RegisterRawInputDevices(devicess.data(), devicess.size(), sizeof(RAWINPUTDEVICE)))
 	{
-		MessageBoxA(NULL, "Failed to register raw input", "Error", MB_OK | MB_ICONERROR);
+		printf("Failed to register game input\n");
 	}
+	else
+		printf("Re-Registered game input\n");
 }
 
 void RawInput::UnregisterGameFromRawInput()

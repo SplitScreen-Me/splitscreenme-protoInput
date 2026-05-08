@@ -5,7 +5,7 @@
 namespace Proto
 {
 
-	class Scaler
+	class WindowMsgHook
 	{
 	private:
 		static void Install();

@@ -28,7 +28,7 @@
 #include "RemoveBorderHook.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
-#include "Scaler.h"
+#include "WindowMsgHook.h"
 
 namespace Proto
 {
@@ -540,11 +540,9 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 			case ProtoPipe::PipeMessageType::SetPointerInMouse:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetPointerInMouse*>(messageBuffer);
-
 				printf("Received PointerInMouse, PointerInMouse enabled = %d\n", body->enabled);
-
-				RawInput::PointerInMouse = body->enabled;
-
+				Proto::WindowMsgHook::PointerInMouse(body->enabled);
+				RawInput::PointerInMouse = body->enabled; //for runtime GUI
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated:
@@ -649,7 +647,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				printf("Received SetManualScaling with settings.from res (%d, %d), to (%d,%d)\n", body->oldX, body->oldY, body->newX, body->newY);
 
-				Scaler::Settings(body->oldX, body->oldY, body->newX, body->newY);
+				WindowMsgHook::Settings(body->oldX, body->oldY, body->newX, body->newY);
 
 				break;
 			}

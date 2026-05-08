@@ -11,7 +11,7 @@
 #include "RawInput.h"
 #include "HookManager.h"
 #include "protoloader.h"
-#include "Scaler.h"
+#include "WindowMsgHook.h"
 #include "PipeCommunication.h"
 #include "HwndSelector.h"
 #include "FocusMessageLoop.h"
@@ -50,7 +50,7 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     Proto::RawInput::InitialiseRawInput();
 	// Useful to add a pause if we need to attach a debugger
 
-    Sleep(5000);
+    Sleep(3000);
     if (Proto::RawInput::Reregisterinput)
     { 
         Proto::RawInput::Registergameinput(); //reregistering devices to game
@@ -59,8 +59,7 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
         Sleep(1);
         Proto::HookManager::InstallHook(ProtoHookIDs::RegisterRawInputHookID);
     }
-    if (Proto::RawInput::PointerInMouse)
-        Proto::Scaler::PointerInMouse(true);
+
     return 0;
 }
  

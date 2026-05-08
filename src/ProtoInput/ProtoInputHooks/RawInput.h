@@ -52,7 +52,7 @@ public:
 	static RawInputState rawInputState;
 	static HWND rawInputHwnd;
 	static bool forwardRawInput;
-
+	static bool PointerInMouse; //runtime gui toggle
 	static bool TranslateXinputtoMKB;
 	static bool TranslateMKBtoXinput;
 
@@ -61,7 +61,6 @@ public:
 
 	//Reregisters devices to game then reactivates registerinput hook. called from dllmain
 	static bool Reregisterinput;
-	static bool PointerInMouse;
 	
 	static std::vector<RAWINPUT> rawinputs;
 	static RAWINPUT inputBuffer[RawInputBufferSize];

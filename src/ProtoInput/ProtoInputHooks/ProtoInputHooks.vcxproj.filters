@@ -201,7 +201,7 @@
     <ClInclude Include="GetCursorInfoHook.h">
       <Filter>Source Files\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="Scaler.h">
+    <ClInclude Include="WindowMsgHook.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -362,7 +362,7 @@
     <ClCompile Include="GetCursorInfoHook.cpp">
       <Filter>Source Files\Hooks</Filter>
     </ClCompile>
-    <ClCompile Include="Scaler.cpp">
+    <ClCompile Include="WindowMsgHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
