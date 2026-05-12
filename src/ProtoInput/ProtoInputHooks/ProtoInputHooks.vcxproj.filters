@@ -192,9 +192,6 @@
     <ClInclude Include="GtoMnK_RawInput.h">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClInclude>
-    <ClInclude Include="GtoMnK_RawInputHooks.h">
-      <Filter>Source Files\TranslateXtoMKB</Filter>
-    </ClInclude>
     <ClInclude Include="ScanThread.h">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClInclude>
@@ -351,9 +348,6 @@
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClCompile>
     <ClCompile Include="GtoMnK_RawInput.cpp">
-      <Filter>Source Files\TranslateXtoMKB</Filter>
-    </ClCompile>
-    <ClCompile Include="GtoMnK_RawInputHooks.cpp">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClCompile>
     <ClCompile Include="ScanThread.cpp">

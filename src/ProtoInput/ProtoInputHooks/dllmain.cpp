@@ -34,31 +34,31 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     std::cout << "Hooks DLL loaded\n";
 
-
+    Proto::HwndSelector::UpdateMainHwnd();
 
     Proto::FocusMessageLoop::SetupThread();
 
     Proto::FakeCursor::Initialise(Proto::hmodule);
 
+    Proto::RawInput::InitialiseRawInput();
+
     Proto::AddThreadToACL(GetCurrentThreadId());
 
     Proto::StartPipeCommunication(); 
 
-    Proto::HwndSelector::UpdateMainHwnd();
-
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
-    Proto::RawInput::InitialiseRawInput();
+
 	// Useful to add a pause if we need to attach a debugger
 
-    Sleep(3000);
-    if (Proto::RawInput::Reregisterinput)
-    { 
-        Proto::RawInput::Registergameinput(); //reregistering devices to game
-        Sleep(1);
-        Proto::HookManager::UninstallHook(ProtoHookIDs::RegisterRawInputHookID);
-        Sleep(1);
-        Proto::HookManager::InstallHook(ProtoHookIDs::RegisterRawInputHookID);
-    }
+  //  Sleep(3000);
+  //  if (Proto::RawInput::Reregisterinput)
+  //  { 
+    //    Proto::RawInput::Registergameinput(); //reregistering devices to game
+       // Sleep(1);
+      //  Proto::HookManager::UninstallHook(ProtoHookIDs::RegisterRawInputHookID);
+      //  Sleep(1);
+      //  Proto::HookManager::InstallHook(ProtoHookIDs::RegisterRawInputHookID);
+   // }
 
     return 0;
 }

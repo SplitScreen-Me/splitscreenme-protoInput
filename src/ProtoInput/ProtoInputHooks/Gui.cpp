@@ -782,8 +782,18 @@ void RawInputMenu()
 					"Use this when debugging/scripting so you don't accidentally control the game changing the GUI settings. ");
 
     ImGui::Separator();
-	
-	
+
+    //this enough to prevent both en enabled?
+    if (!XinputHook::TranslateMKBtoXinput)
+        ImGui::Checkbox("TranslateXtoMKB", &RawInput::TranslateXinputtoMKB);
+    ImGui::Separator();
+    if (!RawInput::TranslateXinputtoMKB)
+        ImGui::Checkbox("TranslateMKBtoX", &XinputHook::TranslateMKBtoXinput);
+    ImGui::Separator();
+    if (RawInput::TranslateXinputtoMKB && XinputHook::TranslateMKBtoXinput)
+        RawInput::TranslateXinputtoMKB = false;
+    RawInput::TranslateXinputtoMKB2 = RawInput::TranslateXinputtoMKB;
+
     bool showFakeCursor = FakeCursor::IsDrawingEnabled();
     if (ImGui::Checkbox("Draw fake cursor", &showFakeCursor))
     {

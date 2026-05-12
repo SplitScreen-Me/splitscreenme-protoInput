@@ -9,6 +9,7 @@ enum class PipeMessageType
 {
 	AddSelectedMouseOrKeyboard,
 	SetTranslateXinputtoMKB,
+	SetReregisterinput,
 	SetupHook,
 	WakeUpProcess,
 	SetupMessageFilter,
@@ -36,7 +37,6 @@ enum class PipeMessageType
 	SetAllowFakeCursorOutOfBounds,
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
-	SetReregisterinput,
 	SetPointerInMouse,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
@@ -68,6 +68,10 @@ struct PipeMessageSetTranslateXinputtoMKB
 	bool TranslateXinputtoMKB;
 };
 
+struct PipeMessageSetReregisterinput
+{
+	bool enabled;
+};
 
 struct PipeMessageSetupHook
 {
@@ -228,10 +232,7 @@ struct PipeMessageSetRawInputBypass
 	bool bypassEnabled;
 };
 
-struct PipeMessageSetReregisterinput
-{
-	bool enabled;
-};
+
 
 struct PipeMessageSetPointerInMouse
 {

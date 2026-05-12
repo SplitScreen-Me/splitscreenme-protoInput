@@ -974,11 +974,10 @@ namespace ScreenshotInput
 
     void TranslateXtoMKB::Initialize(HMODULE hModule)
     {
-        RawInput::Initialize();
         g_hModule = hModule;
         InstanceID = Proto::StateInfo::info.instanceIndex;
         Proto::AddThreadToACL(GetCurrentThreadId());
-        Sleep(50);
+        //Sleep(50);
         return;
     }
 }

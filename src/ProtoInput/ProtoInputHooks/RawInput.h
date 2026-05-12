@@ -45,22 +45,26 @@ private:
 
 	static bool locked; //input lock state
 	static bool alreadyAddToACL;
+
 public:
 	static void SendInputMessages(const RAWMOUSE& data);
 	static void SendKeyMessage(const RAWKEYBOARD& data, bool pressed);
 	static void ToggleLockInput();
+	static void InjectFakeRawInput(const RAWINPUT& fakeInput);
 	static RawInputState rawInputState;
 	static HWND rawInputHwnd;
 	static bool forwardRawInput;
 	static bool PointerInMouse; //runtime gui toggle
 	static bool TranslateXinputtoMKB;
-	static bool TranslateMKBtoXinput;
+	static bool TranslateXinputtoMKB2;
+	//static bool TranslateMKBtoXinput; //in XinputHook
+
+	static size_t bufferCounter;
 
 	// Passes input from all devices to the game. Proto Input doesn't process anything
 	static bool rawInputBypass;
 
 	//Reregisters devices to game then reactivates registerinput hook. called from dllmain
-	static bool Reregisterinput;
 	
 	static std::vector<RAWINPUT> rawinputs;
 	static RAWINPUT inputBuffer[RawInputBufferSize];
@@ -68,7 +72,6 @@ public:
 	static bool lockInputToggleEnabled;
 	
 	static void RefreshDevices();
-	static void Registergameinput();
 
 	static void AddSelectedMouseHandle(unsigned int handle);
 	static void AddSelectedKeyboardHandle(unsigned int handle);

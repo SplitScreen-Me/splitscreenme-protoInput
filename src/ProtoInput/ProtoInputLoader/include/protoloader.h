@@ -60,7 +60,7 @@ extern "C" __declspec(dllexport) ProtoInstanceHandle EasyHookInjectStartup(
 extern "C" __declspec(dllexport) void AddSelectedMouseHandle(ProtoInstanceHandle instanceHandle, unsigned int mouseHandle);
 extern "C" __declspec(dllexport) void AddSelectedKeyboardHandle(ProtoInstanceHandle instanceHandle, unsigned int keyboardHandle);
 extern "C" __declspec(dllexport) void SetTranslateXinputtoMKB(ProtoInstanceHandle instanceHandle, bool TranslateXinputtoMKB);
-
+extern "C" __declspec(dllexport) void SetReregisterinput(ProtoInstanceHandle instanceHandle, bool enabled);
 extern "C" __declspec(dllexport) void InstallHook(ProtoInstanceHandle instanceHandle, ProtoHookIDs hookID);
 extern "C" __declspec(dllexport) void UninstallHook(ProtoInstanceHandle instanceHandle, ProtoHookIDs hookID);
 
@@ -136,8 +136,6 @@ extern "C" __declspec(dllexport) void AllowFakeCursorOutOfBounds(ProtoInstanceHa
 extern "C" __declspec(dllexport) void SetToggleFakeCursorVisibilityShortcut(ProtoInstanceHandle instanceHandle, bool enabled, unsigned int vkey);
 
 extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled);
-
-extern "C" __declspec(dllexport) void SetReregisterinput(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetPointerInMouse(ProtoInstanceHandle instanceHandle, bool enabled);
 

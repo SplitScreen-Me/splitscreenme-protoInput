@@ -27,15 +27,17 @@ RawInputState RawInput::rawInputState{};
 std::bitset<9> RawInput::usages{};
 std::vector<HWND> RawInput::forwardingWindows{};
 bool RawInput::forwardRawInput = true; //ReRegisterInput
-bool RawInput::Reregisterinput; //ReRegisterInput
 bool RawInput::PointerInMouse; //ReRegisterInput
 bool RawInput::lockInputToggleEnabled = false;
 bool RawInput::rawInputBypass = false;
 RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
 std::vector<RAWINPUT> RawInput::rawinputs{};
 bool RawInput::TranslateXinputtoMKB;
+bool RawInput::TranslateXinputtoMKB2; //copy to prevent crash
 bool RawInput::locked = false;
 bool RawInput::alreadyAddToACL = false;
+
+size_t RawInput::bufferCounter = 0;
 
 
 const std::vector<USAGE> RawInput::usageTypesOfInterest
@@ -390,7 +392,7 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 		
 		if (allowMouse || allowKeyboard)
 		{
-			if (!rawInputBypass)
+			if (!rawInputBypass) //!XinputHook::TranslateMKBtoXinput
 			{
 				if (allowMouse)
 					ProcessMouseInput(rawinput.data.mouse, rawinput.header.hDevice);
@@ -616,51 +618,36 @@ std::bitset<9> RawInput::GetUsageBitField()
 	return usages;
 }
 
+bool initializedrawinput = false; //for X to MKB translation
+void RawInput::InjectFakeRawInput(const RAWINPUT& fakeInput) {
+	
+	bufferCounter = (bufferCounter + 1) % 20;
+	RawInput::inputBuffer[bufferCounter] = fakeInput;
+
+	const LPARAM magicLParam = (bufferCounter) | 0xAB000000;
+	for (const auto& hwnd : forwardingWindows) 
+ 	{
+		//bypassing rawinputhwnd, game windows direct
+ 		PostMessageW(hwnd, WM_INPUT, RIM_INPUT, magicLParam);
+ 	}
+}
+
 void RawInput::InitialiseRawInput()
 {
-	RefreshDevices();
-	if (!RawInput::TranslateXinputtoMKB)
-	{
+	if (!initializedrawinput) //initalizeonlyonce
+	{ 
+		RefreshDevices();
 
 		HANDLE hThread = CreateThread(nullptr, 0,
-									  (LPTHREAD_START_ROUTINE)RawInputWindowThread, GetModuleHandle(nullptr), 0, 0);
+										  (LPTHREAD_START_ROUTINE)RawInputWindowThread, GetModuleHandle(nullptr), 0, 0);
 		if (hThread != nullptr)
 			CloseHandle(hThread);
+		initializedrawinput = true;
 	}
-	return;
+		return;
 }
 
-void RawInput::Registergameinput()
-{
-	HWND hwnd = (HWND)Proto::HwndSelector::GetSelectedHwnd();
-	std::vector<RAWINPUTDEVICE> devicess;
 
-	// Mouse
-	{
-		RAWINPUTDEVICE dev{};
-		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
-		dev.usUsage = 0x02;                     // Mouse
-		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
-		dev.hwndTarget = hwnd;
-		devicess.push_back(dev);
-	}
-
-	// Keyboard
-	{
-		RAWINPUTDEVICE dev{};
-		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
-		dev.usUsage = 0x06;                     // Keyboard
-		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
-		dev.hwndTarget = hwnd;
-		devicess.push_back(dev);
-	}
-	if (!RegisterRawInputDevices(devicess.data(), devicess.size(), sizeof(RAWINPUTDEVICE)))
-	{
-		printf("Failed to register game input\n");
-	}
-	else
-		printf("Re-Registered game input\n");
-}
 
 void RawInput::UnregisterGameFromRawInput()
 {

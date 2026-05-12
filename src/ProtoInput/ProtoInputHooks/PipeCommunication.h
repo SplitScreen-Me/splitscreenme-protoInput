@@ -4,7 +4,7 @@ namespace Proto
 {
 
 void StartPipeCommunication();
-static HANDLE evt; 
+//static HANDLE evt; 
 
 
 }
