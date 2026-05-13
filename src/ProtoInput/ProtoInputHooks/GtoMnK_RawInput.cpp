@@ -1,156 +1,12 @@
 #include "GtoMnK_RawInput.h"
 #include "GtoMnK_RawInputHooks.h"
 #include "HwndSelector.h"
+#include "RawInput.h"
 
-namespace ScreenshotInput {
+//copied from:https://github.com/SAM1430B/GtoMnK
 
-        //public
-        RAWINPUT RawInput::g_inputBuffer[20]{};
-        std::vector<HWND> RawInput::g_forwardingWindows{};
-        HWND RawInput::g_rawInputHwnd = nullptr;
-        bool RawInput::createdWindowIsOwned;
-        LRESULT WINAPI RawInputWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-        DWORD WINAPI RawInputWindowThread(LPVOID lpParameter);
-        //void RecoverMissedRegistration();
+namespace ScreenshotInput { 
 
-               // A fix for RawInput registrations that get lost. e.g when we use `StartUpDelay` or add a dinput.dll
-        void RecoverMissedRegistration() {
-            UINT nDevices = 0;
-            GetRegisteredRawInputDevices(NULL, &nDevices, sizeof(RAWINPUTDEVICE));
-
-            if (nDevices == 0) return;
-
-            std::vector<RAWINPUTDEVICE> devices(nDevices);
-            if (GetRegisteredRawInputDevices(devices.data(), &nDevices, sizeof(RAWINPUTDEVICE)) == (UINT)-1) {
-                return;
-            }
-
-            //LOG("Recovery: checking %u registered RawInput devices...", nDevices);
-
-            for (const auto& device : devices) {
-                if (device.usUsagePage == 1 && device.usUsage == 2) {
-
-                    HWND target = device.hwndTarget;
-
-                    // If target is NULL, it means "Focus Window", so we rely on our Foreground check.
-                    // But if it is NOT NULL, it is the specific window (likely hidden) the game wants.
-                    if (target != NULL) {
-
-                        bool known = false;
-                        for (auto w : RawInput::g_forwardingWindows) {
-                            if (w == target) { known = true; break; }
-                        }
-
-                        if (!known) {
-                            //LOG("Recovery: Found registered RawInput Target (0x%p). Adding to list.", target);
-                            RawInput::g_forwardingWindows.push_back(target);
-                        }
-                    }
-                }
-            }
-        }
-        void RawInput::Initialize() {
-          //  LOG("RawInput System: Initializing...");
-
-            RecoverMissedRegistration();
-
-            HANDLE hWindowReadyEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-            if (hWindowReadyEvent == NULL) {
-                //LOG("FATAL: Could not create window ready event!");
-                return;
-            }
-
-            HANDLE hThread = CreateThread(nullptr, 0, RawInputWindowThread, hWindowReadyEvent, 0, 0);
-            if (hThread) {
-                WaitForSingleObject(hWindowReadyEvent, 2000);
-                CloseHandle(hThread);
-            }
-           // RawInputHooks::InstallHooks();
-            CloseHandle(hWindowReadyEvent);
-        }
-
-        void RawInput::Shutdown() {
-            //LOG("RawInput System: Shutting down...");
-
-            if (RawInput::g_rawInputHwnd) {
-                PostMessage(RawInput::g_rawInputHwnd, WM_QUIT, 0, 0);
-            }
-        }
-
-
-        LRESULT WINAPI RawInputWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
-        {
-            switch (msg) 
-            {
-            case WM_DESTROY: {
-                PostQuitMessage(0);
-                return 0;
-            }
-            }
-            return DefWindowProc(hWnd, msg, wParam, lParam);
-        }
-
-        DWORD WINAPI RawInputWindowThread(LPVOID lpParameter) {
-            HANDLE hWindowReadyEvent = (HANDLE)lpParameter;
-
-            /*if (createdWindowIsOwned)
-            {
-                hwnd = GetMainWindowHandle(GetCurrentProcessId(), iniWindowName, iniClassName, 60000);
-
-                if (!hwnd || !IsWindow(hwnd)) {
-                    LOG("Timeout: Game Window never appeared. RawInput aborting.");
-                    return 1;
-                }
-                LOG("RawInput window is owned by the game window.");
-            }*/
-
-            //LOG("RawInput hidden window thread started.");
-            WNDCLASSW wc = { 0 };
-            wc.lpfnWndProc = RawInputWindowWndProc;
-            wc.hInstance = GetModuleHandle(NULL);
-            wc.lpszClassName = L"GtoMnK_RawInput_Window";
-
-            HWND parentWindow;
-            if (RawInput::createdWindowIsOwned)
-                parentWindow = (HWND)Proto::HwndSelector::GetSelectedHwnd();
-            else
-                parentWindow = nullptr;
-
-            if (RegisterClassW(&wc)) {
-                RawInput::g_rawInputHwnd = CreateWindowW(wc.lpszClassName, L"GtoMnK RI Sink", 0, 0, 0, 0, 0, parentWindow, NULL, wc.hInstance, NULL);
-            }
-
-            if (!RawInput::g_rawInputHwnd) {
-                //LOG("FATAL: Failed to create RawInput hidden window!");
-                SetEvent(hWindowReadyEvent);
-                return 1;
-            }
-
-            SetEvent(hWindowReadyEvent);
-            //LOG("RawInput hidden window created and ready.");
-
-            MSG msg;
-            while (GetMessage(&msg, NULL, 0, 0) > 0) {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-
-            //LOG("RawInput hidden window thread finished.");
-            return 0;
-        }
-
-        void RawInput::InjectFakeRawInput(const RAWINPUT& fakeInput) {
-            static size_t bufferCounter = 0;
-            bufferCounter = (bufferCounter + 1) % RawInput::RAWINPUT_BUFFER_SIZE;
-            RawInput::g_inputBuffer[bufferCounter] = fakeInput;
-
-            const LPARAM magicLParam = (bufferCounter) | 0xAB000000;
-
-            for (const auto& hwnd : RawInput::g_forwardingWindows) {
-                PostMessageW(hwnd, WM_INPUT, RIM_INPUT, magicLParam);
-
-            }
-        }
         void RawInput::GenerateRawKey(int vkCode, bool press, bool isExtended) {
             if (vkCode == 0) return;
 
@@ -168,7 +24,7 @@ namespace ScreenshotInput {
                 ri.data.keyboard.Flags |= RI_KEY_E0;
             }
 
-            RawInput::InjectFakeRawInput(ri);
+            Proto::RawInput::InjectFakeRawInput(ri);
         }
 
         void RawInput::GenerateRawMouseButton(int actionCode, bool press) {
@@ -204,7 +60,7 @@ namespace ScreenshotInput {
             case -6: if (press) ri.data.mouse.usButtonFlags = RI_MOUSE_WHEEL; ri.data.mouse.usButtonData = WHEEL_DELTA; break;
             case -7: if (press) ri.data.mouse.usButtonFlags = RI_MOUSE_WHEEL; ri.data.mouse.usButtonData = -WHEEL_DELTA; break;
             }
-            RawInput::InjectFakeRawInput(ri);
+            Proto::RawInput::InjectFakeRawInput(ri);
         }
 
         // For keyboard actions for both methods
@@ -297,7 +153,7 @@ namespace ScreenshotInput {
             ri.data.mouse.usFlags = MOUSE_MOVE_RELATIVE;
             ri.data.mouse.lLastX = deltaX;
             ri.data.mouse.lLastY = deltaY;
-            RawInput::InjectFakeRawInput(ri);
+            Proto::RawInput::InjectFakeRawInput(ri);
         }
     
 }

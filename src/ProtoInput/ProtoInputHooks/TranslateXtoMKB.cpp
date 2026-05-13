@@ -30,7 +30,11 @@
 #pragma comment(lib, "dwmapi.lib")
 #include <unordered_map>
 
-#pragma comment(lib, "Xinput.lib")
+
+//#include "dllmain.h"
+//#include "PostKeyFunction.cpp"
+
+#pragma comment(lib, "Xinput9_1_0.lib")
 
 namespace ScreenshotInput
 {
@@ -530,14 +534,14 @@ namespace ScreenshotInput
                     }
                     else {
                         oldscrollleft = false;
-                        ButtonStateImpulse(TranslateXtoMKB::stickrightmapping, false, 99);//down
+                        ButtonStateImpulse(TranslateXtoMKB::stickleftmapping, false, 99);//down
                     }
                 }
                 else if (scrollXaxis < -deadzonelimit) //left
                 {
                     oldscrollleft = true;
 
-                    ButtonStateImpulse(TranslateXtoMKB::stickrightmapping, true, 99);//down
+                    ButtonStateImpulse(TranslateXtoMKB::stickleftmapping, true, 99);//down
                 }
 
                 if (oldscrollright)
@@ -547,13 +551,13 @@ namespace ScreenshotInput
                     }
                     else {
                         oldscrollright = false;
-                        ButtonStateImpulse(TranslateXtoMKB::stickleftmapping, false, 99);//down
+                        ButtonStateImpulse(TranslateXtoMKB::stickrightmapping, false, 99);//down
                     }
                 }
                 else if (scrollXaxis > deadzonelimit) //left
                 {
                     oldscrollright = true;
-                    ButtonStateImpulse(TranslateXtoMKB::stickleftmapping, true, 99);//down
+                    ButtonStateImpulse(TranslateXtoMKB::stickrightmapping, true, 99);//down
                 }
 
                 if (oldscrollup)
@@ -952,11 +956,10 @@ namespace ScreenshotInput
 
     void TranslateXtoMKB::Initialize(HMODULE hModule)
     {
-        RawInput::Initialize();
         g_hModule = hModule;
         InstanceID = Proto::StateInfo::info.instanceIndex;
         Proto::AddThreadToACL(GetCurrentThreadId());
-        Sleep(50);
+        //Sleep(50);
         return;
     }
 }

@@ -23,13 +23,13 @@
     <ProjectGuid>{CB79B90A-EC6B-49AD-B968-65ED140093B7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ProtoInputHooks</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -214,7 +214,6 @@
     <ClInclude Include="GetKeyStateHook.h" />
     <ClInclude Include="GetRawInputDataHook.h" />
     <ClInclude Include="GtoMnK_RawInput.h" />
-    <ClInclude Include="GtoMnK_RawInputHooks.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Hook.h" />
     <ClInclude Include="HookManager.h" />
@@ -246,7 +245,7 @@
     <ClInclude Include="WindowActivateAppFilter.h" />
     <ClInclude Include="WindowActivateFilter.h" />
     <ClInclude Include="WindowStyleHook.h" />
-    <ClInclude Include="Scaler.h" />
+    <ClInclude Include="WindowMsgHook.h" />
     <ClInclude Include="XinputHook.h" />
   </ItemGroup>
   <ItemGroup>
@@ -280,7 +279,6 @@
     <ClCompile Include="GetKeyStateHook.cpp" />
     <ClCompile Include="GetRawInputDataHook.cpp" />
     <ClCompile Include="GtoMnK_RawInput.cpp" />
-    <ClCompile Include="GtoMnK_RawInputHooks.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="GuiImpl.cpp" />
     <ClCompile Include="HookInstaller.cpp" />
@@ -301,7 +299,7 @@
     <ClCompile Include="StateInfo.cpp" />
     <ClCompile Include="TranslateXtoMKB.cpp" />
     <ClCompile Include="WindowStyleHook.cpp" />
-    <ClCompile Include="Scaler.cpp" />
+    <ClCompile Include="WindowMsgHook.cpp" />
     <ClCompile Include="XinputHook.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

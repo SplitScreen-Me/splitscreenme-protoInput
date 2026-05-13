@@ -1,7 +1,7 @@
 #include "GetCursorInfoHook.h"
 #include "FakeMouseKeyboard.h"
 #include "HwndSelector.h"
-#include "Scaler.h"
+#include "WindowMsgHook.h"
 namespace Proto
 {
 
@@ -33,7 +33,7 @@ namespace Proto
 			}
 
 			//any scaling?
-			clientPos = Scaler::getfactor(clientPos);
+			clientPos = WindowMsgHook::getfactor(clientPos);
 
 			ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &clientPos);
 			pci->ptScreenPos.x = clientPos.x;

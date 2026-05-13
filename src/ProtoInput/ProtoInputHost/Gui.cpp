@@ -184,14 +184,19 @@ bool Launch()
 
         if (instance.keyboardHandle != -1)
             AddSelectedKeyboardHandle(instanceHandle, instance.keyboardHandle);
+
         SetTranslateXinputtoMKB(instanceHandle, currentProfile.TranslateXinputtoMKB);
 
+        SetReregisterinput(instanceHandle, currentProfile.Reregisterinput);
 
         if (hookEnabled(RegisterRawInputHookID))        InstallHook(instanceHandle, RegisterRawInputHookID);
         if (hookEnabled(GetRawInputDataHookID))         InstallHook(instanceHandle, GetRawInputDataHookID);
         if (hookEnabled(MessageFilterHookID))           InstallHook(instanceHandle, MessageFilterHookID);
 
 		SetPutMouseInsideWindow(instanceHandle, currentProfile.putMouseInsideWindow);
+
+        
+        SetPointerInMouse(instanceHandle, currentProfile.PointerInMouse);
         if (hookEnabled(GetCursorPosHookID))            InstallHook(instanceHandle, GetCursorPosHookID);
         if (hookEnabled(SetCursorPosHookID))            InstallHook(instanceHandle, SetCursorPosHookID);
         if (hookEnabled(GetKeyStateHookID))             InstallHook(instanceHandle, GetKeyStateHookID);

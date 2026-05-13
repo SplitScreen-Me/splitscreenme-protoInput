@@ -192,16 +192,13 @@
     <ClInclude Include="GtoMnK_RawInput.h">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClInclude>
-    <ClInclude Include="GtoMnK_RawInputHooks.h">
-      <Filter>Source Files\TranslateXtoMKB</Filter>
-    </ClInclude>
     <ClInclude Include="ScanThread.h">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClInclude>
     <ClInclude Include="GetCursorInfoHook.h">
       <Filter>Source Files\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="Scaler.h">
+    <ClInclude Include="WindowMsgHook.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -353,16 +350,13 @@
     <ClCompile Include="GtoMnK_RawInput.cpp">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClCompile>
-    <ClCompile Include="GtoMnK_RawInputHooks.cpp">
-      <Filter>Source Files\TranslateXtoMKB</Filter>
-    </ClCompile>
     <ClCompile Include="ScanThread.cpp">
       <Filter>Source Files\TranslateXtoMKB</Filter>
     </ClCompile>
     <ClCompile Include="GetCursorInfoHook.cpp">
       <Filter>Source Files\Hooks</Filter>
     </ClCompile>
-    <ClCompile Include="Scaler.cpp">
+    <ClCompile Include="WindowMsgHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

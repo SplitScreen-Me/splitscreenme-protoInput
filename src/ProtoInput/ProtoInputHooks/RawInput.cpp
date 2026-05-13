@@ -2,6 +2,7 @@
 #include "Gui.h"
 #include <cassert>
 #include <windows.h>
+#include <windowsx.h>
 #include <iostream>
 #include <vector>
 #include "HookManager.h"
@@ -17,6 +18,7 @@
 #include "MessageFilterHook.h"
 #include "TranslateXtoMKB.h"
 #include "XinputHook.h"
+#include "WindowMsgHook.h"
 
 namespace Proto
 {
@@ -24,14 +26,20 @@ namespace Proto
 RawInputState RawInput::rawInputState{};
 std::bitset<9> RawInput::usages{};
 std::vector<HWND> RawInput::forwardingWindows{};
-bool RawInput::forwardRawInput = true;
+bool RawInput::forwardRawInput = true; //ReRegisterInput
+bool RawInput::PointerInMouse; //ReRegisterInput
 bool RawInput::lockInputToggleEnabled = false;
 bool RawInput::rawInputBypass = false;
 RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
 std::vector<RAWINPUT> RawInput::rawinputs{};
 bool RawInput::TranslateXinputtoMKB;
+bool RawInput::TranslateXinputtoMKB2; //copy to prevent crash
 bool RawInput::locked = false;
 bool RawInput::alreadyAddToACL = false;
+
+size_t RawInput::bufferCounter = 0;
+
+
 const std::vector<USAGE> RawInput::usageTypesOfInterest
 {
 		HID_USAGE_GENERIC_POINTER,
@@ -50,7 +58,6 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 	// This is used a lot in sending messages
 	const unsigned int mouseMkFlags = FakeMouseKeyboard::GetMouseMkFlags();
 	const unsigned int mousePointLparam = MAKELPARAM(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y);
-
 
 	// Send mouse wheel
 	if (rawInputState.sendMouseWheelMessages)
@@ -140,9 +147,7 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
 		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_UP) != 0)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
-	}
-
-
+		}
 
 	// WM_MOUSEMOVE
 	if (rawInputState.sendMouseMoveMessages)
@@ -155,6 +160,7 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 
 void RawInput::ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle)
 {	
+
 	// Update fake mouse position
 	if ((data.usFlags & MOUSE_MOVE_ABSOLUTE) == MOUSE_MOVE_ABSOLUTE)
 	{
@@ -386,7 +392,7 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 		
 		if (allowMouse || allowKeyboard)
 		{
-			if (!rawInputBypass)
+			if (!rawInputBypass) //!XinputHook::TranslateMKBtoXinput
 			{
 				if (allowMouse)
 					ProcessMouseInput(rawinput.data.mouse, rawinput.header.hDevice);
@@ -612,38 +618,56 @@ std::bitset<9> RawInput::GetUsageBitField()
 	return usages;
 }
 
+bool initializedrawinput = false; //for X to MKB translation
+void RawInput::InjectFakeRawInput(const RAWINPUT& fakeInput) {
+	
+	bufferCounter = (bufferCounter + 1) % 20;
+	RawInput::inputBuffer[bufferCounter] = fakeInput;
+
+	const LPARAM magicLParam = (bufferCounter) | 0xAB000000;
+	for (const auto& hwnd : forwardingWindows) 
+ 	{
+		//bypassing rawinputhwnd, game windows direct
+ 		PostMessageW(hwnd, WM_INPUT, RIM_INPUT, magicLParam);
+ 	}
+}
+
 void RawInput::InitialiseRawInput()
 {
-	RefreshDevices();
-	if (!RawInput::TranslateXinputtoMKB)
-	{
+	if (!initializedrawinput) //initalizeonlyonce
+	{ 
+		RefreshDevices();
 
 		HANDLE hThread = CreateThread(nullptr, 0,
-									  (LPTHREAD_START_ROUTINE)RawInputWindowThread, GetModuleHandle(nullptr), 0, 0);
+										  (LPTHREAD_START_ROUTINE)RawInputWindowThread, GetModuleHandle(nullptr), 0, 0);
 		if (hThread != nullptr)
 			CloseHandle(hThread);
+		initializedrawinput = true;
 	}
-	return;
+		return;
 }
+
+
 
 void RawInput::UnregisterGameFromRawInput()
 {
 	printf("Unregistering game from raw input\n");
 
-	std::vector<RAWINPUTDEVICE> devices{};
+		std::vector<RAWINPUTDEVICE> devices{};
 
-	for (const auto& usage : usageTypesOfInterest)
-	{
-		RAWINPUTDEVICE dev;
-		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;
-		dev.usUsage = usage;
-		dev.dwFlags = RIDEV_REMOVE;
-		dev.hwndTarget = NULL;
-		devices.push_back(dev);
+		for (const auto& usage : usageTypesOfInterest)
+		{
+			RAWINPUTDEVICE dev;
+			dev.usUsagePage = HID_USAGE_PAGE_GENERIC;
+			dev.usUsage = usage;
+			dev.dwFlags = RIDEV_REMOVE;
+			dev.hwndTarget = NULL;
+			devices.push_back(dev);
 
-		auto res = RegisterRawInputDevices(&dev, 1, sizeof(RAWINPUTDEVICE));
-		printf("Deregister usage 0x%X: Result 0x%X\n", usage, res);
-	}
+			auto res = RegisterRawInputDevices(&dev, 1, sizeof(RAWINPUTDEVICE));
+			printf("Deregister usage 0x%X: Result 0x%X\n", usage, res);
+		}
+	return;
 }
 
 void RawInput::RegisterProtoForRawInput()

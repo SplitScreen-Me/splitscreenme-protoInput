@@ -24,11 +24,12 @@
 #include "FakeMouseKeyboard.h"
 #include "CursorVisibilityHook.h"
 #include "MoveWindowHook.h"
+#include "RegisterRawInputHook.h"
 #include "AdjustWindowRectHook.h"
 #include "RemoveBorderHook.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
-#include "Scaler.h"
+#include "WindowMsgHook.h"
 
 namespace Proto
 {
@@ -164,10 +165,19 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 					else printf("Enabling TranslateXtoMKB");
 				}
 				else printf("TranslateXtoMKB is set to false");
-				SetEvent(evt);
+				RawInput::TranslateXinputtoMKB2 = RawInput::TranslateXinputtoMKB;
 				break;
 			}
+			case ProtoPipe::PipeMessageType::SetReregisterinput: //RegisterRawInputHook-Option
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetReregisterinput*>(messageBuffer);
 
+				printf("Received ReregisterInput, ReregisterInput enabled = %d\n", body->enabled);
+
+				RegisterRawInputHook::Reregisterinput = body->enabled;
+
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetupHook:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetupHook*>(messageBuffer);
@@ -527,6 +537,15 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 					
 				break;
 			}
+
+			case ProtoPipe::PipeMessageType::SetPointerInMouse:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetPointerInMouse*>(messageBuffer);
+				printf("Received PointerInMouse, PointerInMouse enabled = %d\n", body->enabled);
+				Proto::WindowMsgHook::PointerInMouse(body->enabled);
+				RawInput::PointerInMouse = body->enabled; //for runtime GUI
+				break;
+			}
 			case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageShowCursorWhenImageUpdated*>(messageBuffer);
@@ -629,7 +648,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				printf("Received SetManualScaling with settings.from res (%d, %d), to (%d,%d)\n", body->oldX, body->oldY, body->newX, body->newY);
 
-				Scaler::Settings(body->oldX, body->oldY, body->newX, body->newY);
+				WindowMsgHook::Settings(body->oldX, body->oldY, body->newX, body->newY);
 
 				break;
 			}
@@ -724,11 +743,11 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 void StartPipeCommunication()
 {
-	evt = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	//evt = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	
 	HANDLE hThread = CreateThread(nullptr, 0,
 								  (LPTHREAD_START_ROUTINE)PipeThread, GetModuleHandle(0), 0, 0);
-	WaitForSingleObject(evt, INFINITE); //waits on TranslateXtoMKB and input devices settings
+	//WaitForSingleObject(evt, INFINITE); //waits on TranslateXtoMKB and input devices settings
 	if (hThread != nullptr)
 		CloseHandle(hThread);
 	

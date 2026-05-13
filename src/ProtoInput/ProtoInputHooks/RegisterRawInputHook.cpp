@@ -13,6 +13,8 @@ namespace Proto
 
 bool RegisterRawInputHook::logCallsToRegisterRawInput = false;
 RegisterRawInputHook* registerRawInputHookPtr = nullptr;
+bool RegisterRawInputHook::Reregisterinput;
+
 
 BOOL WINAPI Hook_RegisterRawInputDevices(PCRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
 {
@@ -144,6 +146,8 @@ void RegisterRawInputHook::ShowGuiStatus()
 	ImGui::Checkbox("Forward raw input", &RawInput::forwardRawInput);
 	ImGui::Checkbox("Log calls to registering raw input", &logCallsToRegisterRawInput);
 		
+	ImGui::Checkbox("ReRegister Input", &RegisterRawInputHook::Reregisterinput);
+
 	ImGui::Checkbox("Raw input bypass", &RawInput::rawInputBypass);
 	if (ImGui::IsItemHovered())
 	{
@@ -154,32 +158,56 @@ void RegisterRawInputHook::ShowGuiStatus()
 		ImGui::EndTooltip();
 	}
 }
+void Registergameinput()
+{
+	HWND hwnd = (HWND)Proto::HwndSelector::GetSelectedHwnd();
+	std::vector<RAWINPUTDEVICE> devicess;
+
+	// Mouse
+	{
+		RAWINPUTDEVICE dev{};
+		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
+		dev.usUsage = 0x02;                     // Mouse
+		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
+		dev.hwndTarget = hwnd;
+		devicess.push_back(dev);
+	}
+
+	// Keyboard
+	{
+		RAWINPUTDEVICE dev{};
+		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
+		dev.usUsage = 0x06;                     // Keyboard
+		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
+		dev.hwndTarget = hwnd;
+		devicess.push_back(dev);
+	}
+	if (!Hook_RegisterRawInputDevices(devicess.data(), devicess.size(), sizeof(RAWINPUTDEVICE)))
+	{
+		printf("Failed to register game input\n");
+	}
+	else
+		printf("Re-Registered game input\n");
+}
 
 void RegisterRawInputHook::InstallImpl()
 {
-	if (RawInput::TranslateXinputtoMKB)
-	{
-		auto [status, _hookInfo] = InstallNamedHook(L"user32", "RegisterRawInputDevices", ScreenshotInput::RawInputHooks::RegisterRawInputDevicesHookX);
-		this->hookInfo = _hookInfo;
-	}
-	else
-	{
+	std::bitset<9> usages{};
 		if (!installedAtLeastOnce)
 		{
 			installedAtLeastOnce = true;
-			std::bitset<9> usages{};
-			// usages[HID_USAGE_GENERIC_MOUSE] = true;
-			// usages[HID_USAGE_GENERIC_KEYBOARD] = true;
 			RawInput::SetUsageBitField(usages);
 		}
 
-		auto [status, _hookInfo] = InstallNamedHook(L"user32", "RegisterRawInputDevices", Hook_RegisterRawInputDevices);
-		this->hookInfo = _hookInfo;
+
+	auto [status, _hookInfo] = InstallNamedHook(L"user32", "RegisterRawInputDevices", Hook_RegisterRawInputDevices);
+	this->hookInfo = _hookInfo;
 		
-		FindAlreadySubscribedWindows();
-		RawInput::UnregisterGameFromRawInput();
-		RawInput::RegisterProtoForRawInput();
-	}
+	FindAlreadySubscribedWindows();
+	RawInput::UnregisterGameFromRawInput();
+	RawInput::RegisterProtoForRawInput();
+	if (RegisterRawInputHook::Reregisterinput)
+		Registergameinput(); //calls Hook_RegisterRawInputDevices //adds forwarding window
 }
 
 void RegisterRawInputHook::UninstallImpl()

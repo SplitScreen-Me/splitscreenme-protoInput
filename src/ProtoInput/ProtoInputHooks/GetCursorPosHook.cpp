@@ -1,7 +1,7 @@
 #include "GetCursorPosHook.h"
 #include "FakeMouseKeyboard.h"
 #include "HwndSelector.h"
-#include "Scaler.h"
+#include "WindowMsgHook.h"
 #include "XinputHook.h"
 #include "SetCursorPosHook.h"
 
@@ -44,7 +44,7 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 		}
 		//any scaling?
 		POINT clientPos = { lpPoint->x, lpPoint->y };
-		clientPos = Scaler::getfactor(clientPos);
+		clientPos = WindowMsgHook::getfactor(clientPos);
 
 		lpPoint->x = clientPos.x;
 		lpPoint->y = clientPos.y;

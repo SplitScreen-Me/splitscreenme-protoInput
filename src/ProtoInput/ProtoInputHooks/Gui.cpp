@@ -17,10 +17,14 @@
 #include "ScanThread.h" 
 #include "GtoMnK_RawInput.h" 
 #include "XinputHook.h" 
+#include "WindowMsgHook.h" 
+
 
 namespace Proto
 {
 intptr_t ConsoleHwnd;
+
+bool PointerInMouseold = false;
 
 static void HelpMarker(const char* desc)
 {
@@ -781,8 +785,18 @@ void RawInputMenu()
 					"Use this when debugging/scripting so you don't accidentally control the game changing the GUI settings. ");
 
     ImGui::Separator();
-	
-	
+
+    //this enough to prevent both en enabled?
+    if (!XinputHook::TranslateMKBtoXinput)
+        ImGui::Checkbox("TranslateXtoMKB", &RawInput::TranslateXinputtoMKB);
+    ImGui::Separator();
+    if (!RawInput::TranslateXinputtoMKB)
+        ImGui::Checkbox("TranslateMKBtoX", &XinputHook::TranslateMKBtoXinput);
+    ImGui::Separator();
+    if (RawInput::TranslateXinputtoMKB && XinputHook::TranslateMKBtoXinput)
+        RawInput::TranslateXinputtoMKB = false;
+    RawInput::TranslateXinputtoMKB2 = RawInput::TranslateXinputtoMKB;
+
     bool showFakeCursor = FakeCursor::IsDrawingEnabled();
     if (ImGui::Checkbox("Draw fake cursor", &showFakeCursor))
     {
@@ -809,7 +823,12 @@ void RawInputMenu()
     ImGui::InputInt("Toggle visibility keyboard VKey", (int*)&FakeCursor::GetToggleVisibilityVkey(), 1, 100);
 	
     ImGui::Separator();
-	
+    
+    ImGui::Checkbox("Translate mouse messages to Pointermessages", &RawInput::PointerInMouse);
+
+    if (PointerInMouseold != RawInput::PointerInMouse)
+        WindowMsgHook::PointerInMouse(RawInput::PointerInMouse);
+    PointerInMouseold = RawInput::PointerInMouse;
     ImGui::Checkbox("Send mouse movement messages", &RawInput::rawInputState.sendMouseMoveMessages);
     ImGui::Checkbox("Send mouse button messages", &RawInput::rawInputState.sendMouseButtonMessages);
     ImGui::Checkbox("Send mouse wheel messages", &RawInput::rawInputState.sendMouseWheelMessages);
