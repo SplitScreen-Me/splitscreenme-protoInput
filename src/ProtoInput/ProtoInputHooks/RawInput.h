@@ -29,6 +29,12 @@ struct RawInputState
 	bool freezeInputWhileGuiOpened = true;
 	bool guiOpened = false; // This is just a copy of the variable
 };
+struct ForwardedRawInput
+{
+	UINT size;
+	std::vector<BYTE> raw;   
+};
+
 
 const size_t RawInputBufferSize = 1024;
 
@@ -46,14 +52,19 @@ private:
 	static bool locked; //input lock state
 	static bool alreadyAddToACL;
 
+
+	static ForwardedRawInput dst;
+
 public:
 	static void SendInputMessages(const RAWMOUSE& data);
 	static void SendKeyMessage(const RAWKEYBOARD& data, bool pressed);
 	static void ToggleLockInput();
 	static void InjectFakeRawInput(const RAWINPUT& fakeInput);
+
 	static RawInputState rawInputState;
 	static HWND rawInputHwnd;
 	static bool forwardRawInput;
+	static bool ForwardRawGamepadIDData;
 	static bool PointerInMouse; //runtime gui toggle
 	static bool TranslateXinputtoMKB;
 	static bool TranslateXinputtoMKB2;
@@ -63,10 +74,10 @@ public:
 
 	// Passes input from all devices to the game. Proto Input doesn't process anything
 	static bool rawInputBypass;
-
-	//Reregisters devices to game then reactivates registerinput hook. called from dllmain
 	
 	static std::vector<RAWINPUT> rawinputs;
+	static UINT inputBuffersize[RawInputBufferSize];
+	static ForwardedRawInput inputBufferHID[RawInputBufferSize];
 	static RAWINPUT inputBuffer[RawInputBufferSize];
 
 	static bool lockInputToggleEnabled;

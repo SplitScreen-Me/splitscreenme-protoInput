@@ -69,7 +69,7 @@ namespace ScreenshotInput
     int TranslateXtoMKB::mode = 1;
 	bool TranslateXtoMKB::SaveBmps;
 
-    int TranslateXtoMKB::Sens = 12;
+    int TranslateXtoMKB::Sens = 1;
     int TranslateXtoMKB::Sensmult = 4;
     int TranslateXtoMKB::Deadzone = 2;
 

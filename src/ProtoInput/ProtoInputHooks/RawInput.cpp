@@ -3,6 +3,7 @@
 #include <cassert>
 #include <windows.h>
 #include <windowsx.h>
+#include "XinputHook.h"
 #include <iostream>
 #include <vector>
 #include "HookManager.h"
@@ -17,20 +18,27 @@
 #include "KeyboardButtonFilter.h"
 #include "MessageFilterHook.h"
 #include "TranslateXtoMKB.h"
-#include "XinputHook.h"
+
+#include "HIDRawDevice.h"
+
 #include "WindowMsgHook.h"
 
 namespace Proto
 {
 
 RawInputState RawInput::rawInputState{};
+//HID
+ForwardedRawInput RawInput::inputBufferHID[RawInputBufferSize]{};
+//MKB
+RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
+
 std::bitset<9> RawInput::usages{};
 std::vector<HWND> RawInput::forwardingWindows{};
-bool RawInput::forwardRawInput = true; //ReRegisterInput
-bool RawInput::PointerInMouse; //ReRegisterInput
+bool RawInput::forwardRawInput = true;
+bool RawInput::ForwardRawGamepadIDData;
+bool RawInput::PointerInMouse;
 bool RawInput::lockInputToggleEnabled = false;
 bool RawInput::rawInputBypass = false;
-RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
 std::vector<RAWINPUT> RawInput::rawinputs{};
 bool RawInput::TranslateXinputtoMKB;
 bool RawInput::TranslateXinputtoMKB2; //copy to prevent crash
@@ -38,7 +46,6 @@ bool RawInput::locked = false;
 bool RawInput::alreadyAddToACL = false;
 
 size_t RawInput::bufferCounter = 0;
-
 
 const std::vector<USAGE> RawInput::usageTypesOfInterest
 {
@@ -52,6 +59,8 @@ const std::vector<USAGE> RawInput::usageTypesOfInterest
 };
 
 HWND RawInput::rawInputHwnd = nullptr;
+
+
 
 void RawInput::SendInputMessages(const RAWMOUSE& data)
 {
@@ -307,31 +316,33 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 	// 	
 	// 	return;
 	// }
-	
-	RAWINPUT rawinput;
-	UINT cbSize;
-	
-	if (0 != GetRawInputData(rawInputHandle, RID_INPUT, nullptr, &cbSize, sizeof(RAWINPUTHEADER)))
+	UINT cbSize = 0;
+	if (GetRawInputData(rawInputHandle,
+		RID_INPUT,
+		nullptr,
+		&cbSize,
+		sizeof(RAWINPUTHEADER)) != 0)
 		return;
 
-	// This seems to happen with a PS4 controller plugged in, giving a stack corruption (yay)
-	// If we ever need HID input, create a large memory buffer, then reinterpret the pointer to the buffer as a RAWINPUT*
-	// (HID input has variable size)
-	if (cbSize > sizeof(RAWINPUT)) 
+	// allocate a buffer big enough for HID
+	std::vector<BYTE> buffer(cbSize);
+
+	RAWINPUT* rawinput = reinterpret_cast<RAWINPUT*>(buffer.data());
+
+	if (GetRawInputData(rawInputHandle,
+		RID_INPUT,
+		buffer.data(),
+		&cbSize,
+		sizeof(RAWINPUTHEADER)) != cbSize)
 		return;
-	
-	if (cbSize != GetRawInputData(rawInputHandle, RID_INPUT, &rawinput, &cbSize, sizeof(RAWINPUTHEADER)))
-		return;
-		
-	rawinput.header.wParam = RIM_INPUT; // Sent in the foreground
 
 	const int index = StateInfo::info.instanceIndex;
 	
 	// Shortcut to open UI (doesn't care about what keyboard is attached)
-	if (rawinput.header.dwType == RIM_TYPEKEYBOARD && index >= 1 && index <= 9 && (rawinput.data.keyboard.VKey == 0x30 + index))
+	if (rawinput->header.dwType == RIM_TYPEKEYBOARD && index >= 1 && index <= 9 && (rawinput->data.keyboard.VKey == 0x30 + index))
 	{
 		static bool keyDown = false;
-		if (rawinput.data.keyboard.Flags == RI_KEY_MAKE && !keyDown)
+		if (rawinput->data.keyboard.Flags == RI_KEY_MAKE && !keyDown)
 		{
 			keyDown = true;
 	
@@ -344,14 +355,14 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 			}			
 		}
 	
-		if (rawinput.data.keyboard.Flags == RI_KEY_BREAK && keyDown)
+		if (rawinput->data.keyboard.Flags == RI_KEY_BREAK && keyDown)
 		{
 			keyDown = false;
 		}
 	}
 	
 	// Need to occasionally update the window is case the main window changes (e.g. because of a launcher) or the main window is resized
-	if (rawinput.header.dwType == RIM_TYPEMOUSE && (rawinput.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP) != 0)
+	if (rawinput->header.dwType == RIM_TYPEMOUSE && (rawinput->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP) != 0)
 	{
 		//TODO: This may waste CPU? (But need a way to update window otherwise)
 		//if (HwndSelector::GetSelectedHwnd() == 0)
@@ -362,7 +373,7 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 	
 	
 	// Lock input toggle
-	if (lockInputToggleEnabled && rawinput.header.dwType == RIM_TYPEKEYBOARD && rawinput.data.keyboard.VKey == VK_HOME && rawinput.data.keyboard.Message == WM_KEYUP)
+	if (lockInputToggleEnabled && rawinput->header.dwType == RIM_TYPEKEYBOARD && rawinput->data.keyboard.VKey == VK_HOME && rawinput->data.keyboard.Message == WM_KEYUP)
 	{
 		printf(locked ? "Locking input\n" : "Unlocking input\n");
 		RawInput::ToggleLockInput();
@@ -383,24 +394,28 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 		
 		forwardRawInput)
 	{
-		const bool dataIsMouse = rawinput.header.dwType == RIM_TYPEMOUSE;
-		const bool dataIsKeyboard = rawinput.header.dwType == RIM_TYPEKEYBOARD;
-		const bool selectedThisMouse = std::find(rawInputState.selectedMouseHandles.begin(), rawInputState.selectedMouseHandles.end(), rawinput.header.hDevice) != rawInputState.selectedMouseHandles.end();
-		const bool selectedThisKeyboard = std::find(rawInputState.selectedKeyboardHandles.begin(), rawInputState.selectedKeyboardHandles.end(), rawinput.header.hDevice) != rawInputState.selectedKeyboardHandles.end();
+		const bool dataIsHid = rawinput->header.dwType == RIM_TYPEHID;
+		const bool dataIsMouse = rawinput->header.dwType == RIM_TYPEMOUSE;
+		const bool dataIsKeyboard = rawinput->header.dwType == RIM_TYPEKEYBOARD;
+		const bool selectedThisMouse = std::find(rawInputState.selectedMouseHandles.begin(), rawInputState.selectedMouseHandles.end(), rawinput->header.hDevice) != rawInputState.selectedMouseHandles.end();
+		const bool selectedThisKeyboard = std::find(rawInputState.selectedKeyboardHandles.begin(), rawInputState.selectedKeyboardHandles.end(), rawinput->header.hDevice) != rawInputState.selectedKeyboardHandles.end();
 		const bool allowMouse = dataIsMouse && (rawInputBypass || selectedThisMouse);
 		const bool allowKeyboard = dataIsKeyboard && (rawInputBypass ||  selectedThisKeyboard);
+		const bool allowhid = dataIsHid && (rawInputBypass || XinputHook::controllerIndex - 1 == HidRawDevice::FindIndex(rawinput->header.hDevice));
+		if (!dataIsHid)
+			rawinput->header.wParam = RIM_INPUT;
 		
-		if (allowMouse || allowKeyboard)
+		if (allowMouse || allowKeyboard || allowhid)
 		{
 			if (!rawInputBypass) //!XinputHook::TranslateMKBtoXinput
 			{
 				if (allowMouse)
-					ProcessMouseInput(rawinput.data.mouse, rawinput.header.hDevice);
+					ProcessMouseInput(rawinput->data.mouse, rawinput->header.hDevice);
 				else if (allowKeyboard)
-					ProcessKeyboardInput(rawinput.data.keyboard, rawinput.header.hDevice);
+					ProcessKeyboardInput(rawinput->data.keyboard, rawinput->header.hDevice);
 			}
-	
-			if ((allowMouse && usages[HID_USAGE_GENERIC_MOUSE]) || (allowKeyboard && usages[HID_USAGE_GENERIC_KEYBOARD]))
+			
+			if ((allowMouse && usages[HID_USAGE_GENERIC_MOUSE]) || (allowKeyboard && usages[HID_USAGE_GENERIC_KEYBOARD]) || allowhid)
 			// if ((allowMouse) || (allowKeyboard))
 			{
 
@@ -409,18 +424,40 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 						static size_t inputBufferCounter = 0;
 	
 						// The game is going to lag behind the data we get by a few times, so store in an array and pass the index as a message parameter
-					
+
 						inputBufferCounter = (inputBufferCounter + 1) % RawInputBufferSize;
-						inputBuffer[inputBufferCounter] = rawinput;
-	
-						const LPARAM x = (inputBufferCounter) | 0xAB000000;
-						if (!XinputHook::TranslateMKBtoXinput)
-							PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
+
+						
+
+						//dst.size = cbSize;
+						//dst.raw = *rawinput;
+						
+						if (rawinput->header.dwType == RIM_TYPEHID && RawInput::ForwardRawGamepadIDData)
+						{
+							
+							ForwardedRawInput& dst = inputBufferHID[inputBufferCounter];
+							dst.size = cbSize;
+							dst.raw.resize(cbSize);
+							memcpy(dst.raw.data(), rawinput, cbSize);
+							const LPARAM x = (inputBufferCounter) | 0xAC000000;
+							if (!XinputHook::TranslateMKBtoXinput)
+								PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
+						}
+						else //MKB
+						{
+							rawinput->header.wParam = RIM_INPUT;
+							inputBuffer[inputBufferCounter] = *rawinput;
+							const LPARAM x = (inputBufferCounter) | 0xAB000000;
+							if (!XinputHook::TranslateMKBtoXinput)
+								PostMessageW(hwnd, WM_INPUT, RIM_INPUT, x);
+						}
+
+
+
 					}
 			}
 		}
 	}
-
 }
 
 LRESULT WINAPI RawInputWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -712,6 +749,8 @@ void RawInput::RegisterProtoForRawInput()
 	}
 	else
 		printf("Successfully register raw input\n");
+
+	HidRawDevice::searchgamepads();
 }
 
 }

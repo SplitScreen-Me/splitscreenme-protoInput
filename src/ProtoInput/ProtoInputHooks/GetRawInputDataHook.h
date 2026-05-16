@@ -1,6 +1,7 @@
 #pragma once
 #include "Hook.h"
 #include "InstallHooks.h"
+#include "RawInput.h"
 
 namespace Proto
 {
@@ -9,7 +10,7 @@ class GetRawInputDataHook final : public Hook
 {
 private:
 	HookInfo hookInfo{};
-
+	static ForwardedRawInput src;
 public:
 	const char* GetHookName() const override { return "Get Raw Input Data"; }
 	const char* GetHookDescription() const override

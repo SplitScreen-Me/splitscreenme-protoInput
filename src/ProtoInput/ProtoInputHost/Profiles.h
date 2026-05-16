@@ -75,8 +75,9 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 	bool useOpenXinput = false;
 
 	//reregister devices to game after hooking
-	bool Reregisterinput = false;
+	bool Reregisterinput = true;
 	bool PointerInMouse = false;
+	bool ForwardRawGamepadIDData = false;
 
 	bool TranslateMKBtoXinput = false;
 	bool TranslateXinputtoMKB = false;

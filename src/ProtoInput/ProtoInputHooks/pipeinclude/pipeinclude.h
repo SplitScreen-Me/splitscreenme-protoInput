@@ -38,6 +38,7 @@ enum class PipeMessageType
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
 	SetPointerInMouse,
+	SetForwardRawGamepadIDData,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
 	SetDefaultTopLeftMouseBounds,
@@ -235,6 +236,11 @@ struct PipeMessageSetRawInputBypass
 
 
 struct PipeMessageSetPointerInMouse
+{
+	bool enabled;
+};
+
+struct PipeMessageSetForwardRawGamepadIDData
 {
 	bool enabled;
 };

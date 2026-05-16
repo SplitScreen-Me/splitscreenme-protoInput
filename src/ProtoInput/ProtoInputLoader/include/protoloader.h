@@ -139,6 +139,8 @@ extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle inst
 
 extern "C" __declspec(dllexport) void SetPointerInMouse(ProtoInstanceHandle instanceHandle, bool enabled);
 
+extern "C" __declspec(dllexport) void SetForwardRawGamepadIDData(ProtoInstanceHandle instanceHandle, bool enabled);
+
 extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled);
