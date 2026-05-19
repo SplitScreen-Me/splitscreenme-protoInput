@@ -593,23 +593,6 @@ void SetPointerInMouse(ProtoInstanceHandle instanceHandle, bool enabled)
 	}
 }
 
-void SetForwardRawGamepadIDData(ProtoInstanceHandle instanceHandle, bool enabled)
-{
-	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
-	{
-		auto& instance = find->second;
-
-		WaitClientConnect(instance);
-
-		ProtoPipe::PipeMessageSetForwardRawGamepadIDData message
-		{
-			enabled
-		};
-
-		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetForwardRawGamepadIDData, &message);
-	}
-}
-
 void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())

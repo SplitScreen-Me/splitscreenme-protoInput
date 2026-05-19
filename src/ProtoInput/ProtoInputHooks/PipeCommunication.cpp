@@ -542,18 +542,10 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetPointerInMouse*>(messageBuffer);
 				printf("Received PointerInMouse, PointerInMouse enabled = %d\n", body->enabled);
-				WindowMsgHook::PointerInMouse(body->enabled);
+				Proto::WindowMsgHook::PointerInMouse(body->enabled);
 				RawInput::PointerInMouse = body->enabled; //for runtime GUI
-				break; //
-			}
-			case ProtoPipe::PipeMessageType::SetForwardRawGamepadIDData:
-			{
-				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetForwardRawGamepadIDData*>(messageBuffer);
-				printf("Received Set Raw Gamepad forwarding, ForwardRawGamepadIDData enabled = %d\n", body->enabled);
-				RawInput::ForwardRawGamepadIDData = body->enabled;
 				break;
 			}
-
 			case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageShowCursorWhenImageUpdated*>(messageBuffer);

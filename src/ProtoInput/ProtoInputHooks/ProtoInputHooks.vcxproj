@@ -23,7 +23,7 @@
     <ProjectGuid>{CB79B90A-EC6B-49AD-B968-65ED140093B7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ProtoInputHooks</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -215,7 +215,6 @@
     <ClInclude Include="GetRawInputDataHook.h" />
     <ClInclude Include="GtoMnK_RawInput.h" />
     <ClInclude Include="Gui.h" />
-    <ClInclude Include="HIDRawDevice.h" />
     <ClInclude Include="Hook.h" />
     <ClInclude Include="HookManager.h" />
     <ClInclude Include="HwndSelector.h" />
@@ -282,7 +281,6 @@
     <ClCompile Include="GtoMnK_RawInput.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="GuiImpl.cpp" />
-    <ClCompile Include="HIDRawDevice.cpp" />
     <ClCompile Include="HookInstaller.cpp" />
     <ClCompile Include="HookManager.cpp" />
     <ClCompile Include="HwndSelector.cpp" />

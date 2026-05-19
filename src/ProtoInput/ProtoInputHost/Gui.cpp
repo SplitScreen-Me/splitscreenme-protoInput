@@ -197,8 +197,6 @@ bool Launch()
 
         
         SetPointerInMouse(instanceHandle, currentProfile.PointerInMouse);
-        SetForwardRawGamepadIDData(instanceHandle, currentProfile.ForwardRawGamepadIDData);
-
         if (hookEnabled(GetCursorPosHookID))            InstallHook(instanceHandle, GetCursorPosHookID);
         if (hookEnabled(SetCursorPosHookID))            InstallHook(instanceHandle, SetCursorPosHookID);
         if (hookEnabled(GetKeyStateHookID))             InstallHook(instanceHandle, GetKeyStateHookID);
@@ -740,17 +738,13 @@ void SelectedInstanceWindow()
     ImGui::SliderInt("", (int*)&instance.controllerIndex, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::TextWrapped("Raw gamepad ID decided by ControllerIndex."
-        "");
-    ImGui::Checkbox("Forward raw gamepad input", &currentProfile.ForwardRawGamepadIDData); 
     ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::TextWrapped("If Translate X to MKB is selected, then it will emulate mouse and keyboard from ControllerIndex." 
+    ImGui::TextWrapped("If Translate X to MKB is selected, then it will emulate mouse and keyboard from selected ControllerIndex." 
         "Option will automatically deactivate if a keyboard or mouse is selected for the instance. "
+        "Also you should make sure ControllerIndex is not zero, as zero still implies no controller"
+        "UseOpenXinput hook or Xinput hook are not needed, as it will use OpenXinput already and poll selected controllerindex"
         "");
     ImGui::Checkbox("Translate X to MKB", &currentProfile.TranslateXinputtoMKB); //
-    ImGui::Spacing();
-    ImGui::Separator();
     if (currentProfile.TranslateXinputtoMKB)
         currentProfile.TranslateMKBtoXinput = false;
     if (currentProfile.TranslateXinputtoMKB || currentProfile.TranslateMKBtoXinput)
@@ -1488,10 +1482,6 @@ void OptionsMenu()
 
     if (ImGui::CollapsingHeader("Hooks Options", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (IsHookEnabled(currentProfile, ProtoHookIDs::RegisterRawInputHookID))
-        {
-            ImGui::Checkbox("RegisterRawInput: ReRegisterinput", &currentProfile.Reregisterinput);
-        }
         if (IsHookEnabled(currentProfile, ProtoHookIDs::XinputHookID))
         {
             ImGui::Checkbox("Xinput: Use OpenXinput", &currentProfile.useOpenXinput);
@@ -1538,7 +1528,7 @@ void OptionsMenu()
         
     	if (currentProfile.drawFakeMouseCursor)
         { 
-            ImGui::Checkbox("DrawFakeCursorFix", &currentProfile.drawFakeCursorFix);
+            ImGui::Checkbox("Fake cursor offset fix", &currentProfile.drawFakeCursorFix);
             ImGui::Checkbox("Toggle fake cursor shortcut (Home)", &currentProfile.toggleFakeCursorVisibilityShortcut);
         }
         ImGui::Checkbox("Allow fake cursor to go out of bounds", &currentProfile.allowMouseOutOfBounds);
@@ -1546,12 +1536,11 @@ void OptionsMenu()
         ImGui::Checkbox("Put Mouse Inside Window", &currentProfile.putMouseInsideWindow);
         ImGui::Separator();
 
-        ImGui::Checkbox("Send keyboard button messages", &currentProfile.sendKeyboardButtonMessages);
         ImGui::Checkbox("Send mouse movement messages", &currentProfile.sendMouseMovementMessages);
         ImGui::Checkbox("Send mouse button messages", &currentProfile.sendMouseButtonMessages);
         ImGui::Checkbox("Send mouse wheel messages", &currentProfile.sendMouseWheelMessages);
+        ImGui::Checkbox("Send keyboard button messages", &currentProfile.sendKeyboardButtonMessages);
         ImGui::Checkbox("Send mouse double click messages", &currentProfile.sendMouseDblClkMessages);
-        ImGui::Checkbox("Mouse use Pointer messages(unusual)", &currentProfile.PointerInMouse);
 
     }
 
