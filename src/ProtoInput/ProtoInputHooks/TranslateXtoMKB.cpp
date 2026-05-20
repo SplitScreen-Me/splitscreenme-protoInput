@@ -381,7 +381,7 @@ namespace ScreenshotInput
     {
         if (ScanThread::scanoption && ScanThread::scanloop == false)
         {
-			MessageBoxA(NULL, "Starting BMP scanner...", "Info", MB_OK);
+			//MessageBoxA(NULL, "Starting BMP scanner...", "Info", MB_OK);
 			StartScanner();
         }
         float sensitivity = static_cast<float>(TranslateXtoMKB::Sens);

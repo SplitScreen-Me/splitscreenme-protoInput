@@ -349,10 +349,9 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDrawFakeCursorFix*>(messageBuffer);
 
-				printf("Received message to %s fake cursor fix\n", body->enable ? "enable" : "disable");
-
-					FakeCursor::DrawFakeCursorFix = body->enable;
-
+				printf("Received message to %s fake cursor with offset fix\n", body->enable ? "enable" : "disable");
+				FakeCursor::EnableDisableFakeCursor(body->enable);
+				FakeCursor::DrawFakeCursorFix = body->enable;
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetExternalFreezeFakeInput:
@@ -427,7 +426,6 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				printf("Received set translate MKB to Xinput. also extended mousestate bounds. remember Xinputhook also%d\n", body->TranslateMKBtoXinput);
 
 				XinputHook::TranslateMKBtoXinput = body->TranslateMKBtoXinput;
-
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetDinputDeviceGuid:
