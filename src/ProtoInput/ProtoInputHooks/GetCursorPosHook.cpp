@@ -46,7 +46,7 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 		POINT clientPos = { lpPoint->x, lpPoint->y };
 		clientPos = WindowMsgHook::getfactor(clientPos);
 
-		lpPoint->x = clientPos.x;
+		lpPoint->x = clientPos.x; 
 		lpPoint->y = clientPos.y;
 		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
 	}

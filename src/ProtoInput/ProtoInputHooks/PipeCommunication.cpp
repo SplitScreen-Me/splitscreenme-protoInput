@@ -33,6 +33,7 @@
 
 namespace Proto
 {
+	bool gotkeyboardmouse = false;
 
 std::wstring GetPipeName()
 {
@@ -80,7 +81,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 	}
 	while (pipe == INVALID_HANDLE_VALUE);
 	
-	bool gotkeyboardmouse = false;
+	
 	if (pipe != INVALID_HANDLE_VALUE)
 	{
 		printf("Successfully connected pipe \"%ws\"\n", pipeName.c_str());
@@ -349,9 +350,8 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDrawFakeCursorFix*>(messageBuffer);
 
 				printf("Received message to %s fake cursor fix\n", body->enable ? "enable" : "disable");
-				 
-					// Not sure about this...
-					FakeCursor::state.DrawFakeCursorFix = body->enable;
+
+					FakeCursor::DrawFakeCursorFix = body->enable;
 
 				break;
 			}
@@ -735,7 +735,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 	}
 	endPipe:
 
-	MessageBoxA(NULL, "report this error: Pipe ended", "Pipe ended", MB_OK);
+	//MessageBoxA(NULL, "report this error: Pipe ended", "Pipe ended", MB_OK);
 	printf("End of pipe thread\n");
 	CloseHandle(pipe);
 	return 0;
@@ -743,14 +743,10 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 void StartPipeCommunication()
 {
-	//evt = CreateEvent(nullptr, TRUE, FALSE, nullptr);
-	
 	HANDLE hThread = CreateThread(nullptr, 0,
 								  (LPTHREAD_START_ROUTINE)PipeThread, GetModuleHandle(0), 0, 0);
-	//WaitForSingleObject(evt, INFINITE); //waits on TranslateXtoMKB and input devices settings
 	if (hThread != nullptr)
 		CloseHandle(hThread);
-	
 }
 
 }

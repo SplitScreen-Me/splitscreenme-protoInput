@@ -158,6 +158,9 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 			cereal::make_nvp("renameHandles", renameHandles),
 			cereal::make_nvp("renameNamedPipeHandles", renameNamedPipeHandles),
 
+			cereal::make_nvp("Reregisterinput", Reregisterinput),
+			cereal::make_nvp("PointerInMouse", PointerInMouse),
+
 			cereal::make_nvp("dinputToXinputRedirection", dinputToXinputRedirection),
 			cereal::make_nvp("useOpenXinput", useOpenXinput),
 			cereal::make_nvp("TranslateMKBtoXinput", TranslateMKBtoXinput),

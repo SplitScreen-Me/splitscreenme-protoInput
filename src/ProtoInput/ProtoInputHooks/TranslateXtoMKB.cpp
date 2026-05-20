@@ -2,23 +2,15 @@
 #include "Gui.h"
 #include <string>
 #include <map>
+#include <unordered_map>
 #include "TranslateXtoMKB.h"
 #include "RawInput.h"
 #include <imgui.h>
 #include <cmath>
 #define NOMINMAX
-#include <windows.h>
 #include <algorithm>
 #include "EasyHook.h"
-#include <tlhelp32.h>
-#include <tchar.h>
-#include <iostream>
 #include <vector>
-#include <cstdio>  // for swprintf
-#include <psapi.h>
-#include <cstdlib> // For strtoul
-#include <dwmapi.h>
-#include <dinput.h>
 #include <thread>
 #include "HwndSelector.h"
 #include "FakeCursor.h"
@@ -27,14 +19,7 @@
 #include "FakeMouseKeyboard.h"
 #include "ScanThread.h"
 #include "StateInfo.h"
-#pragma comment(lib, "dwmapi.lib")
-#include <unordered_map>
 
-
-//#include "dllmain.h"
-//#include "PostKeyFunction.cpp"
-
-#pragma comment(lib, "Xinput9_1_0.lib")
 
 namespace ScreenshotInput
 {
@@ -172,7 +157,6 @@ namespace ScreenshotInput
     void TranslateXtoMKB::SendMouseClick(int x, int y, int z) {
         // Create a named mutex
         RAWMOUSE muusjn = { 0 };
-        POINT heer;
         muusjn.usButtonFlags = 0;
 
         muusjn.lLastX = x;

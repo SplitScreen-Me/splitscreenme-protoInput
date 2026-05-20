@@ -371,6 +371,15 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 	
 	
 	//TODO: handle forwarding HID input
+
+	//attempted:
+	//std::byte type large, in array[inputbuffer]. then resize byte to size rawinput, 
+	// and copy it over in getrawinputdatahook. worked for controller, but not mouse and keyboard.
+	// used seperate signature on HID input so std::byte was only used on hid. example: 0xAB000000 for mouse+kb
+	//then 0xAC000000 for HID. worked well on a pure raw controller game, but crashed on games with registered mouse+KB also
+	//could be because i did not seperate what window to send input message, as game was not meant to receive the messages,
+	//or the custom Dinput8 that i built that polled rawinput for controller.
+	//possible to try again, but then i think getting usages need to be array, so check each window seperatly what devices it is registered for
 	
 	if (
 		(	

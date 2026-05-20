@@ -1,34 +1,21 @@
 #include <algorithm>
-//#include "pch.h"
 #include <cmath>
 #define NOMINMAX
 #include <windows.h>
-//#include <windowsx.h>
 #include <Xinput.h>
-#include <tlhelp32.h>
-#include <tchar.h>
 #include <iostream>
 #include <vector>
-#include <cstdio>  // for swprintf
-#include <psapi.h>
 #include <string>
-#include <cstdlib> // For strtoul
-#include <dwmapi.h>
 #include <thread>
 #include <string>
-//#include "input.h"
-//#include "MainThread.h"
-//#include "Mouse.h"
 #include "FakeMouseKeyboard.h"
 #include "ScanThread.h"
 #include "TranslateXtoMKB.h"
 #include "FakeCursor.h"
 #include "HwndSelector.h"
 
-#pragma comment(lib, "dwmapi.lib")
 
-
-
+//coordinate pixel scanner from .bmp files or static points in ini next to exe.
 
 namespace ScreenshotInput {
 
@@ -413,7 +400,6 @@ namespace ScreenshotInput {
 
     POINT GetStaticFactor(POINT pp, int doscale, bool isnotbmp)
     {
-        FLOAT ny;
         POINT currentres;
         currentres.x = Proto::HwndSelector::windowWidth;
         currentres.y = Proto::HwndSelector::windowHeight;

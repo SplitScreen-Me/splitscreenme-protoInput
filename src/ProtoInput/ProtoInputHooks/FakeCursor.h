@@ -29,6 +29,7 @@ namespace Proto
 		int cursorHeight = 40;//was constant
 		bool nochange = false; //if normal offset was found at first then assume all cursors got same offset
 		HCURSOR oldhCursor = NULL;
+		POINT OldTestpos = { 0,0 };
 
 		// This is either on or off for a given game (ie. it doesn't change)
 		bool drawingEnabled = false;
@@ -39,6 +40,14 @@ namespace Proto
 		bool toggleVisilbityShorcutEnabled = false;
 		unsigned int toggleVisibilityVkey = VK_HOME;
 
+		
+
+		//TranslateXtoMKB
+		POINT OldspotA, OldspotB, OldspotX, OldspotY;
+		int oldmessage = 0;
+		bool messageshown = false;
+		HWND selectorhwnd = nullptr; //copy of variable in TranslateXtoMKB to avoid accessing it multiple times with critical section in DrawCursor
+
 		void DrawMessage(HDC hdc, HWND window, HBRUSH Brush, int message);
 		void DrawFoundSpots(HDC hdc, POINT spotA, POINT spotB, POINT spotX, POINT spotY, HWND window, HBRUSH Brush);
 		void DrawPointsandMessages();
@@ -47,7 +56,7 @@ namespace Proto
 
 public:
 	static FakeCursor state;
-	bool DrawFakeCursorFix;
+	static bool DrawFakeCursorFix;
 	void StartInternal();
 	void StartDrawLoopInternal();
 

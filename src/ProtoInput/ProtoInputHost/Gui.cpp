@@ -188,15 +188,13 @@ bool Launch()
         SetTranslateXinputtoMKB(instanceHandle, currentProfile.TranslateXinputtoMKB);
 
         SetReregisterinput(instanceHandle, currentProfile.Reregisterinput);
-
+        SetPointerInMouse(instanceHandle, currentProfile.PointerInMouse);
         if (hookEnabled(RegisterRawInputHookID))        InstallHook(instanceHandle, RegisterRawInputHookID);
         if (hookEnabled(GetRawInputDataHookID))         InstallHook(instanceHandle, GetRawInputDataHookID);
         if (hookEnabled(MessageFilterHookID))           InstallHook(instanceHandle, MessageFilterHookID);
 
 		SetPutMouseInsideWindow(instanceHandle, currentProfile.putMouseInsideWindow);
 
-        
-        SetPointerInMouse(instanceHandle, currentProfile.PointerInMouse);
         if (hookEnabled(GetCursorPosHookID))            InstallHook(instanceHandle, GetCursorPosHookID);
         if (hookEnabled(SetCursorPosHookID))            InstallHook(instanceHandle, SetCursorPosHookID);
         if (hookEnabled(GetKeyStateHookID))             InstallHook(instanceHandle, GetKeyStateHookID);
@@ -739,10 +737,9 @@ void SelectedInstanceWindow()
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-    ImGui::TextWrapped("If Translate X to MKB is selected, then it will emulate mouse and keyboard from selected ControllerIndex." 
+    ImGui::TextWrapped("If Translate X to MKB is selected, mouse and keyboard will be emulated from selected ControllerIndex." 
         "Option will automatically deactivate if a keyboard or mouse is selected for the instance. "
-        "Also you should make sure ControllerIndex is not zero, as zero still implies no controller"
-        "UseOpenXinput hook or Xinput hook are not needed, as it will use OpenXinput already and poll selected controllerindex"
+        "Uses OpenXinput directly. "
         "");
     ImGui::Checkbox("Translate X to MKB", &currentProfile.TranslateXinputtoMKB); //
     if (currentProfile.TranslateXinputtoMKB)
@@ -1274,21 +1271,6 @@ void SelectedInstanceWindow()
         }
     }
     ImGui::PopID();
-    bool stickinvert;
-    bool scanoption;
-    bool shoulderswap;
-    bool astsatic;
-    bool aclick;
-    bool amove;
-    bool bstsatic;
-    bool bclick;
-    bool bmove;
-    bool xstsatic;
-    bool xclick;
-    bool xmove;
-    bool ystsatic;
-    bool yclick;
-    bool ymove;
 }
 
 void OptionsMenu()
@@ -1491,6 +1473,7 @@ void OptionsMenu()
         if (IsHookEnabled(currentProfile, ProtoHookIDs::XinputHookID))
         {
             ImGui::Checkbox("Xinput: Translate MKB to fake Xinput", &currentProfile.TranslateMKBtoXinput);
+            ImGui::Checkbox("Xinput: Dinput to Xinput redirection", &currentProfile.dinputToXinputRedirection);
         }
         else currentProfile.TranslateMKBtoXinput = false;
 
@@ -1499,9 +1482,9 @@ void OptionsMenu()
             currentProfile.TranslateXinputtoMKB = false;
             currentProfile.ScanOption = false;
         }
-        if (IsHookEnabled(currentProfile, ProtoHookIDs::XinputHookID))
+        if (IsHookEnabled(currentProfile, ProtoHookIDs::RegisterRawInputHookID))
         {
-            ImGui::Checkbox("Xinput: Dinput to Xinput redirection", &currentProfile.dinputToXinputRedirection);
+            ImGui::Checkbox("RegisterRawInput: ReRegister", &currentProfile.Reregisterinput);
         }
         else currentProfile.dinputToXinputRedirection = false;
 
@@ -1541,6 +1524,8 @@ void OptionsMenu()
         ImGui::Checkbox("Send mouse wheel messages", &currentProfile.sendMouseWheelMessages);
         ImGui::Checkbox("Send keyboard button messages", &currentProfile.sendKeyboardButtonMessages);
         ImGui::Checkbox("Send mouse double click messages", &currentProfile.sendMouseDblClkMessages);
+        ImGui::Separator();
+        ImGui::Checkbox("Use Pointer Messages For Mouse", &currentProfile.PointerInMouse);
 
     }
 

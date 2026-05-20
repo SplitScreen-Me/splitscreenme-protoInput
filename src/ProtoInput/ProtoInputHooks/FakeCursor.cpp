@@ -14,13 +14,9 @@ namespace Proto
 {
 
 FakeCursor FakeCursor::state{};
-
-//TranslateXtoMKB
-POINT OldspotA, OldspotB, OldspotX, OldspotY;
 int FakeCursor::Showmessage = 0;
-int oldmessage = 0;
-bool messageshown = false;
-HWND selectorhwnd = nullptr; //copy of variable in TranslateXtoMKB to avoid accessing it multiple times with critical section in DrawCursor
+bool FakeCursor::DrawFakeCursorFix;
+
 
 LRESULT WINAPI FakeCursorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -119,7 +115,7 @@ void DrawPinkSquare(HDC hdc, int x, int y)
     SelectObject(hdc, hOldPen);
     DeleteObject(hPen);
 }
-POINT OldTestpos = { 0,0 };
+
 
 void FakeCursor::DrawMessage(HDC hdc, HWND window, HBRUSH Brush, int message) 
 {
@@ -141,27 +137,22 @@ void FakeCursor::DrawMessage(HDC hdc, HWND window, HBRUSH Brush, int message)
     if (!messageshown)
     { 
         if (message == 1){
-          //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 20, TEXT("DISCONNECTED!"), 14); //14
 		    messageshown = true;
 	    }
         if (message == 2) {
-          //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 20, TEXT("GUI TOGGLE!"), 11); //14
             messageshown = true;
         }
         if (message == 3) {
-          //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 20, TEXT("SHOWCURSOR TOGGLE!"), 18); //14
             messageshown = true;
         }
         if (message == 4) {
-          //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 20, TEXT("LOCK TOGGLED!"), 13); //14
             messageshown = true;
         }
         if (message == 5) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 20, TEXT("Window top!"), 11); //14
             messageshown = true;
         }
@@ -173,7 +164,6 @@ void FakeCursor::DrawMessage(HDC hdc, HWND window, HBRUSH Brush, int message)
             messageshown = true;
         }
         if (message == 7) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             wchar_t buffer[25];
             swprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), L"Sens Curve Adjust! (%d)", ScreenshotInput::TranslateXtoMKB::Sensmult);
             TextOutW(hdc, here.x + 20, here.y + 20, buffer, (int)wcslen(buffer));
@@ -181,27 +171,22 @@ void FakeCursor::DrawMessage(HDC hdc, HWND window, HBRUSH Brush, int message)
             messageshown = true;
         }
         if (ScreenshotInput::TranslateXtoMKB::SaveBmps) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 0, TEXT("BMP SAVE MODE!"), 14); //14
             messageshown = true;
         }
         if (message == 10) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 25, TEXT("A MAPPED TO SPOT!"), 17); //14
             messageshown = true;
         }
         if (message == 11) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 25, TEXT("B MAPPED TO SPOT!"), 17); //14
             messageshown = true;
         }
         if (message == 12) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 25, TEXT("X MAPPED TO SPOT!"), 17); //14
             messageshown = true;
         }
         if (message == 13) {
-            //  DrawGreenTriangle(hdc, here.x + 50, here.y + 50);
             TextOutW(hdc, here.x + 20, here.y + 25, TEXT("Y MAPPED TO SPOT!"), 17); //14
             messageshown = true;
         }
@@ -289,13 +274,14 @@ void FakeCursor::DrawFoundSpots(HDC hdc, POINT spotA, POINT spotB, POINT spotX, 
     }
     if (spotX.x != 0 && spotX.y != 0 && erased == true)
     {
+        DrawPinkSquare(hdc, spotY.x, spotY.y);
         ClientToScreen(window, &spotX);
-        DrawGreenTriangle(hdc, spotX.x, spotX.y);
+        
     }
     if (spotY.x != 0 && spotY.y != 0 && erased == true)
     {
         ClientToScreen(window, &spotY);
-        DrawPinkSquare(hdc, spotY.x, spotY.y);
+        DrawGreenTriangle(hdc, spotX.x, spotX.y);
     }
 	OldTestpos = testpos;
 }
@@ -349,6 +335,7 @@ void FakeCursor::DrawCursor()
         if (pos.x < 0) pos.x = 0;
         if (pos.y < 0) pos.y = 0;
 
+        //offsetSET is stepping each cursor update: step 0 check size //step 1 check offset //step 2 only draw
         if (showCursor)// && hdc && hCursor
         {
             if (DrawIconEx(hdc, pos.x, pos.y, hCursor, cursorWidth, cursorHeight, 0, transparencyBrush, DI_NORMAL))
