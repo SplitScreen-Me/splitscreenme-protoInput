@@ -207,46 +207,53 @@ void FakeCursor::DrawFoundSpots(HDC hdc, POINT spotA, POINT spotB, POINT spotX, 
 	ClientToScreen(window, &testpos);
     if (testpos.x < OldTestpos.x || testpos.y < OldTestpos.y || testpos.x > OldTestpos.x || testpos.y > OldTestpos.y)
     {
-        windowmoved = true;
-		//MessageBoxA(NULL, "Window moved!", "Debug", MB_OK);
+        erased = true;
 	}
+
+    //point coordinate changes
     if (OldspotA.x != spotA.x || OldspotA.y != spotA.y)
     {
-        RECT wholewindow;
-        GetClientRect(pointerWindow, &wholewindow);
-
-        FillRect(hdc, &wholewindow, Brush);
-        erased = true;
-        ScreenshotInput::TranslateXtoMKB::RefreshWindow = 1; //redraw cursor
+        RECT fill{ OldspotA.x - 20, OldspotA.y - 20, OldspotA.x + 20, OldspotA.y + 20 };
+        FillRect(hdc, &fill, transparencyBrush); // Note: window, not screen coordinates!
+        erasedA = true;
     }
 
     if (OldspotB.x != spotB.x || OldspotB.y != spotB.y) //|| windowmoved)
     {
-        RECT wholewindow;
-        GetClientRect(pointerWindow, &wholewindow);
-
-        FillRect(hdc, &wholewindow, Brush);
-        erased = true;
-        ScreenshotInput::TranslateXtoMKB::RefreshWindow = 1; //redraw cursor
+        RECT fill{ OldspotB.x - 20, OldspotB.y - 20, OldspotB.x + 20, OldspotB.y + 20 };
+        FillRect(hdc, &fill, transparencyBrush); // Note: window, not screen coordinates!
+        erasedB = true;
     }
     if (OldspotX.x != spotX.x || OldspotX.y != spotX.y) //|| windowmoved)
     {
-        RECT wholewindow;
-        GetClientRect(pointerWindow, &wholewindow);
-
-        FillRect(hdc, &wholewindow, Brush);
-        erased = true;
-        ScreenshotInput::TranslateXtoMKB::RefreshWindow = 1; //redraw cursor
+        RECT fill{ OldspotX.x - 20, OldspotX.y - 20, OldspotX.x + 20, OldspotX.y + 20 };
+        FillRect(hdc, &fill, transparencyBrush); // Note: window, not screen coordinates!
+        erasedX = true;
     }
     if (OldspotY.x != spotY.x || OldspotY.y != spotY.y) //|| windowmoved)
+    {
+        RECT fill{ OldspotY.x - 20, OldspotY.y - 20, OldspotY.x + 20, OldspotY.y + 20 };
+        FillRect(hdc, &fill, transparencyBrush); // Note: window, not screen coordinates!
+        erasedY = true;
+        
+    }
+
+
+    if (erased == true)
     {
         RECT wholewindow;
         GetClientRect(pointerWindow, &wholewindow);
 
         FillRect(hdc, &wholewindow, Brush);
-        erased = true;
+
+        erasedA = true;
+        erasedB = true;
+        erasedX = true;
+        erasedY = true;
+
         ScreenshotInput::TranslateXtoMKB::RefreshWindow = 1; //redraw cursor
     }
+
 
     OldspotA.x = spotA.x;
     OldspotA.y = spotA.y;
@@ -260,28 +267,37 @@ void FakeCursor::DrawFoundSpots(HDC hdc, POINT spotA, POINT spotB, POINT spotX, 
     OldspotY.x = spotY.x;
     OldspotY.y = spotY.y;
 
-    if (spotA.x != 0 && spotA.y != 0 && erased == true)
+
+    if (spotA.x != 0 && spotA.y != 0 && erasedA == true)
     { 
-        ClientToScreen(window, &spotA);
-        DrawRedX(hdc, spotA.x, spotA.y);
-		//MessageBoxA(NULL, "Spot A drawn!", "Debug", MB_OK);
-        erasedA = false;
+        POINT drawthere = spotA;
+        ClientToScreen(window, &drawthere); //A
+        DrawRedX(hdc, drawthere.x, drawthere.y);
     }
-    if (spotB.x != 0 && spotB.y != 0 && erased == true)
+
+
+    if (spotB.x != 0 && spotB.y != 0 && erasedB == true)
     {
-        ClientToScreen(window, &spotB);
-        DrawBlueCircle(hdc, spotB.x, spotB.y);
+        POINT drawthere = spotB;
+        ClientToScreen(window, &drawthere); //A
+        DrawBlueCircle(hdc, drawthere.x, drawthere.y);
     }
-    if (spotX.x != 0 && spotX.y != 0 && erased == true)
+
+
+    if (spotX.x != 0 && spotX.y != 0 && erasedX == true)
     {
-        DrawPinkSquare(hdc, spotY.x, spotY.y);
-        ClientToScreen(window, &spotX);
+        POINT drawthere = spotX;
+        ClientToScreen(window, &drawthere); //A
+        DrawPinkSquare(hdc, drawthere.x, drawthere.y);
         
     }
-    if (spotY.x != 0 && spotY.y != 0 && erased == true)
+
+
+    if (spotY.x != 0 && spotY.y != 0 && erasedY == true)
     {
-        ClientToScreen(window, &spotY);
-        DrawGreenTriangle(hdc, spotX.x, spotX.y);
+        POINT drawthere = spotY;
+        ClientToScreen(window, &drawthere); //A
+        DrawGreenTriangle(hdc, drawthere.x, drawthere.y);
     }
 	OldTestpos = testpos;
 }
