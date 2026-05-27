@@ -122,7 +122,12 @@ void RegisterRawInputHook::FindAlreadySubscribedWindows()
 		}
 
 		if (targetHWND == nullptr)
+		{ 
 			printf("Couldn't find a hwnd subscribed to raw input\n");
+			//assuming main window
+			if (RegisterRawInputHook::Reregisterinput)
+				AddWindowToForward((HWND)HwndSelector::GetSelectedHwnd(), usagesToForward);
+		}
 		else
 		{
 			printf("Found raw input hwnd: 0x%X\n", targetHWND);
@@ -158,37 +163,6 @@ void RegisterRawInputHook::ShowGuiStatus()
 		ImGui::EndTooltip();
 	}
 }
-void Registergameinput()
-{
-	HWND hwnd = (HWND)Proto::HwndSelector::GetSelectedHwnd();
-	std::vector<RAWINPUTDEVICE> devicess;
-
-	// Mouse
-	{
-		RAWINPUTDEVICE dev{};
-		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
-		dev.usUsage = 0x02;                     // Mouse
-		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
-		dev.hwndTarget = hwnd;
-		devicess.push_back(dev);
-	}
-
-	// Keyboard
-	{
-		RAWINPUTDEVICE dev{};
-		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;   // 0x01
-		dev.usUsage = 0x06;                     // Keyboard
-		dev.dwFlags = RIDEV_INPUTSINK;          // 0x100
-		dev.hwndTarget = hwnd;
-		devicess.push_back(dev);
-	}
-	if (!Hook_RegisterRawInputDevices(devicess.data(), devicess.size(), sizeof(RAWINPUTDEVICE)))
-	{
-		printf("Failed to register game input\n");
-	}
-	else
-		printf("Re-Registered game input\n");
-}
 
 void RegisterRawInputHook::InstallImpl()
 {
@@ -206,8 +180,6 @@ void RegisterRawInputHook::InstallImpl()
 	FindAlreadySubscribedWindows();
 	RawInput::UnregisterGameFromRawInput();
 	RawInput::RegisterProtoForRawInput();
-	if (RegisterRawInputHook::Reregisterinput)
-		Registergameinput(); //calls Hook_RegisterRawInputDevices //adds forwarding window
 }
 
 void RegisterRawInputHook::UninstallImpl()
