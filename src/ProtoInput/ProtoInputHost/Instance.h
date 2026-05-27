@@ -22,6 +22,9 @@ public:
 	intptr_t mouseHandle = -1;
 
 	unsigned int controllerIndex = 0;
+	unsigned int controllerIndex2 = 0;
+	unsigned int controllerIndex3 = 0;
+	unsigned int controllerIndex4 = 0;
 	
 	std::string instanceName;
 		

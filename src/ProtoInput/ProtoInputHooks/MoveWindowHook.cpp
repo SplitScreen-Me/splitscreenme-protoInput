@@ -1,5 +1,6 @@
 #include "MoveWindowHook.h"
 #include <imgui.h>
+#include "HwndSelector.h"
 
 namespace Proto
 {
@@ -33,6 +34,15 @@ namespace Proto
 		ImGui::SliderInt2("Size", &size[0], 0, 5000);
 		width = size[0];
 		height = size[1];
+
+		ImGui::Checkbox("Dont Resize", &MoveWindowHook::MoveWindowDontResize);
+		ImGui::Checkbox("Dont Resposition", &MoveWindowHook::MoveWindowDontReposition);
+
+		if (ImGui::Button("Set Position"))//these need unique IDs or text
+		{
+			Hook_MoveWindow((HWND)HwndSelector::GetSelectedHwnd(), 0, 0, 0, 0, TRUE);
+		}
+
 	}
 
 	void MoveWindowHook::InstallImpl()

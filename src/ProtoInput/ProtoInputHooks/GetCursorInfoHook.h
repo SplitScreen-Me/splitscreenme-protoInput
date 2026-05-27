@@ -11,7 +11,7 @@ namespace Proto
 		HookInfo hookInfo{};
 
 	public:
-		const char* GetHookName() const override { return "Get Cursor Position with GetCursorInfo"; }
+		const char* GetHookName() const override { return "GetCursorInfo"; }
 		const char* GetHookDescription() const override { return "Hooks the GetCursorInfo function to return our 'fake' position"; }
 		bool HasGuiStatus() const override { return false; }
 		void ShowGuiStatus() override;

@@ -91,7 +91,7 @@ extern "C" __declspec(dllexport) void SetDrawFakeCursorFix(ProtoInstanceHandle i
 extern "C" __declspec(dllexport) void SetExternalFreezeFakeInput(ProtoInstanceHandle instanceHandle, bool enableFreeze);
 
 
-extern "C" __declspec(dllexport) void SetControllerIndex(ProtoInstanceHandle instanceHandle, unsigned int controllerIndex, unsigned int controllerIndex2 = 0, unsigned int controllerIndex3 = 0, unsigned int controllerIndex4 = 0);
+extern "C" __declspec(dllexport) void SetControllerIndex(ProtoInstanceHandle instanceHandle, unsigned int controllerIndex, unsigned int controllerIndex2, unsigned int controllerIndex3, unsigned int controllerIndex4);
 
 // This MUST be called before calling InstallHook on the Xinput hook
 extern "C" __declspec(dllexport) void SetUseDinputRedirection(ProtoInstanceHandle instanceHandle, bool useRedirection);

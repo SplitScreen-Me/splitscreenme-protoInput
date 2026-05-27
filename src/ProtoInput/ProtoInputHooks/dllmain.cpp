@@ -24,6 +24,7 @@ HMODULE Proto::hmodule;
 DWORD WINAPI StartThread(LPVOID lpParameter)
 {
     
+    // Useful to add a pause if we need to attach a debugger
     AllocConsole();
     FILE* f = new FILE();
     freopen_s(&f, "CONOUT$", "w", stdout);
@@ -40,26 +41,14 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     Proto::FakeCursor::Initialise(Proto::hmodule);
 
+    InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
+
     Proto::RawInput::InitialiseRawInput();
 
     Proto::AddThreadToACL(GetCurrentThreadId());
 
     Proto::StartPipeCommunication(); 
-
-    InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
-
-	// Useful to add a pause if we need to attach a debugger
-
-  //  Sleep(3000);
-  //  if (Proto::RawInput::Reregisterinput)
-  //  { 
-    //    Proto::RawInput::Registergameinput(); //reregistering devices to game
-       // Sleep(1);
-      //  Proto::HookManager::UninstallHook(ProtoHookIDs::RegisterRawInputHookID);
-      //  Sleep(1);
-      //  Proto::HookManager::InstallHook(ProtoHookIDs::RegisterRawInputHookID);
-   // }
-
+	
     return 0;
 }
  

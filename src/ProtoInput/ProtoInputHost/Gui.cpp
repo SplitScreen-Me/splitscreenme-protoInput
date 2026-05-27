@@ -267,7 +267,7 @@ bool Launch()
             AddNamedPipeToRename(instanceHandle, utf8_decode(renameNamedPipeHandle).c_str());
 
 
-        SetControllerIndex(instanceHandle, instance.controllerIndex);
+        SetControllerIndex(instanceHandle, instance.controllerIndex, instance.controllerIndex2, instance.controllerIndex3, instance.controllerIndex4);
 
         SetExternalFreezeFakeInput(instanceHandle, !isInputCurrentlyLocked && freezeGameInputWhileInputNotLocked);
 
@@ -732,12 +732,21 @@ void SelectedInstanceWindow()
     ImGui::PushID(128794);
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::TextWrapped("Controller index");
-    ImGui::SliderInt("", (int*)&instance.controllerIndex, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::TextWrapped("Controller index 1");
+    ImGui::SliderInt("##CI1", (int*)&instance.controllerIndex, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::Spacing();
     ImGui::Separator();
+    ImGui::TextWrapped("Controller index 2");
+    ImGui::SliderInt("##CI2", (int*)&instance.controllerIndex2, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::Separator();
+    ImGui::TextWrapped("Controller index 3");
+    ImGui::SliderInt("##CI3", (int*)&instance.controllerIndex3, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::Separator();
+    ImGui::TextWrapped("Controller index 4");
+    ImGui::SliderInt("##CI4", (int*)&instance.controllerIndex4, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::Spacing();
-    ImGui::TextWrapped("If Translate X to MKB is selected, mouse and keyboard will be emulated from selected ControllerIndex." 
+    ImGui::Separator();
+    ImGui::TextWrapped("If Translate X to MKB is selected, mouse and keyboard will be emulated from first ControllerIndex." 
         "Option will automatically deactivate if a keyboard or mouse is selected for the instance. "
         "Uses OpenXinput directly. "
         "");

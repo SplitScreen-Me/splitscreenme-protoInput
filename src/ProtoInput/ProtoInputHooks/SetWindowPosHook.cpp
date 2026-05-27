@@ -1,5 +1,6 @@
 #include "SetWindowPosHook.h"
 #include <imgui.h>
+#include "HwndSelector.h"
 
 namespace Proto
 {
@@ -25,7 +26,7 @@ BOOL WINAPI Hook_SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int
 void SetWindowPosHook::ShowGuiStatus()
 {
 	int pos[2] = { posx, posy };
-	ImGui::SliderInt2("Position", &pos[0], -5000, 5000);
+	ImGui::SliderInt2("Position", &pos[0], 0, 5000);
 	posx = pos[0];
 	posy = pos[1];
 	
@@ -33,6 +34,14 @@ void SetWindowPosHook::ShowGuiStatus()
 	ImGui::SliderInt2("Size", &size[0], 0, 5000);
 	width = size[0];
 	height = size[1];
+
+	ImGui::Checkbox("Dont Resize", &SetWindowPosHook::SetWindowPosDontResize);
+	ImGui::Checkbox("Dont Resposition", &SetWindowPosHook::SetWindowPosDontReposition);
+
+	if (ImGui::Button("Set Position"))//these need unique IDs or text
+	{
+		Hook_SetWindowPos((HWND)HwndSelector::GetSelectedHwnd(), HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW);
+	}
 }
 
 void SetWindowPosHook::InstallImpl()

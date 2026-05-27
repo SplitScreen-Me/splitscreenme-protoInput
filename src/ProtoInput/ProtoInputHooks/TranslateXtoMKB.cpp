@@ -372,11 +372,6 @@ namespace ScreenshotInput
         return { integerDeltaX, -integerDeltaY };
     }
 
-
-    std::wstring ToWString(const std::string& s)
-    {
-        return std::wstring(s.begin(), s.end());
-    }
     void TranslateXtoMKB::ThreadFunction()
     {
         if (ScanThread::scanoption && ScanThread::scanloop == false)
