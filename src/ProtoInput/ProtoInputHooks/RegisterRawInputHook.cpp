@@ -15,7 +15,6 @@ bool RegisterRawInputHook::logCallsToRegisterRawInput = false;
 RegisterRawInputHook* registerRawInputHookPtr = nullptr;
 bool RegisterRawInputHook::Reregisterinput;
 
-
 BOOL WINAPI Hook_RegisterRawInputDevices(PCRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
 {
 	if (RegisterRawInputHook::logCallsToRegisterRawInput)
@@ -150,7 +149,7 @@ void RegisterRawInputHook::ShowGuiStatus()
 {
 	ImGui::Checkbox("Forward raw input", &RawInput::forwardRawInput);
 	ImGui::Checkbox("Log calls to registering raw input", &logCallsToRegisterRawInput);
-		
+
 	ImGui::Checkbox("ReRegister Input", &RegisterRawInputHook::Reregisterinput);
 
 	ImGui::Checkbox("Raw input bypass", &RawInput::rawInputBypass);
@@ -161,6 +160,26 @@ void RegisterRawInputHook::ShowGuiStatus()
 		ImGui::TextUnformatted("Forwards Raw Input to the game without processing it. ");
 		ImGui::PopTextWrapPos();
 		ImGui::EndTooltip();
+	}
+	ImGui::Separator();
+	bool gotawindow = false;
+	for (const auto& hwnd : RawInput::forwardingWindows)
+	{
+		char windowTitleBuffer[60];
+		GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
+		ImGui::Text("Raw input to window: %X, %s", hwnd, windowTitleBuffer);
+		gotawindow = true;
+	}
+	if (gotawindow == false)
+		ImGui::Text("No rawinput forwarded. ");
+	char windowTitleBuffer[60];
+	GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
+	ImGui::Separator();
+	ImGui::Text("Main window is: %X, %s", HwndSelector::GetSelectedHwnd(), windowTitleBuffer);
+	ImGui::Separator();
+	if (ImGui::Button("Force Main Window to forward list"))
+	{
+		RawInput::AddWindowToForward((HWND)HwndSelector::GetSelectedHwnd());
 	}
 }
 

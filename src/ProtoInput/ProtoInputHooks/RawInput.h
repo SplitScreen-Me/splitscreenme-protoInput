@@ -37,7 +37,7 @@ class RawInput
 private:
 	static std::bitset<9> usages;
 	
-	static std::vector<HWND> forwardingWindows;
+	
 	static const std::vector<USAGE> usageTypesOfInterest;
 
 	static void ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle);
@@ -51,6 +51,7 @@ public:
 	static void SendKeyMessage(const RAWKEYBOARD& data, bool pressed);
 	static void ToggleLockInput();
 	static void InjectFakeRawInput(const RAWINPUT& fakeInput);
+	static std::vector<HWND> forwardingWindows;
 	static RawInputState rawInputState;
 	static HWND rawInputHwnd;
 	static bool forwardRawInput;

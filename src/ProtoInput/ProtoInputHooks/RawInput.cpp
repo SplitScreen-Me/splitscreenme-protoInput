@@ -413,7 +413,7 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 			// if ((allowMouse) || (allowKeyboard))
 			{
 
-					for (const auto& hwnd : forwardingWindows)
+					for (const auto& hwnd : RawInput::forwardingWindows)
 					{
 						static size_t inputBufferCounter = 0;
 	
@@ -610,10 +610,10 @@ void RawInput::AddSelectedKeyboardHandle(unsigned handle)
 
 void RawInput::AddWindowToForward(HWND hwnd)
 {
-	if (auto find = std::find(forwardingWindows.begin(), forwardingWindows.end(), hwnd) == forwardingWindows.end())
+	if (auto find = std::find(RawInput::forwardingWindows.begin(), RawInput::forwardingWindows.end(), hwnd) == RawInput::forwardingWindows.end())
 	{
 		printf("Adding hwnd 0x%X to forwarding list\n", hwnd);
-		forwardingWindows.push_back(hwnd);
+		RawInput::forwardingWindows.push_back(hwnd);
 	}
 }
 
@@ -634,7 +634,7 @@ void RawInput::InjectFakeRawInput(const RAWINPUT& fakeInput) {
 	RawInput::inputBuffer[bufferCounter] = fakeInput;
 
 	const LPARAM magicLParam = (bufferCounter) | 0xAB000000;
-	for (const auto& hwnd : forwardingWindows) 
+	for (const auto& hwnd : RawInput::forwardingWindows)
  	{
 		//bypassing rawinputhwnd, game windows direct
  		PostMessageW(hwnd, WM_INPUT, RIM_INPUT, magicLParam);
