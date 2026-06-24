@@ -22,6 +22,7 @@
 #include "AdjustWindowRectHook.h"
 #include "RemoveBorderHook.h"
 #include "GetCursorInfoHook.h"
+#include "SetWindowsHookHook.h"
 #include "RawInput.h"
 #include "TranslateXtoMKB.h"
 
@@ -56,6 +57,7 @@ HookManager::HookManager()
 	AddHook<AdjustWindowRectHook>(ProtoHookIDs::AdjustWindowRectHookID);//20
 	AddHook<RemoveBorderHook>(ProtoHookIDs::RemoveBorderHookID);//21
 	AddHook<GetCursorInfoHook>(ProtoHookIDs::GetCursorInfoHookID);//22
+	AddHook<SetWindowsHookHook>(ProtoHookIDs::SetWindowsHookHookID);//22
 }
 
 void HookManager::InstallHook(ProtoHookIDs hookID)

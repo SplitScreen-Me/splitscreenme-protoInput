@@ -56,7 +56,8 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 		{ "Block Raw Input", false, "Block Raw Input", ProtoHookIDs::BlockRawInputHookID },
 		{ "Dinput Order", false, "Dinput Order", ProtoHookIDs::DinputOrderHookID },
 		{ "Xinput", false, "Xinput", ProtoHookIDs::XinputHookID },
-		{ "GetCursorInfo", false, "GetCursorInfo", ProtoHookIDs::GetCursorInfoHookID }
+		{ "GetCursorInfo", false, "GetCursorInfo", ProtoHookIDs::GetCursorInfoHookID },
+		{ "SetWindowsHookHook", false, "SetWindowsHookHook", ProtoHookIDs::SetWindowsHookHookID }
 	};
 
 	std::vector<ProfileOption> messageFilters
@@ -142,6 +143,7 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 	bool focusLoopSendWM_ACTIVATEAPP = false;
 	bool focusLoopSendWM_SETFOCUS = true;
 	bool focusLoopSendWM_MOUSEACTIVATE = true;
+	int focuslooptimer = 5;
 
 	std::vector<std::string> renameHandles{};
 	std::vector<std::string> renameNamedPipeHandles{};

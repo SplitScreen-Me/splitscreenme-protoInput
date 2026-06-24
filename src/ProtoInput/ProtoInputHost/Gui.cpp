@@ -221,6 +221,8 @@ bool Launch()
         if (hookEnabled(DinputOrderHookID))             InstallHook(instanceHandle, DinputOrderHookID);
         if (hookEnabled(GetCursorInfoHookID))             InstallHook(instanceHandle, GetCursorInfoHookID);
     	
+        if (hookEnabled(SetWindowsHookHookID))             InstallHook(instanceHandle, SetWindowsHookHookID);
+
         if (filterEnabled(RawInputFilterID))            EnableMessageFilter(instanceHandle, RawInputFilterID);
         if (filterEnabled(MouseMoveFilterID))           EnableMessageFilter(instanceHandle, MouseMoveFilterID);
         if (filterEnabled(MouseActivateFilterID))       EnableMessageFilter(instanceHandle, MouseActivateFilterID);
@@ -245,7 +247,7 @@ bool Launch()
 
         if (currentProfile.focusMessageLoop)
             StartFocusMessageLoop(instanceHandle,
-                                  5,
+                                  currentProfile.focuslooptimer,
                                   currentProfile.focusLoopSendWM_ACTIVATE,
                                   currentProfile.focusLoopSendWM_ACTIVATEAPP,
                                   currentProfile.focusLoopSendWM_NCACTIVATE,
@@ -1547,7 +1549,8 @@ void OptionsMenu()
         if (currentProfile.focusMessageLoop)
         { 
             ImGui::TextWrapped("Some games only work with specific messages, some games break with specific messages. Make sure to test different combinations");
-
+            ImGui::TextWrapped("Remember that message spamming can cause message overflow. adjust timer if necessary.");
+            ImGui::SliderInt("##C81", (int*)&currentProfile.focuslooptimer, 0, 1000, "looptimer %d ms", ImGuiSliderFlags_AlwaysClamp);
             ImGui::Checkbox("Send WM_ACTIVATE", &currentProfile.focusLoopSendWM_ACTIVATE);
             ImGui::Checkbox("Send WM_NCACTIVATE", &currentProfile.focusLoopSendWM_NCACTIVATE);
             ImGui::Checkbox("Send WM_ACTIVATEAPP", &currentProfile.focusLoopSendWM_ACTIVATEAPP);

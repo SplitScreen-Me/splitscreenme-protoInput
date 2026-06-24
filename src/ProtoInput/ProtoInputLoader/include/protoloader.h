@@ -28,7 +28,8 @@ enum ProtoHookIDs : unsigned int
 	MoveWindowHookID,
 	AdjustWindowRectHookID,
 	RemoveBorderHookID,
-	GetCursorInfoHookID
+	GetCursorInfoHookID,
+	SetWindowsHookHookID
 };
 
 enum ProtoMessageFilterIDs : unsigned int

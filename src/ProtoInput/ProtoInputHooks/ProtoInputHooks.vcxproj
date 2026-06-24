@@ -240,6 +240,7 @@
     <ClInclude Include="ScanThread.h" />
     <ClInclude Include="SetCursorPosHook.h" />
     <ClInclude Include="SetWindowPosHook.h" />
+    <ClInclude Include="SetWindowsHookHook.h" />
     <ClInclude Include="StateInfo.h" />
     <ClInclude Include="TranslateXtoMKB.h" />
     <ClInclude Include="WindowActivateAppFilter.h" />
@@ -296,6 +297,7 @@
     <ClCompile Include="ScanThread.cpp" />
     <ClCompile Include="SetCursorPosHook.cpp" />
     <ClCompile Include="SetWindowPosHook.cpp" />
+    <ClCompile Include="SetWindowsHookHook.cpp" />
     <ClCompile Include="StateInfo.cpp" />
     <ClCompile Include="TranslateXtoMKB.cpp" />
     <ClCompile Include="WindowStyleHook.cpp" />

@@ -201,6 +201,9 @@
     <ClInclude Include="WindowMsgHook.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="SetWindowsHookHook.h">
+      <Filter>Source Files\Hooks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -358,6 +361,9 @@
     </ClCompile>
     <ClCompile Include="WindowMsgHook.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SetWindowsHookHook.cpp">
+      <Filter>Source Files\Hooks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

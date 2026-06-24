@@ -125,6 +125,7 @@ int main()
 			InstallHook(instanceHandle, FocusHooksHookID);
 			InstallHook(instanceHandle, RenameHandlesHookID);
 			InstallHook(instanceHandle, GetCursorInfoHookID);
+			InstallHook(instanceHandle, SetWindowsHookHookID);
 
 			EnableMessageFilter(instanceHandle, RawInputFilterID);
 			EnableMessageFilter(instanceHandle, MouseMoveFilterID);
