@@ -189,6 +189,7 @@ bool Launch()
 
         SetReregisterinput(instanceHandle, currentProfile.Reregisterinput);
         SetPointerInMouse(instanceHandle, currentProfile.PointerInMouse);
+        SetSendMessagesToSubWindows(instanceHandle, currentProfile.SendMessagesToSubWindows);
         if (hookEnabled(RegisterRawInputHookID))        InstallHook(instanceHandle, RegisterRawInputHookID);
         if (hookEnabled(GetRawInputDataHookID))         InstallHook(instanceHandle, GetRawInputDataHookID);
         if (hookEnabled(MessageFilterHookID))           InstallHook(instanceHandle, MessageFilterHookID);
@@ -1535,8 +1536,8 @@ void OptionsMenu()
         ImGui::Checkbox("Send mouse wheel messages", &currentProfile.sendMouseWheelMessages);
         ImGui::Checkbox("Send keyboard button messages", &currentProfile.sendKeyboardButtonMessages);
         ImGui::Checkbox("Send mouse double click messages", &currentProfile.sendMouseDblClkMessages);
-        ImGui::Separator();
         ImGui::Checkbox("Use Pointer Messages For Mouse", &currentProfile.PointerInMouse);
+        ImGui::Checkbox("Message Subwindows", &currentProfile.SendMessagesToSubWindows); 
 
     }
 

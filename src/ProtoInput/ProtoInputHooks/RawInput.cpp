@@ -19,6 +19,7 @@
 #include "TranslateXtoMKB.h"
 #include "XinputHook.h"
 #include "WindowMsgHook.h"
+#include "SetWindowsHookHook.h"
 
 namespace Proto
 {
@@ -26,8 +27,9 @@ namespace Proto
 RawInputState RawInput::rawInputState{};
 std::bitset<9> RawInput::usages{};
 std::vector<HWND> RawInput::forwardingWindows{};
-bool RawInput::forwardRawInput = true; //ReRegisterInput
-bool RawInput::PointerInMouse; //ReRegisterInput
+bool RawInput::forwardRawInput = true; 
+bool RawInput::MessageAllWindows = false;
+bool RawInput::PointerInMouse; 
 bool RawInput::lockInputToggleEnabled = false;
 bool RawInput::rawInputBypass = false;
 RAWINPUT RawInput::inputBuffer[RawInputBufferSize]{};
@@ -39,6 +41,7 @@ bool RawInput::alreadyAddToACL = false;
 
 size_t RawInput::bufferCounter = 0;
 
+HWND ChildselectedHwnd = nullptr;
 
 const std::vector<USAGE> RawInput::usageTypesOfInterest
 {
@@ -52,6 +55,63 @@ const std::vector<USAGE> RawInput::usageTypesOfInterest
 };
 
 HWND RawInput::rawInputHwnd = nullptr;
+
+
+void SearchAndSendInput(int X, int Y, int msg, WPARAM wparam, LPARAM lparam)
+{
+	ChildselectedHwnd = nullptr;
+	if (msg == WM_LBUTTONDOWN)
+	{ 
+		HwndSelector::allwindows.clear();
+		HwndSelector::GetAllProcessWindows();
+		Sleep(1);
+	}
+	HWND parent = (HWND)HwndSelector::GetSelectedHwnd();
+	if (!parent)
+		return;
+
+	POINT pt{ X, Y };
+
+	HWND bestHwnd = nullptr;
+	LONG bestArea = LONG_MAX;
+
+	size_t count = HwndSelector::allwindows.size();
+
+	for (size_t i = 0; i < count; ++i)
+	{
+		HWND child = HwndSelector::allwindows[i];
+		if (!IsWindow(child))
+			continue;
+
+		RECT rc{};
+		if (!GetWindowRect(child, &rc))
+			continue;
+
+
+		MapWindowPoints(HWND_DESKTOP, parent, (POINT*)&rc, 2);
+
+		if (PtInRect(&rc, pt))
+		{
+			LONG width = rc.right - rc.left;
+			LONG height = rc.bottom - rc.top;
+			LONG area = width * height;
+
+			if (area < bestArea)
+			{
+				bestArea = area;
+				bestHwnd = child;
+			}
+
+		}
+	}
+	POINT ptChild = pt;
+	MapWindowPoints(parent, bestHwnd, &ptChild, 1);
+
+	LPARAM lp = MAKELPARAM(ptChild.x, ptChild.y);
+	PostMessageW(bestHwnd, msg, wparam, lp);
+	ChildselectedHwnd = bestHwnd;
+}
+
 
 void RawInput::SendInputMessages(const RAWMOUSE& data)
 {
@@ -124,37 +184,94 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 	else if (rawInputState.sendMouseButtonMessages)
 	{
 		if ((data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN) != 0)
+		{
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_LBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
-		if ((data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_LBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
-
-		if ((data.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
-		if ((data.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
-
-		if ((data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_RBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
-		if ((data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_RBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
-
-		if ((data.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
-		if ((data.usButtonFlags & RI_MOUSE_BUTTON_4_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
-
-		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
-		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_LBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_LBUTTONDOWN, mouseMkFlags, mousePointLparam);
 		}
-
+		if ((data.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_LBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_LBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_LBUTTONUP, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_MBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_MBUTTONDOWN, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_MBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_MBUTTONUP, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_RBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_RBUTTONDOWN, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_RBUTTONDOWN, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_RBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_RBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_RBUTTONUP, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_XBUTTONDOWN, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_BUTTON_4_UP) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (RawInput::MessageAllWindows)
+				SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_XBUTTONUP, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_XBUTTONUP, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_XBUTTONDOWN, mouseMkFlags, mousePointLparam);
+		}
+		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_UP) != 0)
+		{
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+				SetWindowsHookHook::FireFakeGetMessage(WM_XBUTTONUP, mouseMkFlags, mousePointLparam);
+		}
+	}
 	// WM_MOUSEMOVE
 	if (rawInputState.sendMouseMoveMessages)
 	{
+		//if (RawInput::MessageAllWindows)
+		//	SearchAndSendInput(FakeMouseKeyboard::GetMouseState().x, FakeMouseKeyboard::GetMouseState().y, WM_MOUSEMOVE, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
 		PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MOUSEMOVE, mouseMkFlags, mousePointLparam);
+		if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+			SetWindowsHookHook::FireFakeGetMessage(WM_MOUSEMOVE, mouseMkFlags, mousePointLparam);
 	}
+	//MessageBoxA(NULL, "jo", "a", MB_OK);
 	FakeCursor::NotifyUpdatedCursorPosition();
+	
 
 }
 
@@ -250,6 +367,11 @@ void RawInput::SendKeyMessage(const RAWKEYBOARD& data, bool pressed)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYDOWN,
 				MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
 				lparam);
+
+			if (ChildselectedHwnd != nullptr)
+				PostMessageW(ChildselectedHwnd, WM_KEYDOWN,
+					MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
+					lparam);
 		}
 		else
 		{
@@ -262,6 +384,10 @@ void RawInput::SendKeyMessage(const RAWKEYBOARD& data, bool pressed)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYUP,
 				MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
 				lparam);
+			if (ChildselectedHwnd != nullptr)
+				PostMessageW(ChildselectedHwnd, WM_KEYDOWN,
+					MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
+					lparam);
 		}
 	}
 }
@@ -376,7 +502,7 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 	//std::byte type large, in array[inputbuffer]. then resize byte to size rawinput, 
 	// and copy it over in getrawinputdatahook. worked for controller, but not mouse and keyboard.
 	// used seperate signature on HID input so std::byte was only used on hid. example: 0xAB000000 for mouse+kb
-	//then 0xAC000000 for HID. worked well on a pure raw controller game, but crashed on games with registered mouse+KB also
+	//then 0xAC000000 for HID. worked well on a pure raw controller game, but crashed on games with registered mouse+KB also.
 	//could be because i did not seperate what window to send input message, as game was not meant to receive the messages,
 	//or the custom Dinput8 that i built that polled rawinput for controller.
 	//possible to try again, but then i think getting usages need to be array, so check each window seperatly what devices it is registered for

@@ -9,6 +9,7 @@ namespace Proto
 	{
 	private:
 		HookInfo hookInfoWndHookExA{};
+		HookInfo hookInfoWndHookExW{};
 		HookInfo hookInfoNextHookEx{};
 
 
@@ -18,11 +19,14 @@ namespace Proto
 		{
 			return
 				"Hooks SetWindowsHook function to prevent windows from hooking and bypassing protoinput. "
-				"Not many games calls this function, but if it does it can make mouse or keyboard not separate. ";
+				"Not many games calls this function, but if it does, then input cant be filtered. ";
 		}
 
 		static HOOKPROC gameshookcallLLKB;
 		static HOOKPROC gameshookcallLLMouse;
+
+		static HOOKPROC gameshookcallMessage;
+
 		static tagKBDLLHOOKSTRUCT Kbstate;
 
 		bool HasGuiStatus() const override { return true; }
@@ -30,9 +34,13 @@ namespace Proto
 
 		static void FireFakeLLMouseMove(int x, int y);
 		static void FireFakeLLKeyboardEvent(int vkey, bool pressed);
+		static void FireFakeGetMessage(int message, WPARAM wParam, LPARAM lParam);
 
 		static bool LLKBhooked;
 		static bool LLMousehooked;
+
+		static bool Messagehooked;
+
 		void InstallImpl() override;
 		void UninstallImpl() override;
 	};

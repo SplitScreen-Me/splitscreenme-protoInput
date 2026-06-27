@@ -323,7 +323,7 @@ void FakeCursor::DrawPointsandMessages() //only on Xtranslate
 }
 void FakeCursor::DrawCursor()
 {
-
+    
     POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
     if (XinputHook::TranslateMKBtoXinput)
@@ -553,7 +553,7 @@ void FakeCursor::StartInternal()
 
         // ShowWindow(pointerWindow, SW_SHOWDEFAULT);
         // UpdateWindow(pointerWindow);
-        EnableDisableFakeCursor(drawingEnabled);
+        //EnableDisableFakeCursor(drawingEnabled);
 
     	// Over every screen
         EnumDisplayMonitors(nullptr, nullptr, &EnumWindowsProc, 0);

@@ -38,6 +38,7 @@ enum class PipeMessageType
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
 	SetPointerInMouse,
+	SetSendMessagesToSubWindows,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
 	SetDefaultTopLeftMouseBounds,
@@ -235,6 +236,11 @@ struct PipeMessageSetRawInputBypass
 
 
 struct PipeMessageSetPointerInMouse
+{
+	bool enabled;
+};
+
+struct PipeMessageSetSendMessagesToSubWindows
 {
 	bool enabled;
 };

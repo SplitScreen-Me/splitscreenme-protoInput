@@ -58,6 +58,7 @@ public:
 	static bool PointerInMouse; //runtime gui toggle
 	static bool TranslateXinputtoMKB;
 	static bool TranslateXinputtoMKB2;
+	static bool MessageAllWindows;
 	//static bool TranslateMKBtoXinput; //in XinputHook
 
 	static size_t bufferCounter;

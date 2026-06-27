@@ -4,13 +4,19 @@
 #include "FakeMouseKeyboard.h"
 #include "SetWindowsHookHook.h"
 
-namespace Proto
+namespace Proto //oops need startup injection
 {
 	HOOKPROC SetWindowsHookHook::gameshookcallLLKB = nullptr;
 	HOOKPROC SetWindowsHookHook::gameshookcallLLMouse = nullptr;
+
+	HOOKPROC SetWindowsHookHook::gameshookcallMessage = nullptr;
+
 	bool SetWindowsHookHook::LLKBhooked = false;
 	bool SetWindowsHookHook::LLMousehooked = false;
 
+	bool SetWindowsHookHook::Messagehooked = false;
+
+	bool calledatall = false;
 	HHOOK WINAPI SetWindowsHookExAHook(
 		int       idHook,
 		HOOKPROC  lpfn,
@@ -18,15 +24,51 @@ namespace Proto
 		DWORD     dwThreadId
 	) 
 	{
+		calledatall = true;
 		if (idHook == WH_KEYBOARD_LL)
 		{ 
-			FakeMouseKeyboard::CallgameWindowLLKBHooks = true;
+			
+			SetWindowsHookHook::LLKBhooked = true;
+			SetWindowsHookHook::gameshookcallLLKB = lpfn;
+		}
+
+		else if (idHook == WH_MOUSE_LL)
+		{
+			SetWindowsHookHook::LLMousehooked = true;
+			SetWindowsHookHook::gameshookcallLLMouse = lpfn;
+		}
+
+		else if (idHook == WH_GETMESSAGE)
+		{
+			SetWindowsHookHook::Messagehooked = true;
+			SetWindowsHookHook::gameshookcallMessage = lpfn;
+		}
+
+		return (HHOOK)0x1;
+	}
+
+	HHOOK WINAPI SetWindowsHookExWHook(
+		int       idHook,
+		HOOKPROC  lpfn,
+		HINSTANCE hmod,
+		DWORD     dwThreadId
+	)
+	{
+		calledatall = true;
+		if (idHook == WH_KEYBOARD_LL)
+		{
+			SetWindowsHookHook::LLKBhooked = true;
 			SetWindowsHookHook::gameshookcallLLKB = lpfn;
 		}
 		else if (idHook == WH_MOUSE_LL)
 		{
-			FakeMouseKeyboard::CallgameWindowLLMouseHooks = true;
+			SetWindowsHookHook::LLMousehooked = true;
 			SetWindowsHookHook::gameshookcallLLMouse = lpfn;
+		}
+		else if (idHook == WH_GETMESSAGE)
+		{
+			SetWindowsHookHook::Messagehooked = true;
+			SetWindowsHookHook::gameshookcallMessage = lpfn;
 		}
 
 		return (HHOOK)0x1;
@@ -39,6 +81,16 @@ namespace Proto
 		LPARAM lParam
 	) {
 		return 0;
+	}
+
+	void SetWindowsHookHook::FireFakeGetMessage(int message, WPARAM wParam, LPARAM lParam)
+	{
+		//MessageBoxA(NULL, "a", "s", MB_OK);
+		MSG msg;
+		msg.lParam = lParam;
+		msg.message = message;
+		msg.wParam = wParam;
+		gameshookcallMessage(HC_ACTION, PM_REMOVE, (LPARAM)&msg); //or PM_NOREMOVE?
 	}
 
 	void SetWindowsHookHook::FireFakeLLMouseMove(int x, int y)
@@ -73,12 +125,27 @@ namespace Proto
 
 	void SetWindowsHookHook::ShowGuiStatus()
 	{
-		ImGui::Text("Input actions for Scanoption. 0 is move+click. 1 is only move. 2 is only click");
+		if (SetWindowsHookHook::Messagehooked || SetWindowsHookHook::LLKBhooked || SetWindowsHookHook::LLMousehooked)
+		{
+			ImGui::Text("SetWindowsHookEx has been called by the game.");
+			ImGui::Text("Callbacks listed below:");
+			if (SetWindowsHookHook::Messagehooked)
+				ImGui::Text("Message callback activated");
+			if (SetWindowsHookHook::LLKBhooked)
+				ImGui::Text("lowlevel Keyboard callback activated");
+			if (SetWindowsHookHook::LLMousehooked)
+				ImGui::Text("lowlevel mouse callback activated");
+		}
+		else
+		{
+			ImGui::Text("SetWindowsHookEx may not been called by the game.");
+		}
 	}
 
 	void SetWindowsHookHook::InstallImpl()
 	{
 		hookInfoWndHookExA = std::get<1>(InstallNamedHook(L"user32", "SetWindowsHookExA", SetWindowsHookExAHook));
+		hookInfoWndHookExW = std::get<1>(InstallNamedHook(L"user32", "SetWindowsHookExW", SetWindowsHookExWHook));
 		hookInfoNextHookEx = std::get<1>(InstallNamedHook(L"user32", "CallNextHookEx", CallNextHookExHook));
 	}
 	

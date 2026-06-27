@@ -834,6 +834,7 @@ void RawInputMenu()
     ImGui::Checkbox("Send mouse wheel messages", &RawInput::rawInputState.sendMouseWheelMessages);
     ImGui::Checkbox("Send keyboard button messages", &RawInput::rawInputState.sendKeyboardPressMessages);
     ImGui::Checkbox("Send mouse double click messages", &RawInput::rawInputState.sendMouseDblClkMessages);
+    ImGui::Checkbox("Send Messages to Subwindows", &RawInput::MessageAllWindows);
 
     ImGui::Separator();
 	

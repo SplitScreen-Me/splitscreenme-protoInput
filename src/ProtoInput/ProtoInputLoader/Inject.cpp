@@ -593,6 +593,22 @@ void SetPointerInMouse(ProtoInstanceHandle instanceHandle, bool enabled)
 	}
 }
 
+void SetSendMessagesToSubWindows(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetSendMessagesToSubWindows message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetSendMessagesToSubWindows, &message);
+	}
+}
+
 void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())

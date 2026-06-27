@@ -2,14 +2,15 @@
 #include "HwndSelector.h"
 #include <cstdio>
 #include "FakeCursor.h"
-
+#include <vector>
 
 namespace Proto
 {
 
+    std::vector<HWND> HwndSelector::allwindows;
+    //std::vector<RECT> HwndSelector::allwindowsrect;
     intptr_t HwndSelector::selectedHwnd = 0;
     int HwndSelector::windowWidth, HwndSelector::windowHeight;
-
     bool HwndSelector::RemoteHwndEnabled = false;
 
     struct HandleData
@@ -42,6 +43,34 @@ namespace Proto
         data.hwnd = handle;
 
         return FALSE;
+    }
+
+    //for available windows list in runtime gui
+    BOOL CALLBACK EnumChildWindowsCallback(HWND hwnd, LPARAM lParam)
+    {
+        HwndSelector::allwindows.push_back(hwnd);
+        return TRUE;
+    }
+    //for available windows list in runtime gui
+    BOOL CALLBACK EnumWindowsCallbacklistall(HWND hwnd, LPARAM lParam) //children too
+    {
+        HandleData& data = *(HandleData*)lParam;
+        DWORD windowPid = 0;
+        GetWindowThreadProcessId(hwnd, &windowPid);
+        if (data.pid == windowPid && IsMainWindow(hwnd))
+        {
+            HwndSelector::allwindows.push_back(hwnd);
+            EnumChildWindows(hwnd, EnumChildWindowsCallback, 0);
+        }
+        return TRUE;
+    }
+    //for available windows list in runtime gui
+    void HwndSelector::GetAllProcessWindows()
+    {
+        HwndSelector::allwindows.clear();
+        HandleData data{ GetCurrentProcessId(), nullptr };
+        EnumWindows(EnumWindowsCallbacklistall, (LPARAM)&data);
+        return;
     }
 
     void HwndSelector::UpdateMainHwnd(bool logOutput)
