@@ -13,7 +13,7 @@ private:
 public:
 	//TODO: pipe option?
 	static bool blockSettingCursorPos;
-		
+	static POINT mousesethere;
 	const char* GetHookName() const override { return "Set Cursor Position"; }
 	const char* GetHookDescription() const override
 	{

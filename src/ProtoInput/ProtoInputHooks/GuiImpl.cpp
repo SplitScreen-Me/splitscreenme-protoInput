@@ -12,6 +12,7 @@
 #include "FontData.h"
 #include "Cleanup.h"
 
+bool guithreadstarted = false;
 //TODO: default to hidden
 constexpr bool defaultGuiToHidden = true;
 constexpr bool defaultConsoleToHidden = true;
@@ -123,6 +124,12 @@ void Proto::ToggleWindow()
 
 void Proto::SetWindowVisible(bool visible)
 {
+    if (!guithreadstarted)
+    {
+        StartGUIThread();
+        guithreadstarted = true;
+        Sleep(100);
+    }
     RawInput::rawInputState.guiOpened = visible;
     ShowWindow(ProtoGuiHwnd, visible ? SW_SHOW : SW_HIDE);
 }

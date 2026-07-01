@@ -36,20 +36,36 @@ class RawInput
 {
 private:
 	static std::bitset<9> usages;
-	static std::vector<HWND> forwardingWindows;
-
+	
+	
 	static const std::vector<USAGE> usageTypesOfInterest;
 
 	static void ProcessMouseInput(const RAWMOUSE& data, HANDLE deviceHandle);
 	static void ProcessKeyboardInput(const RAWKEYBOARD& data, HANDLE deviceHandle);
 
+	static bool locked; //input lock state
+	static bool alreadyAddToACL;
+
 public:
+	static void SendInputMessages(const RAWMOUSE& data);
+	static void SendKeyMessage(const RAWKEYBOARD& data, bool pressed);
+	static void ToggleLockInput();
+	static void InjectFakeRawInput(const RAWINPUT& fakeInput);
+	static std::vector<HWND> forwardingWindows;
 	static RawInputState rawInputState;
 	static HWND rawInputHwnd;
 	static bool forwardRawInput;
+	static bool PointerInMouse; //runtime gui toggle
+	static bool TranslateXinputtoMKB;
+	static bool TranslateXinputtoMKB2;
+	//static bool TranslateMKBtoXinput; //in XinputHook
+
+	static size_t bufferCounter;
 
 	// Passes input from all devices to the game. Proto Input doesn't process anything
 	static bool rawInputBypass;
+
+	//Reregisters devices to game then reactivates registerinput hook. called from dllmain
 	
 	static std::vector<RAWINPUT> rawinputs;
 	static RAWINPUT inputBuffer[RawInputBufferSize];

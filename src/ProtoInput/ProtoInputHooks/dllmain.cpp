@@ -11,27 +11,20 @@
 #include "RawInput.h"
 #include "HookManager.h"
 #include "protoloader.h"
+#include "WindowMsgHook.h"
 #include "PipeCommunication.h"
 #include "HwndSelector.h"
 #include "FocusMessageLoop.h"
-#include "Gui.h"
 #include "FakeCursor.h"
+#include "TranslateXtoMKB.h"
+#include "ScanThread.h"
 
-HMODULE dll_hModule;
-
-DWORD WINAPI GuiThread(LPVOID lpParameter)
-{
-    std::cout << "Starting gui thread\n";
-
-	Proto::AddThreadToACL(GetCurrentThreadId());
-
-    Proto::ShowGuiImpl();
-
-    return 0;
-}
+HMODULE Proto::hmodule;
 
 DWORD WINAPI StartThread(LPVOID lpParameter)
 {
+    
+    // Useful to add a pause if we need to attach a debugger
     AllocConsole();
     FILE* f = new FILE();
     freopen_s(&f, "CONOUT$", "w", stdout);
@@ -42,34 +35,23 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     std::cout << "Hooks DLL loaded\n";
 
-	// Useful to add a pause if we need to attach a debugger
-    // MessageBoxW(NULL, L"Press OK to start", L"", MB_OK);
-    	
     Proto::HwndSelector::UpdateMainHwnd();
 
     Proto::FocusMessageLoop::SetupThread();
 
-    Proto::FakeCursor::Initialise();
-	
-    Proto::AddThreadToACL(GetCurrentThreadId());
-	
-    HANDLE hGuiThread = CreateThread(nullptr, 0,
-                                  (LPTHREAD_START_ROUTINE)GuiThread, dll_hModule, CREATE_SUSPENDED, &Proto::GuiThreadID);
-  
+    Proto::FakeCursor::Initialise(Proto::hmodule);
+
+    InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
+
     Proto::RawInput::InitialiseRawInput();
-    	
-    Proto::StartPipeCommunication();
 
-    ResumeThread(hGuiThread);
+    Proto::AddThreadToACL(GetCurrentThreadId());
 
-    if (hGuiThread != nullptr)
-        CloseHandle(hGuiThread);
-		
-    std::cout << "Reached end of startup thread\n";
-    	
+    Proto::StartPipeCommunication(); 
+	
     return 0;
 }
-
+ 
 // EasyHook entry point
 extern "C" __declspec(dllexport) void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO * inRemoteInfo)
 {
@@ -94,7 +76,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        dll_hModule = hModule;
+        Proto::hmodule = hModule;
     		
          HANDLE hThread = CreateThread(nullptr, 0,
                                       (LPTHREAD_START_ROUTINE)StartThread, hModule, 0, 0);

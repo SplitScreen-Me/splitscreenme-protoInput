@@ -46,6 +46,65 @@ bool Isx64(unsigned long pid)
 	
 	return !is32;
 }
+void AddSelectedInputHandleImpl(ProtoInstanceHandle instanceHandle, unsigned int handle, bool mouse)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageAddSelectedMouseOrKeyboard message //spelling okay?
+		{
+			mouse ? handle : -1,
+			mouse ? -1 : handle
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::AddSelectedMouseOrKeyboard, &message);
+	}
+}
+extern "C" __declspec(dllexport) void AddSelectedMouseHandle(ProtoInstanceHandle instanceHandle, unsigned int mouseHandle)
+{
+	AddSelectedInputHandleImpl(instanceHandle, mouseHandle, true);
+}
+
+extern "C" __declspec(dllexport) void AddSelectedKeyboardHandle(ProtoInstanceHandle instanceHandle, unsigned int keyboardHandle)
+{
+	AddSelectedInputHandleImpl(instanceHandle, keyboardHandle, false);
+}
+void SetTranslateXinputtoMKB(ProtoInstanceHandle instanceHandle, bool TranslateXinputtoMKB)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetTranslateXinputtoMKB message
+		{
+			TranslateXinputtoMKB
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetTranslateXinputtoMKB, &message);
+	}
+}
+void SetReregisterinput(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetReregisterinput message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetReregisterinput, &message);
+	}
+}
+
 
 extern "C" __declspec(dllexport) void StartFocusMessageLoop(ProtoInstanceHandle instanceHandle, int milliseconds,
 															bool wm_activate, bool wm_activateapp, bool wm_ncactivate, bool wm_setfocus, bool wm_mouseactivate)
@@ -138,33 +197,7 @@ extern "C" __declspec(dllexport) void SetExternalFreezeFakeInput(ProtoInstanceHa
 	}
 }
 
-void AddSelectedInputHandleImpl(ProtoInstanceHandle instanceHandle, unsigned int handle, bool mouse)
-{
-	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
-	{
-		auto& instance = find->second;
 
-		WaitClientConnect(instance);
-
-		ProtoPipe::PipeMesasgeAddSelectedMouseOrKeyboard message //spelling okay?
-		{
-			mouse ? handle : -1,
-			mouse ? -1 : handle
-		};
-
-		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::AddSelectedMouseOrKeyboard, &message);
-	}
-}
-
-extern "C" __declspec(dllexport) void AddSelectedMouseHandle(ProtoInstanceHandle instanceHandle, unsigned int mouseHandle)
-{
-	AddSelectedInputHandleImpl(instanceHandle, mouseHandle, true);
-}
-
-extern "C" __declspec(dllexport) void AddSelectedKeyboardHandle(ProtoInstanceHandle instanceHandle, unsigned int keyboardHandle)
-{
-	AddSelectedInputHandleImpl(instanceHandle, keyboardHandle, false);
-}
 
 extern "C" __declspec(dllexport) void SetControllerIndex(ProtoInstanceHandle instanceHandle, unsigned int controllerIndex, unsigned int controllerIndex2, unsigned int controllerIndex3, unsigned int controllerIndex4)
 {
@@ -221,6 +254,22 @@ void SetUseOpenXinput(ProtoInstanceHandle instanceHandle, bool useOpenXinput)
 	}
 }
 
+void SetTranslateMKBtoXinput(ProtoInstanceHandle instanceHandle, bool TranslateMKBtoXinput)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetTranslateMKBtoXinput message
+		{
+			TranslateMKBtoXinput
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::TranslateMKBtoXinput, &message);
+	}
+}
 extern "C" __declspec(dllexport) void SetupState(ProtoInstanceHandle instanceHandle, int instanceIndex)
 {
 	if (instanceIndex < 1)
@@ -527,6 +576,23 @@ void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled)
 	}
 }
 
+void SetPointerInMouse(ProtoInstanceHandle instanceHandle, bool enabled)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetPointerInMouse message
+		{
+			enabled
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetPointerInMouse, &message);
+	}
+}
+
 void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled)
 {
 	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
@@ -677,5 +743,90 @@ void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled)
 		};
 
 		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetDontWaitWindowBorder, &message);
+	}
+}
+void SetManualScaling(ProtoInstanceHandle instanceHandle, int oldX, int oldY, int newX, int newY)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetManualScaling message
+		{
+			oldX, 
+			oldY,
+			newX,
+			newY
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetManualScaling, &message);
+	}
+}
+void SetXinputtoMKBkeys(ProtoInstanceHandle instanceHandle, int XinputtoMKBAkey, int XinputtoMKBBkey, int XinputtoMKBXkey, int XinputtoMKBYkey, int XinputtoMKBRSkey, int XinputtoMKBLSkey, int XinputtoMKBrightkey, int XinputtoMKBleftkey, int XinputtoMKBupkey, int XinputtoMKBdownkey, int XinputtoMKBstickR, int XinputtoMKBstickL, int XinputtoMKBstickright, int XinputtoMKBstickleft, int XinputtoMKBstickup, int XinputtoMKBstickdown, int XinputtoMKBoption, int XinputtoMKBstart, int XinputtoMKBsens, int XinputtoMKBsensmult, int XinputtoMKBDeadzone)
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetXinputtoMKBkeys message
+		{
+			XinputtoMKBAkey,
+			XinputtoMKBBkey,
+			XinputtoMKBXkey,
+			XinputtoMKBYkey,
+			XinputtoMKBRSkey,
+			XinputtoMKBLSkey,
+			XinputtoMKBrightkey,
+			XinputtoMKBleftkey,
+			XinputtoMKBupkey,
+			XinputtoMKBdownkey,
+			XinputtoMKBstickR,
+			XinputtoMKBstickL,
+			XinputtoMKBstickright,
+			XinputtoMKBstickleft,
+			XinputtoMKBstickup,
+			XinputtoMKBstickdown,
+			XinputtoMKBoption,
+			XinputtoMKBstart,
+			XinputtoMKBsens,
+			XinputtoMKBsensmult,
+			XinputtoMKBDeadzone
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetXinputtoMKBkeys, &message);
+	}
+}
+void SetXinputtoMKBCFG(ProtoInstanceHandle instanceHandle, bool stickinvert, bool scanoption, bool shoulderswap, bool astatic, bool aclick, bool amove, bool bstatic, bool bclick, bool bmove, bool xstatic, bool xclick, bool xmove, bool ystatic, bool yclick, bool ymove )
+{
+	if (const auto find = Proto::instances.find(instanceHandle); find != Proto::instances.end())
+	{
+		auto& instance = find->second;
+
+		WaitClientConnect(instance);
+
+		ProtoPipe::PipeMessageSetXinputtoMKBCFG message
+		{
+			stickinvert,
+			scanoption,
+			shoulderswap,
+			astatic,
+			aclick,
+			amove,
+			bstatic,
+			bclick,
+			bmove,
+			xstatic,
+			xclick,
+			xmove,
+			ystatic,
+			yclick,
+			ymove
+		};
+
+		ProtoSendPipeMessage(instance.pipeHandle, ProtoPipe::PipeMessageType::SetXinputtoMKBCFG, &message);
 	}
 }

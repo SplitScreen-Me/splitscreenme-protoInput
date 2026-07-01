@@ -27,7 +27,9 @@ enum ProtoHookIDs : unsigned int
 	WindowStyleHookID,
 	MoveWindowHookID,
 	AdjustWindowRectHookID,
-	RemoveBorderHookID
+	RemoveBorderHookID,
+	GetCursorInfoHookID,
+	SetWindowsHookHookID
 };
 
 enum ProtoMessageFilterIDs : unsigned int
@@ -55,6 +57,11 @@ extern "C" __declspec(dllexport) ProtoInstanceHandle EasyHookInjectStartup(
 	unsigned long* outPid,
 	void* environment = nullptr);
 
+
+extern "C" __declspec(dllexport) void AddSelectedMouseHandle(ProtoInstanceHandle instanceHandle, unsigned int mouseHandle);
+extern "C" __declspec(dllexport) void AddSelectedKeyboardHandle(ProtoInstanceHandle instanceHandle, unsigned int keyboardHandle);
+extern "C" __declspec(dllexport) void SetTranslateXinputtoMKB(ProtoInstanceHandle instanceHandle, bool TranslateXinputtoMKB);
+extern "C" __declspec(dllexport) void SetReregisterinput(ProtoInstanceHandle instanceHandle, bool enabled);
 extern "C" __declspec(dllexport) void InstallHook(ProtoInstanceHandle instanceHandle, ProtoHookIDs hookID);
 extern "C" __declspec(dllexport) void UninstallHook(ProtoInstanceHandle instanceHandle, ProtoHookIDs hookID);
 
@@ -84,15 +91,15 @@ extern "C" __declspec(dllexport) void SetDrawFakeCursorFix(ProtoInstanceHandle i
 
 extern "C" __declspec(dllexport) void SetExternalFreezeFakeInput(ProtoInstanceHandle instanceHandle, bool enableFreeze);
 
-extern "C" __declspec(dllexport) void AddSelectedMouseHandle(ProtoInstanceHandle instanceHandle, unsigned int mouseHandle);
-extern "C" __declspec(dllexport) void AddSelectedKeyboardHandle(ProtoInstanceHandle instanceHandle, unsigned int keyboardHandle);
 
-extern "C" __declspec(dllexport) void SetControllerIndex(ProtoInstanceHandle instanceHandle, unsigned int controllerIndex, unsigned int controllerIndex2 = 0, unsigned int controllerIndex3 = 0, unsigned int controllerIndex4 = 0);
+extern "C" __declspec(dllexport) void SetControllerIndex(ProtoInstanceHandle instanceHandle, unsigned int controllerIndex, unsigned int controllerIndex2, unsigned int controllerIndex3, unsigned int controllerIndex4);
 
 // This MUST be called before calling InstallHook on the Xinput hook
 extern "C" __declspec(dllexport) void SetUseDinputRedirection(ProtoInstanceHandle instanceHandle, bool useRedirection);
 
 extern "C" __declspec(dllexport) void SetUseOpenXinput(ProtoInstanceHandle instanceHandle, bool useOpenXinput);
+
+extern "C" __declspec(dllexport) void SetTranslateMKBtoXinput(ProtoInstanceHandle instanceHandle, bool TranslateMKBtoXinput);
 
 // Both of these functions require RenameHandlesHookHookID hook
 extern "C" __declspec(dllexport) void AddHandleToRename(ProtoInstanceHandle instanceHandle, const wchar_t* name);
@@ -131,6 +138,8 @@ extern "C" __declspec(dllexport) void SetToggleFakeCursorVisibilityShortcut(Prot
 
 extern "C" __declspec(dllexport) void SetRawInputBypass(ProtoInstanceHandle instanceHandle, bool enabled);
 
+extern "C" __declspec(dllexport) void SetPointerInMouse(ProtoInstanceHandle instanceHandle, bool enabled);
+
 extern "C" __declspec(dllexport) void SetShowCursorWhenImageUpdated(ProtoInstanceHandle instanceHandle, bool enabled);
 
 extern "C" __declspec(dllexport) void SetPutMouseInsideWindow(ProtoInstanceHandle instanceHandle, bool enabled);
@@ -148,3 +157,9 @@ extern "C" __declspec(dllexport) void SetMoveWindowDontReposition(ProtoInstanceH
 extern "C" __declspec(dllexport) void SetAdjustWindowRectSettings(ProtoInstanceHandle instanceHandle, int posx, int posy, int width, int height);
 
 extern "C" __declspec(dllexport) void SetDontWaitWindowBorder(ProtoInstanceHandle instanceHandle, bool enabled);
+
+extern "C" __declspec(dllexport) void SetManualScaling(ProtoInstanceHandle instanceHandle, int oldX,  int oldY, int newX, int newY);
+
+extern "C" __declspec(dllexport) void SetXinputtoMKBkeys(ProtoInstanceHandle instanceHandle, int XinputtoMKBAkey, int XinputtoMKBBkey, int XinputtoMKBXkey, int XinputtoMKBYkey, int XinputtoMKBRSkey, int XinputtoMKBLSkey, int XinputtoMKBrightkey, int XinputtoMKBleftkey, int XinputtoMKBupkey, int XinputtoMKBdownkey, int XinputtoMKBstickR, int XinputtoMKBstickL, int XinputtoMKBstickright, int XinputtoMKBstickleft, int XinputtoMKBstickup, int XinputtoMKBstickdown, int XinputtoMKBoption, int XinputtoMKBstart, int XinputtoMKBsens, int XinputtoMKBsensmult, int XinputtoMKBDeadzone);
+
+extern "C" __declspec(dllexport) void SetXinputtoMKBCFG(ProtoInstanceHandle instanceHandle, bool stickinvert, bool scanoption, bool shoulderswap, bool astatic, bool aclick, bool amove, bool bstatic, bool bclick, bool bmove, bool xstatic, bool xclick, bool xmove, bool ystatic, bool yclick, bool ymove);

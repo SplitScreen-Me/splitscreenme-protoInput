@@ -7,6 +7,9 @@ namespace ProtoPipe
 
 enum class PipeMessageType
 {
+	AddSelectedMouseOrKeyboard,
+	SetTranslateXinputtoMKB,
+	SetReregisterinput,
 	SetupHook,
 	WakeUpProcess,
 	SetupMessageFilter,
@@ -18,12 +21,12 @@ enum class PipeMessageType
 	SetDrawFakeCursor,
 	SetDrawFakeCursorFix,
 	SetExternalFreezeFakeInput,
-	AddSelectedMouseOrKeyboard,
 	AddHandleToRename,
 	SetControllerIndex,
 	SetUseDinput,
 	StopFocusMessageLoop,
 	SetUseOpenXinput,
+	TranslateMKBtoXinput,
 	SetDinputDeviceGuid,
 	SetDinputHookGetDeviceState,
 	SetSetWindowPosSettings,
@@ -34,6 +37,7 @@ enum class PipeMessageType
 	SetAllowFakeCursorOutOfBounds,
 	SetToggleCursorVisibilityShortcut,
 	SetRawInputBypass,
+	SetPointerInMouse,
 	SetShowCursorWhenImageUpdated,
 	SetPutMouseInsideWindow,
 	SetDefaultTopLeftMouseBounds,
@@ -42,13 +46,31 @@ enum class PipeMessageType
 	SetMoveWindowDontResize,
 	SetMoveWindowDontReposition,
 	SetAdjustWindowRectSettings,
-	SetDontWaitWindowBorder
+	SetDontWaitWindowBorder,
+	SetManualScaling,
+	SetXinputtoMKBkeys,
+	SetXinputtoMKBCFG
 };
 
 struct PipeMessageHeader
 {
 	PipeMessageType messageType;
 	unsigned int messageSize;
+};
+struct PipeMessageAddSelectedMouseOrKeyboard
+{
+	unsigned int mouse = -1;
+	unsigned int keyboard = -1;
+};
+
+struct PipeMessageSetTranslateXinputtoMKB
+{
+	bool TranslateXinputtoMKB;
+};
+
+struct PipeMessageSetReregisterinput
+{
+	bool enabled;
 };
 
 struct PipeMessageSetupHook
@@ -73,6 +95,10 @@ struct PipeMessageWakeUpProcess
 {
 };
 
+//struct PipeMessageSetNoGUI
+//{
+//	bool SetNoGUI;
+//};
 struct PipeMesasgeUpdateMainWindowHandle
 {
 	uint64_t hwnd = 0;
@@ -115,11 +141,7 @@ struct PipeMessageSetExternalFreezeFakeInput
 	bool freezeEnabled;
 };
 
-struct PipeMesasgeAddSelectedMouseOrKeyboard
-{
-	unsigned int mouse = -1;
-	unsigned int keyboard = -1;
-};
+
 
 struct PipeMessageAddHandleToRename
 {
@@ -148,6 +170,11 @@ struct PipeMessageStopFocusMessageLoop
 struct PipeMessageSetUseOpenXinput
 {
 	bool useOpenXinput;
+};
+
+struct PipeMessageSetTranslateMKBtoXinput
+{
+	bool TranslateMKBtoXinput;
 };
 
 struct PipeMessageSetDinputDeviceGuid
@@ -205,6 +232,13 @@ struct PipeMessageSetRawInputBypass
 	bool bypassEnabled;
 };
 
+
+
+struct PipeMessageSetPointerInMouse
+{
+	bool enabled;
+};
+
 struct PipeMessageShowCursorWhenImageUpdated
 {
 	bool ShowCursorWhenImageUpdated;
@@ -256,4 +290,54 @@ struct PipeMessageSetDontWaitWindowBorder
 	bool DontWaitWindowBorder;
 };
 
+struct PipeMessageSetManualScaling
+{
+	int oldX;
+	int oldY;
+	int newX;
+	int newY;
+};
+
+struct PipeMessageSetXinputtoMKBkeys
+{
+	int XinputtoMKBAkey;
+	int XinputtoMKBBkey;
+	int XinputtoMKBXkey;
+	int XinputtoMKBYkey;
+	int XinputtoMKBRSkey;
+	int XinputtoMKBLSkey;
+	int XinputtoMKBrightkey;
+	int XinputtoMKBleftkey;
+	int XinputtoMKBupkey;
+	int XinputtoMKBdownkey;
+	int XinputtoMKBstickR;
+	int XinputtoMKBstickL;
+	int XinputtoMKBstickright;
+	int XinputtoMKBstickleft;
+	int XinputtoMKBstickup;
+	int XinputtoMKBstickdown;
+	int XinputtoMKBoption;
+	int XinputtoMKBstart;
+	int XinputtoMKBsens;
+	int XinputtoMKBsensmult;
+	int XinputtoMKBDeadzone;
+};
+struct PipeMessageSetXinputtoMKBCFG
+{
+	bool stickinvert;
+	bool scanoption;
+	bool shoulderswap;
+	bool astsatic;
+	bool aclick;
+	bool amove;
+	bool bstsatic;
+	bool bclick;
+	bool bmove;
+	bool xstsatic;
+	bool xclick;
+	bool xmove;
+	bool ystsatic;
+	bool yclick;
+	bool ymove;
+};
 }

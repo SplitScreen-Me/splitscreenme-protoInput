@@ -24,11 +24,16 @@
 #include "FakeMouseKeyboard.h"
 #include "CursorVisibilityHook.h"
 #include "MoveWindowHook.h"
+#include "RegisterRawInputHook.h"
 #include "AdjustWindowRectHook.h"
 #include "RemoveBorderHook.h"
+#include "TranslateXtoMKB.h"
+#include "ScanThread.h"
+#include "WindowMsgHook.h"
 
 namespace Proto
 {
+	bool gotkeyboardmouse = false;
 
 std::wstring GetPipeName()
 {
@@ -75,6 +80,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 		}
 	}
 	while (pipe == INVALID_HANDLE_VALUE);
+	
 	
 	if (pipe != INVALID_HANDLE_VALUE)
 	{
@@ -124,17 +130,65 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 			switch(msgHeader.messageType)
 			{
-			case ProtoPipe::PipeMessageType::SetupHook:
-				{
-					const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetupHook*>(messageBuffer);
-					printf("Setup hook message: hook ID %d, install = %d\n", body->hookID, body->install);
-					if (body->install)
-						HookManager::InstallHook(body->hookID);
-					else
-						HookManager::UninstallHook(body->hookID);
 
-					break;
+			case ProtoPipe::PipeMessageType::AddSelectedMouseOrKeyboard:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageAddSelectedMouseOrKeyboard*>(messageBuffer);
+
+				printf("Received message select mouse %d, keyboard %d\n", body->mouse, body->keyboard);
+
+				if (body->mouse != -1)
+				{
+					gotkeyboardmouse = true;
+					RawInput::AddSelectedMouseHandle(body->mouse);
 				}
+					
+
+				if (body->keyboard != -1)
+				{
+					gotkeyboardmouse = true;
+					RawInput::AddSelectedKeyboardHandle(body->keyboard);
+				}
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetTranslateXinputtoMKB:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetTranslateXinputtoMKB*>(messageBuffer);
+				RawInput::TranslateXinputtoMKB = body->TranslateXinputtoMKB;
+				if (RawInput::TranslateXinputtoMKB == true)
+				{ 
+					if (gotkeyboardmouse)
+					{ 
+						RawInput::TranslateXinputtoMKB = false;
+						printf("Discovered mouse or keyboard. disabling TranslateXtoMKB");
+					}
+					else printf("Enabling TranslateXtoMKB");
+				}
+				else printf("TranslateXtoMKB is set to false");
+				RawInput::TranslateXinputtoMKB2 = RawInput::TranslateXinputtoMKB;
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetReregisterinput: //RegisterRawInputHook-Option
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetReregisterinput*>(messageBuffer);
+
+				printf("Received ReregisterInput, ReregisterInput enabled = %d\n", body->enabled);
+
+				RegisterRawInputHook::Reregisterinput = body->enabled;
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetupHook:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetupHook*>(messageBuffer);
+				printf("Setup hook message: hook ID %d, install = %d\n", body->hookID, body->install);
+				if (body->install)
+					HookManager::InstallHook(body->hookID);
+				else
+					HookManager::UninstallHook(body->hookID);
+			break;
+			}
 			case ProtoPipe::PipeMessageType::SetupMessageFilter:
 				{
 					const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetupMessageFilter*>(messageBuffer);
@@ -213,6 +267,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 					printf("Received message to set main window handle to hwnd %lld (0x%llX)\n", body->hwnd, body->hwnd);
 					// HwndSelector::selectedHwnd = body->hwnd;
 					HwndSelector::SetSelectedHwnd((intptr_t)body->hwnd);
+					HwndSelector::RemoteHwndEnabled = true;
 				}
 					
 				break;
@@ -294,11 +349,9 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDrawFakeCursorFix*>(messageBuffer);
 
-				printf("Received message to %s fake cursor fix\n", body->enable ? "enable" : "disable");
-
-					// Not sure about this...
-					FakeCursor::state.DrawFakeCursorFix = body->enable;
-
+				printf("Received message to %s fake cursor with offset fix\n", body->enable ? "enable" : "disable");
+				FakeCursor::EnableDisableFakeCursor(body->enable);
+				FakeCursor::DrawFakeCursorFix = body->enable;
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetExternalFreezeFakeInput:
@@ -311,20 +364,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				
 				break;
 			}
-			case ProtoPipe::PipeMessageType::AddSelectedMouseOrKeyboard:
-			{
-				const auto body = reinterpret_cast<ProtoPipe::PipeMesasgeAddSelectedMouseOrKeyboard*>(messageBuffer);
 
-				printf("Received message select mouse %d, keyboard %d\n", body->mouse, body->keyboard);
-
-				if (body->mouse != -1)
-					RawInput::AddSelectedMouseHandle(body->mouse);
-
-				if (body->keyboard != -1)
-					RawInput::AddSelectedKeyboardHandle(body->keyboard);
-
-				break;
-			}
 			case ProtoPipe::PipeMessageType::AddHandleToRename:
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageAddHandleToRename*>(messageBuffer);
@@ -348,7 +388,15 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				XinputHook::controllerIndex2 = body->controllerIndex2;
 				XinputHook::controllerIndex3 = body->controllerIndex3;
 				XinputHook::controllerIndex4 = body->controllerIndex4;
-
+				if (RawInput::TranslateXinputtoMKB == true)
+				{
+					ScreenshotInput::TranslateXtoMKB::controllerID = XinputHook::controllerIndex - 1;
+					//Xinput hook can block controller making TranslateXtoMKB work on games with Xinput support
+					XinputHook::controllerIndex = 0; 
+					XinputHook::controllerIndex2 = 0;
+					XinputHook::controllerIndex3 = 0;
+					XinputHook::controllerIndex4 = 0;
+				}
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetUseDinput:
@@ -369,6 +417,15 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				XinputHook::useOpenXinput = body->useOpenXinput;
 
+				break;
+			}
+			case ProtoPipe::PipeMessageType::TranslateMKBtoXinput:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetTranslateMKBtoXinput*>(messageBuffer);
+
+				printf("Received set translate MKB to Xinput. also extended mousestate bounds. remember Xinputhook also%d\n", body->TranslateMKBtoXinput);
+
+				XinputHook::TranslateMKBtoXinput = body->TranslateMKBtoXinput;
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetDinputDeviceGuid:
@@ -405,7 +462,6 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				SetWindowPosHook::posy = body->posy;
 				SetWindowPosHook::width = body->width;
 				SetWindowPosHook::height = body->height;
-
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetSetWindowPosDontResize:
@@ -456,7 +512,6 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				FakeMouseKeyboard::SetIgnoreMouseBounds(body->allowOutOfBounds);
 				FakeMouseKeyboard::SetExtendMouseBounds(body->extendBounds);
-
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetToggleCursorVisibilityShortcut:
@@ -478,6 +533,15 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				RawInput::rawInputBypass = body->bypassEnabled;
 					
+				break;
+			}
+
+			case ProtoPipe::PipeMessageType::SetPointerInMouse:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetPointerInMouse*>(messageBuffer);
+				printf("Received PointerInMouse, PointerInMouse enabled = %d\n", body->enabled);
+				Proto::WindowMsgHook::PointerInMouse(body->enabled);
+				RawInput::PointerInMouse = body->enabled; //for runtime GUI
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated:
@@ -576,9 +640,92 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 
 				break;
 			}
+			case ProtoPipe::PipeMessageType::SetManualScaling:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetManualScaling*>(messageBuffer);
+
+				printf("Received SetManualScaling with settings.from res (%d, %d), to (%d,%d)\n", body->oldX, body->oldY, body->newX, body->newY);
+
+				WindowMsgHook::Settings(body->oldX, body->oldY, body->newX, body->newY);
+
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetXinputtoMKBkeys:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetXinputtoMKBkeys*>(messageBuffer);
+				printf("Received TranslateXtoMKB Mapping");
+				ScreenshotInput::TranslateXtoMKB::Amapping = body->XinputtoMKBAkey;
+				ScreenshotInput::TranslateXtoMKB::Bmapping = body->XinputtoMKBBkey;
+				ScreenshotInput::TranslateXtoMKB::Xmapping = body->XinputtoMKBXkey;
+				ScreenshotInput::TranslateXtoMKB::Ymapping = body->XinputtoMKBYkey;
+				ScreenshotInput::TranslateXtoMKB::RSmapping = body->XinputtoMKBRSkey;
+				ScreenshotInput::TranslateXtoMKB::LSmapping = body->XinputtoMKBLSkey;
+				ScreenshotInput::TranslateXtoMKB::RSmapping = body->XinputtoMKBRSkey;
+
+				ScreenshotInput::TranslateXtoMKB::rightmapping = body->XinputtoMKBrightkey;
+				ScreenshotInput::TranslateXtoMKB::leftmapping = body->XinputtoMKBleftkey;
+				ScreenshotInput::TranslateXtoMKB::upmapping = body->XinputtoMKBupkey;
+				ScreenshotInput::TranslateXtoMKB::downmapping = body->XinputtoMKBdownkey;
+
+				ScreenshotInput::TranslateXtoMKB::stickRpressmapping = body->XinputtoMKBstickR;
+				ScreenshotInput::TranslateXtoMKB::stickLpressmapping = body->XinputtoMKBstickL;
+				ScreenshotInput::TranslateXtoMKB::stickrightmapping = body->XinputtoMKBstickright;
+				ScreenshotInput::TranslateXtoMKB::stickleftmapping = body->XinputtoMKBstickleft;
+				ScreenshotInput::TranslateXtoMKB::stickupmapping = body->XinputtoMKBstickup;
+				ScreenshotInput::TranslateXtoMKB::stickdownmapping = body->XinputtoMKBstickdown;
+
+				ScreenshotInput::TranslateXtoMKB::optionmapping = body->XinputtoMKBoption;
+				ScreenshotInput::TranslateXtoMKB::startmapping = body->XinputtoMKBstart;
+				ScreenshotInput::TranslateXtoMKB::Sens = body->XinputtoMKBsens;
+				ScreenshotInput::TranslateXtoMKB::Sensmult = body->XinputtoMKBsensmult;
+				ScreenshotInput::TranslateXtoMKB::Deadzone = body->XinputtoMKBDeadzone;
+				break;
+			} //PipeMessageSetXinputtoMKBCFG
+			case ProtoPipe::PipeMessageType::SetXinputtoMKBCFG:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetXinputtoMKBCFG*>(messageBuffer);
+				ScreenshotInput::TranslateXtoMKB::lefthanded = body->stickinvert;
+				ScreenshotInput::ScanThread::scanoption = body->scanoption;
+				ScreenshotInput::ScanThread::ShoulderNextBMP = body->shoulderswap;
+				ScreenshotInput::ScanThread::Aisstatic = body->astsatic;
+				ScreenshotInput::ScanThread::Bisstatic = body->bstsatic;
+				ScreenshotInput::ScanThread::Xisstatic = body->xstsatic;
+				ScreenshotInput::ScanThread::Yisstatic = body->ystsatic;
+
+				if (body->amove && body->aclick)
+					ScreenshotInput::ScanThread::scanAtype = 0;
+				else if (body->amove)
+					ScreenshotInput::ScanThread::scanAtype = 1;
+				else if (body->aclick)
+					ScreenshotInput::ScanThread::scanAtype = 2;
+
+				if (body->bmove && body->bclick)
+					ScreenshotInput::ScanThread::scanBtype = 0;
+				else if (body->bmove)
+					ScreenshotInput::ScanThread::scanBtype = 1;
+				else if (body->bclick)
+					ScreenshotInput::ScanThread::scanBtype = 2;
+
+				if (body->xmove && body->xclick)
+					ScreenshotInput::ScanThread::scanXtype = 0;
+				else if (body->xmove)
+					ScreenshotInput::ScanThread::scanXtype = 1;
+				else if (body->xclick)
+					ScreenshotInput::ScanThread::scanXtype = 2;
+
+				if (body->ymove && body->yclick)
+					ScreenshotInput::ScanThread::scanYtype = 0;
+				else if (body->ymove)
+					ScreenshotInput::ScanThread::scanYtype = 1;
+				else if (body->yclick)
+					ScreenshotInput::ScanThread::scanYtype = 2;
+				
+				break;
+			}
 			default:
 				{
 					fprintf(stderr, "Unrecongnised message type, exiting pipe\n");
+					//MessageBoxA(NULL, "ukjent message", "quit pipe", MB_OK);
 					goto endPipe;
 				}
 			}
@@ -586,10 +733,9 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 	}
 	endPipe:
 
+	//MessageBoxA(NULL, "report this error: Pipe ended", "Pipe ended", MB_OK);
 	printf("End of pipe thread\n");
-	
 	CloseHandle(pipe);
-
 	return 0;
 }
 

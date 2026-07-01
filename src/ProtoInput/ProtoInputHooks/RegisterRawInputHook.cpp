@@ -5,13 +5,15 @@
 #include <bitset>
 #include "RawInput.h"
 #include <imgui.h>
-#include "HwndSelector.h"
+#include "HwndSelector.h" //GtoMnK_RawInputHooks
+#include "GtoMnK_RawInputHooks.h" //GtoMnK_RawInputHooks
 
 namespace Proto
 {
 
 bool RegisterRawInputHook::logCallsToRegisterRawInput = false;
 RegisterRawInputHook* registerRawInputHookPtr = nullptr;
+bool RegisterRawInputHook::Reregisterinput;
 
 BOOL WINAPI Hook_RegisterRawInputDevices(PCRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
 {
@@ -119,7 +121,12 @@ void RegisterRawInputHook::FindAlreadySubscribedWindows()
 		}
 
 		if (targetHWND == nullptr)
+		{ 
 			printf("Couldn't find a hwnd subscribed to raw input\n");
+			//assuming main window
+			if (RegisterRawInputHook::Reregisterinput)
+				AddWindowToForward((HWND)HwndSelector::GetSelectedHwnd(), usagesToForward);
+		}
 		else
 		{
 			printf("Found raw input hwnd: 0x%X\n", targetHWND);
@@ -142,7 +149,9 @@ void RegisterRawInputHook::ShowGuiStatus()
 {
 	ImGui::Checkbox("Forward raw input", &RawInput::forwardRawInput);
 	ImGui::Checkbox("Log calls to registering raw input", &logCallsToRegisterRawInput);
-		
+
+	ImGui::Checkbox("ReRegister Input", &RegisterRawInputHook::Reregisterinput);
+
 	ImGui::Checkbox("Raw input bypass", &RawInput::rawInputBypass);
 	if (ImGui::IsItemHovered())
 	{
@@ -152,24 +161,42 @@ void RegisterRawInputHook::ShowGuiStatus()
 		ImGui::PopTextWrapPos();
 		ImGui::EndTooltip();
 	}
+	ImGui::Separator();
+	bool gotawindow = false;
+	for (const auto& hwnd : RawInput::forwardingWindows)
+	{
+		char windowTitleBuffer[60];
+		GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
+		ImGui::Text("Raw input to window: %X, %s", hwnd, windowTitleBuffer);
+		gotawindow = true;
+	}
+	if (gotawindow == false)
+		ImGui::Text("No rawinput forwarded. ");
+	char windowTitleBuffer[60];
+	GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
+	ImGui::Separator();
+	ImGui::Text("Main window is: %X, %s", HwndSelector::GetSelectedHwnd(), windowTitleBuffer);
+	ImGui::Separator();
+	if (ImGui::Button("Force Main Window to forward list"))
+	{
+		RawInput::AddWindowToForward((HWND)HwndSelector::GetSelectedHwnd());
+	}
 }
 
 void RegisterRawInputHook::InstallImpl()
 {
-	if (!installedAtLeastOnce)
-	{
-		installedAtLeastOnce = true;
-		std::bitset<9> usages{};
-		// usages[HID_USAGE_GENERIC_MOUSE] = true;
-		// usages[HID_USAGE_GENERIC_KEYBOARD] = true;
-		RawInput::SetUsageBitField(usages);
-	}
+	std::bitset<9> usages{};
+		if (!installedAtLeastOnce)
+		{
+			installedAtLeastOnce = true;
+			RawInput::SetUsageBitField(usages);
+		}
+
 
 	auto [status, _hookInfo] = InstallNamedHook(L"user32", "RegisterRawInputDevices", Hook_RegisterRawInputDevices);
 	this->hookInfo = _hookInfo;
 		
 	FindAlreadySubscribedWindows();
-
 	RawInput::UnregisterGameFromRawInput();
 	RawInput::RegisterProtoForRawInput();
 }

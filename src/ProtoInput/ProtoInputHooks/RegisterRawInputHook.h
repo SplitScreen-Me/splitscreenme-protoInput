@@ -21,7 +21,9 @@ private:
 
 public:
 	static bool logCallsToRegisterRawInput;
-	
+
+	static bool Reregisterinput; 
+
 	const char* GetHookName() const override { return "Register Raw Input"; }
 	const char* GetHookDescription() const override
 	{
@@ -33,6 +35,7 @@ public:
 		"Note that you need this hook for the GUI shortcut to work, so you should almost always have this enabled. ";
 	}
 
+	
 	bool HasGuiStatus() const override { return true; }
 	void ShowGuiStatus() override;
 	void InstallImpl() override;

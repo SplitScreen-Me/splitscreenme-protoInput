@@ -16,6 +16,7 @@ public:
 	static void SetSelectedHwnd(intptr_t set);
 	static void UpdateMainHwnd(bool logOutput = true);
 	static void UpdateWindowBounds();
+	static bool RemoteHwndEnabled;
 };
 
 }
