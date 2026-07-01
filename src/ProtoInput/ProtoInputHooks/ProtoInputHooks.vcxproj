@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -87,6 +87,9 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(PlatformShortName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)$(PlatformArchitecture)</TargetName>
+    <CodeAnalysisRuleSet>CppCoreCheckConcurrencyRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -205,10 +208,12 @@
     <ClInclude Include="FontData.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GetAsyncKeyStateHook.h" />
+    <ClInclude Include="GetCursorInfoHook.h" />
     <ClInclude Include="GetCursorPosHook.h" />
     <ClInclude Include="GetKeyboardStateHook.h" />
     <ClInclude Include="GetKeyStateHook.h" />
     <ClInclude Include="GetRawInputDataHook.h" />
+    <ClInclude Include="GtoMnK_RawInput.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Hook.h" />
     <ClInclude Include="HookManager.h" />
@@ -232,12 +237,16 @@
     <ClInclude Include="RegisterRawInputHook.h" />
     <ClInclude Include="RemoveBorderHook.h" />
     <ClInclude Include="RenameHandlesHook.h" />
+    <ClInclude Include="ScanThread.h" />
     <ClInclude Include="SetCursorPosHook.h" />
     <ClInclude Include="SetWindowPosHook.h" />
+    <ClInclude Include="SetWindowsHookHook.h" />
     <ClInclude Include="StateInfo.h" />
+    <ClInclude Include="TranslateXtoMKB.h" />
     <ClInclude Include="WindowActivateAppFilter.h" />
     <ClInclude Include="WindowActivateFilter.h" />
     <ClInclude Include="WindowStyleHook.h" />
+    <ClInclude Include="WindowMsgHook.h" />
     <ClInclude Include="XinputHook.h" />
   </ItemGroup>
   <ItemGroup>
@@ -265,10 +274,12 @@
     <ClCompile Include="FocusHook.cpp" />
     <ClCompile Include="FocusMessageLoop.cpp" />
     <ClCompile Include="GetAsyncKeyStateHook.cpp" />
+    <ClCompile Include="GetCursorInfoHook.cpp" />
     <ClCompile Include="GetCursorPosHook.cpp" />
     <ClCompile Include="GetKeyboardStateHook.cpp" />
     <ClCompile Include="GetKeyStateHook.cpp" />
     <ClCompile Include="GetRawInputDataHook.cpp" />
+    <ClCompile Include="GtoMnK_RawInput.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="GuiImpl.cpp" />
     <ClCompile Include="HookInstaller.cpp" />
@@ -283,10 +294,14 @@
     <ClCompile Include="RegisterRawInputHook.cpp" />
     <ClCompile Include="RemoveBorderHook.cpp" />
     <ClCompile Include="RenameHandlesHook.cpp" />
+    <ClCompile Include="ScanThread.cpp" />
     <ClCompile Include="SetCursorPosHook.cpp" />
     <ClCompile Include="SetWindowPosHook.cpp" />
+    <ClCompile Include="SetWindowsHookHook.cpp" />
     <ClCompile Include="StateInfo.cpp" />
+    <ClCompile Include="TranslateXtoMKB.cpp" />
     <ClCompile Include="WindowStyleHook.cpp" />
+    <ClCompile Include="WindowMsgHook.cpp" />
     <ClCompile Include="XinputHook.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,14 +3,17 @@
 #include "HwndSelector.h"
 #include "FakeMouseKeyboard.h"
 #include "FakeCursor.h"
+#include "XinputHook.h"
+#include "WindowMsgHook.h"
 
 namespace Proto
 {
 
 bool SetCursorPosHook::blockSettingCursorPos = false;
-
+POINT SetCursorPosHook::mousesethere;
 BOOL WINAPI Hook_SetCursorPos(int X, int Y)
 {
+
 	if (!SetCursorPosHook::blockSettingCursorPos)
 	{
 		POINT p;
@@ -20,7 +23,13 @@ BOOL WINAPI Hook_SetCursorPos(int X, int Y)
 		//SetCursorPos require screen coordinates (relative to 0,0 of monitor)
 		ScreenToClient((HWND)HwndSelector::GetSelectedHwnd(), &p);
 
-		FakeMouseKeyboard::SetMousePos(p.x, p.y);
+		if (XinputHook::TranslateMKBtoXinput)
+		{
+			SetCursorPosHook::mousesethere.x = p.x;
+			SetCursorPosHook::mousesethere.y = p.y;
+		}
+		if (!XinputHook::TranslateMKBtoXinput)
+			FakeMouseKeyboard::SetMousePos(p.x, p.y);
 
 		FakeCursor::NotifyUpdatedCursorPosition();
 	}

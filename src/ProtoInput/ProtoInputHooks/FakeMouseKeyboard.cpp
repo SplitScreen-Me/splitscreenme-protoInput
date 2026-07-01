@@ -1,13 +1,14 @@
 #include <windows.h>
 #include "FakeMouseKeyboard.h"
 #include "HwndSelector.h"
-
+#include "SetWindowsHookHook.h"
 namespace Proto
 {
 
 FakeMouseState FakeMouseKeyboard::mouseState{};
 FakeKeyboardState FakeMouseKeyboard::keyboardState{};
-
+bool FakeMouseKeyboard::CallgameWindowLLKBHooks = false;
+bool FakeMouseKeyboard::CallgameWindowLLMouseHooks = false;
 bool FakeMouseKeyboard::PutMouseInsideWindow = false;
 bool FakeMouseKeyboard::DefaultTopLeftMouseBounds = false;
 bool FakeMouseKeyboard::DefaultBottomRightMouseBounds = false;
@@ -87,6 +88,11 @@ void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
 			if (mouseState.y > mouseState.clipClientBottom)
 				mouseState.y = mouseState.clipClientBottom;
 		}
+	}
+
+	if (FakeMouseKeyboard::CallgameWindowLLMouseHooks && SetWindowsHookHook::gameshookcallLLMouse != nullptr) //directly call HHOOK callback in game?
+	{
+		SetWindowsHookHook::FireFakeLLMouseMove(mouseState.x, mouseState.y);
 	}
 }
 
@@ -202,6 +208,11 @@ void FakeMouseKeyboard::ReceivedKeyPressOrRelease(int vkey, bool pressed)
 
 		if (pressed)
 			keyboardState.asyncKeysState[vkey] = true;
+	}
+
+	if (FakeMouseKeyboard::CallgameWindowLLKBHooks && SetWindowsHookHook::gameshookcallLLKB != nullptr) //directly call HHOOK callback in game?
+	{
+		SetWindowsHookHook::FireFakeLLKeyboardEvent(vkey, pressed);
 	}
 }
 

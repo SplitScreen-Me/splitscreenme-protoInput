@@ -1,6 +1,9 @@
 #include "GetCursorPosHook.h"
 #include "FakeMouseKeyboard.h"
 #include "HwndSelector.h"
+#include "WindowMsgHook.h"
+#include "XinputHook.h"
+#include "SetCursorPosHook.h"
 
 namespace Proto
 {
@@ -9,10 +12,17 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 {	
 	if (lpPoint)
 	{
-		const auto& state = FakeMouseKeyboard::GetMouseState();
-		lpPoint->x = state.x;
-		lpPoint->y = state.y;
-
+		if (!XinputHook::TranslateMKBtoXinput)
+		{
+			const auto& state = FakeMouseKeyboard::GetMouseState();
+			lpPoint->x = state.x;
+			lpPoint->y = state.y;
+		}
+		else
+		{
+			lpPoint->x = SetCursorPosHook::mousesethere.x;
+			lpPoint->y = SetCursorPosHook::mousesethere.y;
+		}
 		if (FakeMouseKeyboard::PutMouseInsideWindow)
 		{
 			int clientWidth = HwndSelector::windowWidth;
@@ -32,6 +42,12 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 					lpPoint->x = clientWidth - 1;  // Right edge
 			}
 		}
+		//any scaling?
+		POINT clientPos = { lpPoint->x, lpPoint->y };
+		clientPos = WindowMsgHook::getfactor(clientPos);
+
+		lpPoint->x = clientPos.x; 
+		lpPoint->y = clientPos.y;
 		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
 	}
 	

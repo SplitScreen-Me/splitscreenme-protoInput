@@ -5,6 +5,8 @@
 #include "Gui.h"
 #include <string>
 #include "OpenXinputWrapper.h"
+#include "FakeMouseKeyboard.h"
+#include "TranslateXtoMKB.h"
 
 
 namespace Proto
@@ -14,6 +16,8 @@ constexpr LONG DINPUT_RANGE_MAX = 32767;
 constexpr LONG DINPUT_RANGE_MIN = -32768;
 bool XinputHook::useDinput = false;
 bool XinputHook::useOpenXinput = false;
+bool XinputHook::TranslateMKBtoXinput = false;
+
 IDirectInputDevice8W* dinputDevice = nullptr;
 GUID dinputDeviceGuid{};
 std::wstring dinputDeviceName{};
@@ -72,36 +76,264 @@ inline std::pair<bool, unsigned int> GetTargetControllerIndex(DWORD dwUserIndex)
 	return { false, 0 };
 }
 
-inline DWORD WINAPI XInputGetState_Inline(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+bool IsKeyPressed(int Vkey)
 {
+	return FakeMouseKeyboard::IsKeyStatePressed(Vkey);
+}
+POINT deltaL;
+POINT deltaR;
+bool oldA, oldB, oldX, oldY, oldtriggerleft, oldtriggerright, oldLS, oldRS, oldup, olddown, oldleft, oldright;
+bool oldstart, oldback, oldstickRB, oldstickLB;
+bool firstcall = false;
+DWORD fakedwpacketnumber = 0;
+bool changed;
+SHORT LaxisX, LaxisY, RaxisX, RaxisY;
+SHORT deadzone = 14000;
+POINT axisvaluemouse(SHORT currentX, SHORT currentY)
+{
+	const auto& mousestate = FakeMouseKeyboard::GetMouseState();
+	POINT Pos = { mousestate.x - 100, mousestate.y - 100};
+
+	int dx = Pos.x * (2 * ScreenshotInput::TranslateXtoMKB::Sens);
+	int dy = -Pos.y * (2 * ScreenshotInput::TranslateXtoMKB::Sens);
+	if (dx != 0 || dy != 0)
+	{ 
+		if (currentX + dx > 32767) currentX = 32767;
+		else if (currentX  + dx < -32767) currentX = -32767;
+		else currentX += dx;
+
+		if (currentY + dy > 32767) currentY = 32767;
+		else if (currentY + dy< -32767) currentY = -32767;
+		else currentY += dy;
+		changed = true;
+		FakeMouseKeyboard::SetMousePos(100, 100);
+	}
+
+	POINT returnaxis;
+	returnaxis.x = currentX;
+	returnaxis.y = currentY;
+	return returnaxis;
+}
+SHORT axisvaluebutton(SHORT currentvalue, BOOL upkey, BOOL downkey)
+{
+	SHORT diditchange = currentvalue;
+	if (upkey && !downkey)
+	{ 
+		//jump to above deadzone
+		if (currentvalue < deadzone)
+			currentvalue = deadzone;
+
+		//increase or stall at max
+		if (currentvalue + (7 * ScreenshotInput::TranslateXtoMKB::Sens) < 32767)
+			currentvalue = currentvalue + (7 * ScreenshotInput::TranslateXtoMKB::Sens);
+		else currentvalue = 32767;
+	}
+	if (downkey && !upkey)
+	{ 
+		//jump to above dead
+		if (currentvalue > -deadzone)
+			currentvalue = -deadzone;
+
+		//increase or stall
+		if (currentvalue - (7 * ScreenshotInput::TranslateXtoMKB::Sens) > -32767)
+			currentvalue = currentvalue - (7 * ScreenshotInput::TranslateXtoMKB::Sens);
+		else currentvalue = -32767;
+	}
+	//drift to 0
+	if (!downkey && !upkey)
+	{ 
+		if (currentvalue > 0 + (7 * ScreenshotInput::TranslateXtoMKB::Sens))
+			currentvalue = currentvalue - (7 * ScreenshotInput::TranslateXtoMKB::Sens);
+		else currentvalue = 0;
+
+		if (currentvalue < 0 - (7 * ScreenshotInput::TranslateXtoMKB::Sens))
+			currentvalue = currentvalue + (7 * ScreenshotInput::TranslateXtoMKB::Sens);
+		else currentvalue = 0;
+	}
+	if (diditchange != currentvalue)
+		changed = true;
+	return currentvalue;
+}
+void FillXbuttons(XINPUT_STATE* pState)
+{
+	//triggers
+	if (IsKeyPressed(VK_RBUTTON)) {
+		pState->Gamepad.bLeftTrigger = 255;
+	}
+	else {
+		pState->Gamepad.bLeftTrigger = 0;
+	}
+
+	if (IsKeyPressed(VK_LBUTTON)) {
+		pState->Gamepad.bRightTrigger = 255;
+	}
+	else {
+		pState->Gamepad.bRightTrigger = 0;
+	}
+
+	//bool buttons
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Amapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_A;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Bmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_B;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Ymapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_Y;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Xmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_X;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::LSmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_LEFT_SHOULDER;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::RSmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_RIGHT_SHOULDER;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::upmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_DPAD_UP;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::downmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_DPAD_DOWN;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::leftmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_DPAD_LEFT;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::rightmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_DPAD_RIGHT;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::startmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_START;
+
+	if (IsKeyPressed(ScreenshotInput::TranslateXtoMKB::optionmapping))
+		pState->Gamepad.wButtons |= XINPUT_GAMEPAD_BACK;
+}
+inline DWORD WINAPI XInputfromkbm(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+{
+	deadzone = 1000 + (ScreenshotInput::TranslateXtoMKB::Deadzone * 3000);
 	if (extended)
 		getStateExCounter++;
 	else
 		getStateCounter++;
 
-	auto [ connected, targetControllerIndex ] = GetTargetControllerIndex(dwUserIndex);	
-	
-	if (!connected)
-		return ERROR_DEVICE_NOT_CONNECTED;
+	pState->Gamepad.wButtons = 0;
 
-	if (XinputHook::useOpenXinput)
+	if (!firstcall)
 	{
-		return OpenXinput::ProtoOpenXinputGetState(targetControllerIndex, pState, extended);
+		FakeMouseKeyboard::SetMousePos(100, 100);
+		pState->Gamepad.sThumbLY = 0;
+		pState->Gamepad.sThumbLX = 0;
+		pState->Gamepad.sThumbRY = 0;
+		pState->Gamepad.sThumbRX = 0;
+		firstcall = true;
 	}
 
-	if (!XinputHook::GetUseDinput())
+	RaxisX = axisvaluebutton(RaxisX, IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickleftmapping), IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickrightmapping));
+	RaxisY = axisvaluebutton(RaxisY, IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickupmapping), IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickdownmapping));
+
+	POINT mouseaxis = axisvaluemouse(LaxisX, LaxisY);
+	LaxisX = mouseaxis.x;
+	LaxisY = mouseaxis.y;
+
+
+
+	FillXbuttons(pState);
+
+
+	//normal buttons 
+
+
+
+	if (ScreenshotInput::TranslateXtoMKB::lefthanded)
 	{
-		if (extended && XInputGetStateExPtr != nullptr)
-		{
-			return XInputGetStateExPtr(targetControllerIndex, pState);
-		}
-		return XInputGetStatePtr(targetControllerIndex, pState);
+		pState->Gamepad.sThumbLY = LaxisY;
+		pState->Gamepad.sThumbLX = LaxisX;
+		pState->Gamepad.sThumbRY = RaxisY;
+		pState->Gamepad.sThumbRX = RaxisX;
 	}
+	else {
+		pState->Gamepad.sThumbLY = RaxisY;
+		pState->Gamepad.sThumbLX = RaxisX;
+		pState->Gamepad.sThumbRY = LaxisY;
+		pState->Gamepad.sThumbRX = LaxisX;
+	}
+
+	//increase dwpacketnumber if statechange
+	if (changed == false)
+	{
+		changed =
+			oldA != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Amapping) ||
+			oldB != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Bmapping) ||
+			oldX != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Xmapping) ||
+			oldY != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Ymapping) ||
+			oldtriggerleft != IsKeyPressed(0x4F) ||
+			oldtriggerright != IsKeyPressed(0x50) ||
+			oldLS != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::LSmapping) ||
+			oldRS != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::RSmapping) ||
+			oldup != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::upmapping) ||
+			olddown != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::downmapping) ||
+			oldleft != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::leftmapping) ||
+
+			oldstart != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::startmapping) ||
+			oldback != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::optionmapping) ||
+			oldstickRB != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickRpressmapping) ||
+			oldstickLB != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickLpressmapping) ||
+
+			oldright != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::rightmapping);
+	}
+	if (changed)
+	{
+		pState->dwPacketNumber++;
+		changed = false;
+	}
+
+	oldA = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Amapping);
+	oldB = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Bmapping);
+	oldX = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Xmapping);
+	oldY = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::Ymapping);
+
+	oldLS = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::LSmapping);
+	oldRS = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::RSmapping);
+	oldup = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::upmapping);
+	olddown = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::downmapping);
+	oldleft = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::leftmapping);
+	oldright = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::rightmapping);
+
+	oldstart = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::startmapping);
+	oldback = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::optionmapping);
+	oldstickRB = IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickRpressmapping);
+	oldstickLB != IsKeyPressed(ScreenshotInput::TranslateXtoMKB::stickLpressmapping);
+
+	oldtriggerleft = IsKeyPressed(VK_RBUTTON);
+	oldtriggerright = IsKeyPressed(VK_LBUTTON);
+
+
+	return ERROR_SUCCESS;
+
+}
+inline DWORD WINAPI GetCapabilitiesfromkbm(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES* pCapabilities)
+{
+	XINPUT_STATE state{};
+	XInputfromkbm(dwUserIndex, &state, false);
+
+	pCapabilities->Gamepad = state.Gamepad;
+	//pCapabilities->Flags = 0;
+	pCapabilities->SubType = XINPUT_DEVSUBTYPE_GAMEPAD;
+	pCapabilities->Type = XINPUT_DEVTYPE_GAMEPAD;
+	pCapabilities->Vibration.wLeftMotorSpeed = 0;
+	pCapabilities->Vibration.wRightMotorSpeed = 0;
+	return ERROR_SUCCESS;
+}
+
+inline DWORD WINAPI XInputGetStateDinput_Inline(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+{
+
 	if (dinputDevice == nullptr)
 		return ERROR_DEVICE_NOT_CONNECTED;
 
+	//WORK TODO TO DO is this an error? it is supposed to increase on statechange. doesnt look correct now?
 	static DWORD packetNumber = 0;
-	pState->dwPacketNumber = packetNumber++;
+	pState->dwPacketNumber = packetNumber++; //
 	memset(&(pState->Gamepad), 0, extended ? sizeof(XINPUT_GAMEPAD_EX) : sizeof(XINPUT_GAMEPAD));
 	dinputDevice->Poll();
 	DIJOYSTATE2 diState;
@@ -152,17 +384,64 @@ inline DWORD WINAPI XInputGetState_Inline(DWORD dwUserIndex, XINPUT_STATE* pStat
 #undef TRIGGERDEADZONE
 	return ERROR_SUCCESS;
 }
+
+inline DWORD WINAPI XInputGetState_Inline(DWORD dwUserIndex, XINPUT_STATE* pState, bool extended)
+{
+	if (extended)
+		getStateExCounter++;
+	else
+		getStateCounter++;
+
+	auto [ connected, targetControllerIndex ] = GetTargetControllerIndex(dwUserIndex);	
+	
+	if (!connected)
+		return ERROR_DEVICE_NOT_CONNECTED;
+
+	if (XinputHook::useOpenXinput)
+	{
+		return OpenXinput::ProtoOpenXinputGetState(targetControllerIndex, pState, extended);
+	}
+
+	if (!XinputHook::GetUseDinput())
+	{
+		if (extended && XInputGetStateExPtr != nullptr)
+		{
+			return XInputGetStateExPtr(targetControllerIndex, pState);
+		}
+		return XInputGetStatePtr(targetControllerIndex, pState);
+	}
+	return XInputGetStateDinput_Inline(targetControllerIndex, pState, extended);
+}
+
+
+
 DWORD WINAPI Hook_XInputGetState(DWORD dwUserIndex, XINPUT_STATE* pState)
 {
-	return XInputGetState_Inline(dwUserIndex, pState, false);
+	if (!XinputHook::TranslateMKBtoXinput)
+		return XInputGetState_Inline(dwUserIndex, pState, false);
+	else if ((dwUserIndex == 0 && XinputHook::controllerIndex == 0) || (dwUserIndex == 1 && XinputHook::controllerIndex2 == 0) || (dwUserIndex == 2 && XinputHook::controllerIndex3 == 0) || (dwUserIndex == 3 && XinputHook::controllerIndex4 == 0)) {
+		return XInputfromkbm(dwUserIndex, pState, false);
+	}
+	else return XInputGetState_Inline(dwUserIndex, pState, false);
 }
-DWORD WINAPI Hook_XInputGetStateEx(DWORD dwUserIndex, XINPUT_STATE* pState)
+DWORD WINAPI Hook_XInputGetStateEx(DWORD dwUserIndex, XINPUT_STATE* pState) //XInputfromkbm
 {
-	return XInputGetState_Inline(dwUserIndex, pState, true);
+	if (!XinputHook::TranslateMKBtoXinput)
+		return XInputGetState_Inline(dwUserIndex, pState, true);
+	else if ((dwUserIndex == 0 && XinputHook::controllerIndex == 0) || (dwUserIndex == 1 && XinputHook::controllerIndex2 == 0) || (dwUserIndex == 2 && XinputHook::controllerIndex3 == 0) || (dwUserIndex == 3 && XinputHook::controllerIndex4 == 0)){
+		return XInputfromkbm(dwUserIndex, pState, true);
+	}
+	else return XInputGetState_Inline(dwUserIndex, pState, true);
 }
 
 DWORD WINAPI Hook_XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
 {
+	if (XinputHook::TranslateMKBtoXinput)
+	{
+		if ((dwUserIndex == 0 && XinputHook::controllerIndex == 0) || (dwUserIndex == 1 && XinputHook::controllerIndex2 == 0) || (dwUserIndex == 2 && XinputHook::controllerIndex3 == 0) || (dwUserIndex == 3 && XinputHook::controllerIndex4 == 0))
+			return ERROR_SUCCESS;
+	}
+
 	auto [connected, targetControllerIndex] = GetTargetControllerIndex(dwUserIndex);
 	
 	if (!connected)
@@ -181,6 +460,11 @@ DWORD WINAPI Hook_XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration
 
 DWORD WINAPI Hook_XInputGetCapabilities(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES* pCapabilities)
 {
+	if (XinputHook::TranslateMKBtoXinput)
+	{
+		if ((dwUserIndex == 0 && XinputHook::controllerIndex == 0) || (dwUserIndex == 1 && XinputHook::controllerIndex2 == 0) || (dwUserIndex == 2 && XinputHook::controllerIndex3 == 0) || (dwUserIndex == 3 && XinputHook::controllerIndex4 == 0)) 
+			return GetCapabilitiesfromkbm(dwUserIndex, dwFlags, pCapabilities);
+	}
 	auto [connected, targetControllerIndex] = GetTargetControllerIndex(dwUserIndex);
 
 	if (!connected)
@@ -331,7 +615,13 @@ void XinputHook::ShowGuiStatus()
 	ImGui::SliderInt("Controller index 2", (int*)&controllerIndex2, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::SliderInt("Controller index 3", (int*)&controllerIndex3, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
 	ImGui::SliderInt("Controller index 4", (int*)&controllerIndex4, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
-	
+	{
+		ImGui::PushID(123896);
+		ImGui::Checkbox("", &TranslateMKBtoXinput);
+		ImGui::SameLine();
+		ImGui::TextWrapped("Enable KBM to Xinput. emulate Xinput gamepad on controllerindex 0");
+		ImGui::PopID();
+	}
 	if (dinputDevice != nullptr)
 	{
 		ImGui::TextWrapped("Selected Dinput device \"%ws\" (GUID %lu-%u-%u)",
@@ -397,6 +687,7 @@ void XinputHook::InstallImpl()
 		
 		XInputGetStateExPtr = t_XInputGetStateEx(GetProcAddress(GetModuleHandleW(L"xinput1_3.dll"), (LPCSTR)(100)));
 		XInputGetStatePtr = t_XInputGetState(GetProcAddress(GetModuleHandleW(L"xinput1_3.dll"), "XInputGetState"));
+		//MessageBoxA(NULL, "hOOKED xINPUT", "Error", MB_OK);
 		XInputSetStatePtr = t_XInputSetState(GetProcAddress(GetModuleHandleW(L"xinput1_3.dll"), "XInputSetState"));
 		XInputGetCapabilitiesPtr = t_XInputGetCapabilities(GetProcAddress(GetModuleHandleW(L"xinput1_3.dll"), "XInputGetCapabilities"));
 

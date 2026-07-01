@@ -18,7 +18,7 @@ public:
 		"This hook forwards the raw input received by Proto Input to the game. "
 		"This is required for any game that uses raw input, or Proto Input will consume all the input.";
 	}
-	
+	static int lastVKcode; //keymapping GUI
 	bool HasGuiStatus() const override { return false; }
 	// void ShowGuiStatus() override;
 	void InstallImpl() override;

@@ -38,7 +38,7 @@
     <ProjectGuid>{D087E484-DBC9-4A2E-8368-C1D0E524994D}</ProjectGuid>
     <RootNamespace>EasyHookDll</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx3.5-Release|Win32'" Label="Configuration">
