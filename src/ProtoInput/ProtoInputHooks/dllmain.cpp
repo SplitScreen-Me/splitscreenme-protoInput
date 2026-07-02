@@ -24,7 +24,7 @@ HMODULE Proto::hmodule;
 DWORD WINAPI StartThread(LPVOID lpParameter)
 {
     
-    // Useful to add a pause if we need to attach a debugger
+    // Useful to add a pause if we need to attach a debugger //pause with MessageBoxA(NULL, "pause here", "oh, okay then, i will just wait here until messagebox close", MB_OK);
     AllocConsole();
     FILE* f = new FILE();
     freopen_s(&f, "CONOUT$", "w", stdout);
@@ -35,19 +35,19 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     std::cout << "Hooks DLL loaded\n";
 
-    Proto::HwndSelector::UpdateMainHwnd();
+    Proto::HwndSelector::UpdateMainHwnd(); //get main window of game
 
-    Proto::FocusMessageLoop::SetupThread();
+    Proto::FocusMessageLoop::SetupThread(); //setfocus message spamming loop
 
-    Proto::FakeCursor::Initialise(Proto::hmodule);
+    Proto::FakeCursor::Initialise(Proto::hmodule); //create cursor drawing window. could be possible to create it later on first drawcursor enable
 
     InitializeCriticalSection(&ScreenshotInput::ScanThread::critical);//must be placed before InitialiseRawInput
 
-    Proto::RawInput::InitialiseRawInput();
+    Proto::RawInput::InitialiseRawInput(); //create raw input listening window
 
-    Proto::AddThreadToACL(GetCurrentThreadId());
+    Proto::AddThreadToACL(GetCurrentThreadId()); //dont hook this thread
 
-    Proto::StartPipeCommunication(); 
+    Proto::StartPipeCommunication();  //hooks starting in here
 	
     return 0;
 }

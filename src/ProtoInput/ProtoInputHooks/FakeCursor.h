@@ -25,8 +25,6 @@ namespace Proto
 		// DrawFakeCursorFix. cursor offset scan and cursor size fix
 		int cursoroffsetx, cursoroffsety;
 		int offsetSET = 0; //0:sizing 1:scanning 2:done, only drawing until cursor change, or nochange
-		int cursorWidth = 40; //was constant
-		int cursorHeight = 40;//was constant
 		bool nochange = false; //if normal offset was found at first then assume all cursors got same offset
 		HCURSOR oldhCursor = NULL;
 		POINT OldTestpos = { 0,0 };
@@ -57,10 +55,14 @@ namespace Proto
 public:
 	static FakeCursor state;
 	static bool DrawFakeCursorFix;
+	static void setmonitorscale(int scale);
+
 	void StartInternal();
+
 	void StartDrawLoopInternal();
 
 	static int Showmessage;
+
 	static bool& GetToggleVisilbityShorcutEnabled()
 	{
 		return state.toggleVisilbityShorcutEnabled;

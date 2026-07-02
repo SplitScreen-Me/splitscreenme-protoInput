@@ -459,6 +459,7 @@ void RawInput::ProcessRawInput(HRAWINPUT rawInputHandle, bool inForeground, cons
 		static bool keyDown = false;
 		if (rawinput.data.keyboard.Flags == RI_KEY_MAKE && !keyDown)
 		{
+			
 			keyDown = true;
 	
 			// Key just pressed
@@ -609,15 +610,19 @@ DWORD WINAPI RawInputWindowThread(LPVOID lpParameter)
 		// DestroyWindow(hwnd);
 		// UnregisterClassW(className, wc.hInstance);
 	}
+	else { MessageBoxA(NULL, "rawinputwindow failed registerclass", "grave error. shutdown recommended", MB_OK);  } //great error
+
 
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
 	while (msg.message != WM_QUIT)
 	{
+		
 		//if (PeekMessage(&msg, RawInput::rawInputHwnd, 0U, 0U, PM_REMOVE))
 		//if (GetMessage(&msg, RawInput::rawInputHwnd, 0U, 0U))
 		if (GetMessage(&msg, RawInput::rawInputHwnd, WM_INPUT, WM_INPUT))
 		{
+			
 			// if (msg.message == WM_INPUT)
 			{
 				RawInput::ProcessRawInput((HRAWINPUT)msg.lParam, GET_RAWINPUT_CODE_WPARAM(msg.wParam) == RIM_INPUT, msg);
@@ -823,6 +828,7 @@ void RawInput::RegisterProtoForRawInput()
 	if (rawInputHwnd == nullptr)
 	{
 		fprintf(stderr, "Raw input window hasn't opened. Giving up registering raw input\n");
+		MessageBoxA(NULL, "Raw input window hasn't opened. Giving up registering raw input. report this error if encountered", "Protoinput Fatal Error!", MB_OK);
 		return;
 	}
 
@@ -836,14 +842,18 @@ void RawInput::RegisterProtoForRawInput()
 		dev.usUsagePage = HID_USAGE_PAGE_GENERIC;
 		dev.usUsage = usage;
 		dev.dwFlags = RIDEV_INPUTSINK;
-		dev.hwndTarget = rawInputHwnd;		
-		
+		dev.hwndTarget = rawInputHwnd;
+
 		devices.push_back(dev);
 	}
-
+	//check for windows compability fixes//breaking rawinput registration
 	if (RegisterRawInputDevices(&devices[0], devices.size(), sizeof(RAWINPUTDEVICE)) == FALSE)
 	{
-		fprintf(stderr, "Failed to register raw input, last error = 0x%X\n", GetLastError());
+		if (GetModuleHandleA("AcGenral.dll"))
+		{
+			MessageBoxA(NULL, "protoinput failed to register rawinput. Windows compability dll detected and is propably the cause. try to rename game exe to avoid it", "Protoinput Fatal Error!", MB_OK);
+		}
+		else MessageBoxA(NULL, "protoinput failed registering rawinput. unknown cause. report this error if encountered", "Protoinput Fatal Error!", MB_OK);
 	}
 	else
 		printf("Successfully register raw input\n");

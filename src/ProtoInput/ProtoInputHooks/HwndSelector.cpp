@@ -2,8 +2,10 @@
 #include "HwndSelector.h"
 #include <cstdio>
 #include "FakeCursor.h"
-#include <vector>
+#include <vector> 
+#include "shellscalingapi.h"
 
+#pragma comment(lib, "Shcore.lib") //for scaling
 namespace Proto
 {
 
@@ -99,6 +101,8 @@ namespace Proto
             selectedHwnd = (intptr_t)data.hwnd;
     }
 
+    int factor = 0;
+    int oldfactor = 0;
     void HwndSelector::UpdateWindowBounds()
     {
         RECT rect;
@@ -109,6 +113,21 @@ namespace Proto
         }
         else
             fprintf(stderr, "GetClientRect failed in update main window bounds\n");
+
+        HMONITOR monitor;
+        monitor = MonitorFromWindow(
+            (HWND)selectedHwnd,
+            MONITOR_DEFAULTTONEAREST
+        );
+        
+        UINT dpiX, dpiY;
+        GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+        factor = (dpiX * 100) / 96;
+        if (factor != oldfactor)
+        {
+			FakeCursor::setmonitorscale((int)factor);
+			oldfactor = factor;
+        }
     }
 
     void HwndSelector::SetSelectedHwnd(intptr_t set)

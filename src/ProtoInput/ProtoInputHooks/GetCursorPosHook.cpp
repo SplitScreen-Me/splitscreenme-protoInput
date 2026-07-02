@@ -12,43 +12,45 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 {	
 	if (lpPoint)
 	{
-		if (!XinputHook::TranslateMKBtoXinput)
+		if (XinputHook::TranslateMKBtoXinput)
+		{
+			lpPoint->x = SetCursorPosHook::mousesethere.x;
+			lpPoint->y = SetCursorPosHook::mousesethere.y;
+
+		}
+		else
 		{
 			const auto& state = FakeMouseKeyboard::GetMouseState();
 			lpPoint->x = state.x;
 			lpPoint->y = state.y;
-		}
-		else
-		{
-			lpPoint->x = SetCursorPosHook::mousesethere.x;
-			lpPoint->y = SetCursorPosHook::mousesethere.y;
-		}
-		if (FakeMouseKeyboard::PutMouseInsideWindow)
-		{
-			int clientWidth = HwndSelector::windowWidth;
-			int clientHeight = HwndSelector::windowHeight;
-			if (!FakeMouseKeyboard::DefaultTopLeftMouseBounds)
+		
+			if (FakeMouseKeyboard::PutMouseInsideWindow)
 			{
-				if (lpPoint->y < 1)
-					lpPoint->y = 0;  // Top edge
-				if (lpPoint->x < 1)
-					lpPoint->x = 0;  // Left edge
+				int clientWidth = HwndSelector::windowWidth;
+				int clientHeight = HwndSelector::windowHeight;
+				if (!FakeMouseKeyboard::DefaultTopLeftMouseBounds)
+				{
+					if (lpPoint->y < 1)
+						lpPoint->y = 0;  // Top edge
+					if (lpPoint->x < 1)
+						lpPoint->x = 0;  // Left edge
+				}
+				if (!FakeMouseKeyboard::DefaultBottomRightMouseBounds)
+				{
+					if (lpPoint->y > clientHeight - 1)
+						lpPoint->y = clientHeight - 1;  // Bottom edge
+					if (lpPoint->x > clientWidth - 1)
+						lpPoint->x = clientWidth - 1;  // Right edge
+				}
 			}
-			if (!FakeMouseKeyboard::DefaultBottomRightMouseBounds)
-			{
-				if (lpPoint->y > clientHeight - 1)
-					lpPoint->y = clientHeight - 1;  // Bottom edge
-				if (lpPoint->x > clientWidth - 1)
-					lpPoint->x = clientWidth - 1;  // Right edge
-			}
-		}
-		//any scaling?
-		POINT clientPos = { lpPoint->x, lpPoint->y };
-		clientPos = WindowMsgHook::getfactor(clientPos);
+			//any scaling?
+			POINT clientPos = { lpPoint->x, lpPoint->y };
+			clientPos = WindowMsgHook::getfactor(clientPos);
 
-		lpPoint->x = clientPos.x; 
-		lpPoint->y = clientPos.y;
-		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
+			lpPoint->x = clientPos.x; 
+			lpPoint->y = clientPos.y;
+			ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
+		}
 	}
 	
 	return true;
