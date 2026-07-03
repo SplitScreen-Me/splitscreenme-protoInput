@@ -139,14 +139,14 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_RBUTTONUP, mouseMkFlags | MouseButtonFilter::signature, mousePointLparam);
 
 		if ((data.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, (mouseMkFlags | MK_XBUTTON1) | (XBUTTON1 << 16) | MouseButtonFilter::signature, mousePointLparam);
 		if ((data.usButtonFlags & RI_MOUSE_BUTTON_4_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON1 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, (mouseMkFlags | MK_XBUTTON1) | (XBUTTON1 << 16) | MouseButtonFilter::signature, mousePointLparam);
 
 		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONDOWN, (mouseMkFlags | MK_XBUTTON2) | (XBUTTON2 << 16) | MouseButtonFilter::signature, mousePointLparam);
 		if ((data.usButtonFlags & RI_MOUSE_BUTTON_5_UP) != 0)
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, mouseMkFlags | (XBUTTON2 << 4) | MouseButtonFilter::signature, mousePointLparam);
+			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_XBUTTONUP, (mouseMkFlags | MK_XBUTTON2) | (XBUTTON2 << 16) | MouseButtonFilter::signature, mousePointLparam);
 		}
 
 	// WM_MOUSEMOVE
