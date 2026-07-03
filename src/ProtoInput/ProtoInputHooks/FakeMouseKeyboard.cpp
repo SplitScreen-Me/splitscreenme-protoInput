@@ -60,10 +60,10 @@ void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
 		{
 			if (!DefaultBottomRightMouseBounds)
 			{
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x >= max)
 					mouseState.x = max - 1;
 
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y >= max)
 					mouseState.y = max - 1;
 			}
 			else if (DefaultBottomRightMouseBounds)
@@ -143,9 +143,9 @@ void FakeMouseKeyboard::SetMousePos(int x, int y)
 		{
 			if (!DefaultBottomRightMouseBounds)
 			{
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x >= max)
 					mouseState.x = max - 1;
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y >= max)
 					mouseState.y = max - 1;
 			}
 			else if (DefaultBottomRightMouseBounds)
