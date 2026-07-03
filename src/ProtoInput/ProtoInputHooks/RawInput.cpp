@@ -247,6 +247,11 @@ void RawInput::SendKeyMessage(const RAWKEYBOARD& data, bool pressed)
 				lparam |= (1 << 30);
 			}
 
+			if (FakeMouseKeyboard::IsExtendedKeyStatePressed(data.VKey))
+			{
+				lparam |= (1 << 24); // Set the extended-key flag
+			}
+
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYDOWN,
 				MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
 				lparam);
@@ -258,6 +263,11 @@ void RawInput::SendKeyMessage(const RAWKEYBOARD& data, bool pressed)
 			lparam |= (data.MakeCode << 16); // Scan code
 			lparam |= (1 << 30); // Previous key state (always 1 for key up)
 			lparam |= (1 << 31); // Transition state (always 1 for key up)
+
+			if (FakeMouseKeyboard::IsExtendedKeyStatePressed(data.VKey))
+			{
+				lparam |= (1 << 24); // Set the extended-key flag
+			}
 
 			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_KEYUP,
 				MessageFilterHook::IsKeyboardButtonFilterEnabled() ? data.VKey | KeyboardButtonFilter::signature : data.VKey,
