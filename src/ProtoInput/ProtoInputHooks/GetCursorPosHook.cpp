@@ -24,20 +24,15 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 			lpPoint->x = state.x;
 			lpPoint->y = state.y;
 		}
-		else
-		{
-			lpPoint->x = SetCursorPosHook::mousesethere.x;
-			lpPoint->y = SetCursorPosHook::mousesethere.y;
-		}
 
 		//any scaling?
 		POINT clientPos = { lpPoint->x, lpPoint->y };
 		clientPos = WindowMsgHook::getfactor(clientPos);
 
-			lpPoint->x = clientPos.x; 
-			lpPoint->y = clientPos.y;
-			ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
-		}
+		lpPoint->x = clientPos.x; 
+		lpPoint->y = clientPos.y;
+		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
+		
 	}
 	
 	return true;

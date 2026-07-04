@@ -4,6 +4,9 @@
 #include "FakeCursor.h"
 #include "INISettings.h"
 
+#include "shellscalingapi.h"
+
+#pragma comment(lib, "Shcore.lib") //for scaling
 namespace Proto
 {
 
