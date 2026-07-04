@@ -2,7 +2,7 @@
 #include "HwndSelector.h"
 #include <cstdio>
 #include "FakeCursor.h"
-
+#include "INISettings.h"
 
 namespace Proto
 {
@@ -16,6 +16,8 @@ namespace Proto
     {
         unsigned long pid;
         HWND hwnd;
+    const char* winName;
+    const char* winClass;
     };
 
     BOOL IsMainWindow(HWND handle)
@@ -36,8 +38,32 @@ namespace Proto
         DWORD pid = 0;
         GetWindowThreadProcessId(handle, &pid);
 
-        if (data.pid != pid || !IsMainWindow(handle))
+    if (data.pid != pid)
             return TRUE; // Keep searching
+
+    bool strictMode = (data.winName && data.winName[0] != '\0') ||
+        (data.winClass && data.winClass[0] != '\0');
+
+    if (strictMode)
+    {
+        if (data.winClass && data.winClass[0] != '\0') {
+            char className[256];
+            GetClassNameA(handle, className, sizeof(className));
+            if (strcmp(className, data.winClass) != 0) return TRUE;
+        }
+
+        if (data.winName && data.winName[0] != '\0') {
+            char windowName[256];
+            GetWindowTextA(handle, windowName, sizeof(windowName));
+            if (strcmp(windowName, data.winName) != 0) return TRUE;
+        }
+
+        if (!IsWindowVisible(handle)) return TRUE;
+    }
+    else
+    {
+        if (!IsMainWindow(handle)) return TRUE;
+    }
 
         data.hwnd = handle;
 
@@ -46,14 +72,16 @@ namespace Proto
 
     void HwndSelector::UpdateMainHwnd(bool logOutput)
     {
-        // Go through all the top level windows, select the first that's visible & belongs to the process
+    // Check if remote hwnd is enabled
 		if (HwndSelector::RemoteHwndEnabled)
 		{
 			if (logOutput)
 				printf("Remote hwnd enabled, skipping search for main window\n");
 			return;
 		}
-        HandleData data{ GetCurrentProcessId(), nullptr };
+
+    // If not custom window, go through all the top level windows, select the first that's visible & belongs to the process
+    HandleData data = { GetCurrentProcessId(), nullptr, customWindowName, customClassName };
         EnumWindows(EnumWindowsCallback, (LPARAM)&data);
 
         const auto hwnd = (intptr_t)data.hwnd;

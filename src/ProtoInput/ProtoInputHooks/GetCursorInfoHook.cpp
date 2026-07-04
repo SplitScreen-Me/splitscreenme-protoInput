@@ -12,25 +12,6 @@ namespace Proto
 		
 			const auto& state = FakeMouseKeyboard::GetMouseState();
 			POINT clientPos = { state.x, state.y };
-			if (FakeMouseKeyboard::PutMouseInsideWindow)
-			{
-				int clientWidth = HwndSelector::windowWidth;
-				int clientHeight = HwndSelector::windowHeight;
-				if (!FakeMouseKeyboard::DefaultTopLeftMouseBounds)
-				{
-					if (clientPos.y < 1)
-						clientPos.y = 0;  // Top edge
-					if (clientPos.x < 1)
-						clientPos.x = 0;  // Left edge
-				}
-				if (!FakeMouseKeyboard::DefaultBottomRightMouseBounds)
-				{
-					if (clientPos.y > clientHeight - 1)
-						clientPos.y = clientHeight - 1;  // Bottom edge
-					if (clientPos.x > clientWidth - 1)
-						clientPos.x = clientWidth - 1;  // Right edge
-				}
-			}
 
 			//any scaling?
 			clientPos = WindowMsgHook::getfactor(clientPos);
