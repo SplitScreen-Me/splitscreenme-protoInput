@@ -56,6 +56,7 @@ public:
 	static void ClearAsyncKeyState(int vkey);
 	static bool IsKeyStatePressed(int vkey);
 	static bool IsAsyncKeyStatePressed(int vkey);
+	static bool IsExtendedKeyStatePressed(int vkey); //To use the exteended key flag (like arrow keys)
 
 	// Some games must use the exact window rect to determine the edge of the window.
 	static bool PutMouseInsideWindow;

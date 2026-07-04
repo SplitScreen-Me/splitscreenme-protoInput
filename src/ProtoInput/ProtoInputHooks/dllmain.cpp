@@ -16,6 +16,7 @@
 #include "HwndSelector.h"
 #include "FocusMessageLoop.h"
 #include "FakeCursor.h"
+#include "INISettings.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
 
@@ -35,7 +36,10 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
 
     std::cout << "Hooks DLL loaded\n";
 
-    Proto::HwndSelector::UpdateMainHwnd(); //get main window of game
+    // LoadConfig is an alternative way of setting the configuration values instead of using the pipe communication.
+    Proto::LoadConfig();
+
+    Proto::HwndSelector::UpdateMainHwnd();
 
     Proto::FocusMessageLoop::SetupThread(); //setfocus message spamming loop
 

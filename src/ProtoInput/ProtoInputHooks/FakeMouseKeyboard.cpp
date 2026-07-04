@@ -58,10 +58,10 @@ void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
 		{
 			if (!DefaultBottomRightMouseBounds)
 			{
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x >= max)
 					mouseState.x = max - 1;
 
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y >= max)
 					mouseState.y = max - 1;
 			}
 			else if (DefaultBottomRightMouseBounds)
@@ -141,9 +141,9 @@ void FakeMouseKeyboard::SetMousePos(int x, int y)
 		{
 			if (!DefaultBottomRightMouseBounds)
 			{
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowWidth * 2 : HwndSelector::windowWidth; mouseState.x >= max)
 					mouseState.x = max - 1;
-				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y > max)
+				if (int max = mouseState.extendMouseBounds ? HwndSelector::windowHeight * 2 : HwndSelector::windowHeight; mouseState.y >= max)
 					mouseState.y = max - 1;
 			}
 			else if (DefaultBottomRightMouseBounds)
@@ -262,6 +262,29 @@ bool FakeMouseKeyboard::IsAsyncKeyStatePressed(int vkey)
 	}
 
 	return false;
+}
+
+bool FakeMouseKeyboard::IsExtendedKeyStatePressed(int vkey)
+{
+	switch (vkey)
+	{
+	case VK_UP:
+	case VK_DOWN:
+	case VK_LEFT:
+	case VK_RIGHT:
+	case VK_HOME:
+	case VK_END:
+	case VK_PRIOR:
+	case VK_NEXT:
+	case VK_INSERT:
+	case VK_DELETE:
+	case VK_RCONTROL:
+	case VK_RMENU:
+	case VK_SEPARATOR:
+		return true;
+	default:
+		return false;
+	}
 }
 
 }
