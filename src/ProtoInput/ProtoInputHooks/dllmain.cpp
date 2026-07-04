@@ -16,6 +16,7 @@
 #include "HwndSelector.h"
 #include "FocusMessageLoop.h"
 #include "FakeCursor.h"
+#include "INISettings.h"
 #include "TranslateXtoMKB.h"
 #include "ScanThread.h"
 
@@ -34,6 +35,9 @@ DWORD WINAPI StartThread(LPVOID lpParameter)
     Proto::SetConsoleVisible(false);
 
     std::cout << "Hooks DLL loaded\n";
+
+    // LoadConfig is an alternative way of setting the configuration values instead of using the pipe communication.
+    Proto::LoadConfig();
 
     Proto::HwndSelector::UpdateMainHwnd();
 

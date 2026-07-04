@@ -59,6 +59,8 @@ public:
 	static bool DrawFakeCursorFix;
 	void StartInternal();
 	void StartDrawLoopInternal();
+	void UpdatePointerWindowLoopInternal(); // Checks the selected window dimensions.
+	void GetWindowDimensions(HWND hWnd); // For pointerWindow
 
 	static int Showmessage;
 	static bool& GetToggleVisilbityShorcutEnabled()
