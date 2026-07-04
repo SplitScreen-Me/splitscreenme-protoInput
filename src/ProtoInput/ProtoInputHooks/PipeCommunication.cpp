@@ -350,7 +350,7 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDrawFakeCursorFix*>(messageBuffer);
 
 				printf("Received message to %s fake cursor with offset fix\n", body->enable ? "enable" : "disable");
-				FakeCursor::EnableDisableFakeCursor(body->enable);
+
 				FakeCursor::DrawFakeCursorFix = body->enable;
 				break;
 			}
