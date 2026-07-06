@@ -14,6 +14,7 @@ namespace Proto
 bool RegisterRawInputHook::logCallsToRegisterRawInput = false;
 RegisterRawInputHook* registerRawInputHookPtr = nullptr;
 bool RegisterRawInputHook::Reregisterinput;
+bool refreshed = false;
 
 BOOL WINAPI Hook_RegisterRawInputDevices(PCRAWINPUTDEVICE pRawInputDevices, UINT uiNumDevices, UINT cbSize)
 {
@@ -146,7 +147,8 @@ void RegisterRawInputHook::AddWindowToForward(HWND hwnd, std::bitset<9> usages)
 }
 
 void RegisterRawInputHook::ShowGuiStatus()
-{
+{	//todo
+	//GetWindowTextA was very slow. better make sure its only done once.
 	ImGui::Checkbox("Forward raw input", &RawInput::forwardRawInput);
 	ImGui::Checkbox("Log calls to registering raw input", &logCallsToRegisterRawInput);
 
@@ -165,22 +167,75 @@ void RegisterRawInputHook::ShowGuiStatus()
 	bool gotawindow = false;
 	for (const auto& hwnd : RawInput::forwardingWindows)
 	{
-		char windowTitleBuffer[60];
-		GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
-		ImGui::Text("Raw input to window: %X, %s", hwnd, windowTitleBuffer);
+		char windowTitleBuffer[60]; //GetWindowTextA was so slow
+		//GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
+		ImGui::Text("Raw input to window: %X", hwnd);
 		gotawindow = true;
 	}
 	if (gotawindow == false)
 		ImGui::Text("No rawinput forwarded. ");
+
 	char windowTitleBuffer[60];
 	GetWindowTextA((HWND)HwndSelector::GetSelectedHwnd(), windowTitleBuffer, sizeof(windowTitleBuffer));
 	ImGui::Separator();
-	ImGui::Text("Main window is: %X, %s", HwndSelector::GetSelectedHwnd(), windowTitleBuffer);
+	ImGui::Text("Main window is: %X %s", HwndSelector::GetSelectedHwnd(), windowTitleBuffer);
 	ImGui::Separator();
 	if (ImGui::Button("Force Main Window to forward list"))
 	{
+
 		RawInput::AddWindowToForward((HWND)HwndSelector::GetSelectedHwnd());
 	}
+
+	if (refreshed)
+	{
+		ImGui::TextUnformatted("Windows in process:");
+
+		static int pendingIndex = -1;
+
+		// Label for the combo
+		char currentLabel[64];
+		if (pendingIndex >= 0 && pendingIndex < HwndSelector::allwindows.size())
+			sprintf_s(currentLabel, "%08X", (unsigned int)(uintptr_t)HwndSelector::allwindows[pendingIndex]);
+		else
+			strcpy_s(currentLabel, "Select a window");
+
+		// Dropdown
+		if (ImGui::BeginCombo("##WindowSelector", currentLabel))
+		{
+			for (int i = 0; i < HwndSelector::allwindows.size(); i++)
+			{
+				HWND hwnd = HwndSelector::allwindows[i];
+
+				char itemLabel[64];
+				sprintf_s(itemLabel, "%08X", (unsigned int)(uintptr_t)hwnd);
+
+				bool isSelected = (pendingIndex == i);
+
+				if (ImGui::Selectable(itemLabel, isSelected))
+					pendingIndex = i;
+
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+
+			ImGui::EndCombo();
+		}
+		if (ImGui::Button("Set window as main window"))
+		{
+			if (pendingIndex >= 0)
+			{
+				HWND hwnd = HwndSelector::allwindows[pendingIndex];
+				HwndSelector::RemoteHwndEnabled = true;
+				HwndSelector::SetSelectedHwnd((intptr_t)hwnd);
+			}
+		}
+	}
+	if (ImGui::Button("Refresh Window list"))
+	{
+		refreshed = true;
+		HwndSelector::GetAllProcessWindows();
+	}
+
 }
 
 void RegisterRawInputHook::InstallImpl()

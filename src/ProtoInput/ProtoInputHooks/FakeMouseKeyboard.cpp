@@ -7,8 +7,6 @@ namespace Proto
 
 FakeMouseState FakeMouseKeyboard::mouseState{};
 FakeKeyboardState FakeMouseKeyboard::keyboardState{};
-bool FakeMouseKeyboard::CallgameWindowLLKBHooks = false;
-bool FakeMouseKeyboard::CallgameWindowLLMouseHooks = false;
 bool FakeMouseKeyboard::PutMouseInsideWindow = false;
 bool FakeMouseKeyboard::DefaultTopLeftMouseBounds = false;
 bool FakeMouseKeyboard::DefaultBottomRightMouseBounds = false;
@@ -90,7 +88,7 @@ void FakeMouseKeyboard::AddMouseDelta(int dx, int dy)
 		}
 	}
 
-	if (FakeMouseKeyboard::CallgameWindowLLMouseHooks && SetWindowsHookHook::gameshookcallLLMouse != nullptr) //directly call HHOOK callback in game?
+	if (SetWindowsHookHook::LLMousehooked && SetWindowsHookHook::gameshookcallLLMouse != nullptr) //directly call HHOOK callback in game?
 	{
 		SetWindowsHookHook::FireFakeLLMouseMove(mouseState.x, mouseState.y);
 	}
@@ -210,7 +208,7 @@ void FakeMouseKeyboard::ReceivedKeyPressOrRelease(int vkey, bool pressed)
 			keyboardState.asyncKeysState[vkey] = true;
 	}
 
-	if (FakeMouseKeyboard::CallgameWindowLLKBHooks && SetWindowsHookHook::gameshookcallLLKB != nullptr) //directly call HHOOK callback in game?
+	if (SetWindowsHookHook::LLKBhooked && SetWindowsHookHook::gameshookcallLLKB != nullptr) //directly call HHOOK callback in game?
 	{
 		SetWindowsHookHook::FireFakeLLKeyboardEvent(vkey, pressed);
 	}

@@ -46,9 +46,6 @@ public:
 	static void AddMouseDelta(int dx, int dy);
 	static void SetMousePos(int x, int y);
 	
-	static bool CallgameWindowLLKBHooks;
-	static bool CallgameWindowLLMouseHooks;
-
 	static void SetClipCursor(int clientLeft, int clientTop, int clientRight, int clientBottom);
 	static void RemoveClipCursor();
 

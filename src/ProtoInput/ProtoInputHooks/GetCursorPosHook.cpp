@@ -12,16 +12,17 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 {	
 	if (lpPoint)
 	{
-		if (!XinputHook::TranslateMKBtoXinput)
+		if (XinputHook::TranslateMKBtoXinput)
+		{
+			lpPoint->x = SetCursorPosHook::mousesethere.x;
+			lpPoint->y = SetCursorPosHook::mousesethere.y;
+
+		}
+		else
 		{
 			const auto& state = FakeMouseKeyboard::GetMouseState();
 			lpPoint->x = state.x;
 			lpPoint->y = state.y;
-		}
-		else
-		{
-			lpPoint->x = SetCursorPosHook::mousesethere.x;
-			lpPoint->y = SetCursorPosHook::mousesethere.y;
 		}
 
 		//any scaling?
@@ -31,6 +32,7 @@ BOOL WINAPI Hook_GetCursorPos(LPPOINT lpPoint)
 		lpPoint->x = clientPos.x; 
 		lpPoint->y = clientPos.y;
 		ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), lpPoint);
+		
 	}
 	
 	return true;

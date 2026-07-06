@@ -834,6 +834,7 @@ void RawInputMenu()
     ImGui::Checkbox("Send mouse wheel messages", &RawInput::rawInputState.sendMouseWheelMessages);
     ImGui::Checkbox("Send keyboard button messages", &RawInput::rawInputState.sendKeyboardPressMessages);
     ImGui::Checkbox("Send mouse double click messages", &RawInput::rawInputState.sendMouseDblClkMessages);
+    ImGui::Checkbox("Send Messages to Subwindows", &RawInput::MessageAllWindows);
 
     ImGui::Separator();
 	
@@ -924,21 +925,21 @@ static void InfoMenu()
 
 void RenderImgui()
 {
-   // ImGui::ShowDemoWindow();
-   // return;
+    // ImGui::ShowDemoWindow();
+    // return;
     const auto displaySize = ImGui::GetIO().DisplaySize;
-	
+
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(displaySize.x, displaySize.y), ImGuiCond_Always);
 
     if (ImGui::Begin("Main", nullptr,
-                     ImGuiWindowFlags_NoTitleBar |
-                     ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoMove |
-                     ImGuiWindowFlags_NoCollapse |
-                     //ImGuiWindowFlags_NoBackground |
-                     // ImGuiWindowFlags_MenuBar |
-                     ImGuiWindowFlags_NoBringToFrontOnFocus
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse |
+        //ImGuiWindowFlags_NoBackground |
+        // ImGuiWindowFlags_MenuBar |
+        ImGuiWindowFlags_NoBringToFrontOnFocus
     ))
     {
 
@@ -951,7 +952,7 @@ void RenderImgui()
         ImGui::Begin("Hooks/Filter", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
         const auto hooksWindowSize = ImVec2(ImGui::GetWindowSize().x, mainWindowSize.y);
         ImGui::SetWindowSize(hooksWindowSize);
-    	
+
         if (ImGui::BeginTabBar("Tabs"))
         {
             if (ImGui::BeginTabItem("Hooks"))
@@ -960,7 +961,7 @@ void RenderImgui()
                 ImGui::EndTabItem();
             }
             if (RawInput::TranslateXinputtoMKB || XinputHook::TranslateMKBtoXinput)
-            { 
+            {
                 if (ImGui::BeginTabItem("Translation options"))
                 {
                     XTranslateMenu();
@@ -978,13 +979,13 @@ void RenderImgui()
                         {
                             ImGui::PushID(1337);
                             ImGui::PushStyleColor(ImGuiCol_Text,
-                                                  (ImVec4)ImColor::HSV(35.0f / 255.0f, 0.9f, 0.9f)
+                                (ImVec4)ImColor::HSV(35.0f / 255.0f, 0.9f, 0.9f)
                             );
                             ImGui::TextWrapped("Warning: Message Filter hook is disabled.\nMessage filtering/blocking will not work!");
                             ImGui::PopStyleColor(1);
                             ImGui::PopID();
                         }
-                    	
+
                         MessageFilterHook::FilterGui();
 
                         ImGui::EndTabItem();
@@ -995,13 +996,13 @@ void RenderImgui()
                         {
                             ImGui::PushID(1337);
                             ImGui::PushStyleColor(ImGuiCol_Text,
-                                                  (ImVec4)ImColor::HSV(35.0f / 255.0f, 0.9f, 0.9f)
+                                (ImVec4)ImColor::HSV(35.0f / 255.0f, 0.9f, 0.9f)
                             );
                             ImGui::TextWrapped("Warning: Message Filter hook is disabled.\nMessage filtering/blocking will not work!");
                             ImGui::PopStyleColor(1);
                             ImGui::PopID();
                         }
-                    	
+
                         MessageList::ShowUI();
                         ImGui::EndTabItem();
                     }
@@ -1011,14 +1012,14 @@ void RenderImgui()
             }
             ImGui::EndTabBar();
         }
-    	    	
+
         ImGui::End();
 
 
         ImGui::SetNextWindowPos(ImVec2(hooksWindowSize.x, 0), ImGuiCond_Always);
         ImGui::SetNextWindowSizeConstraints(ImVec2(200, displaySize.y), ImVec2(displaySize.x - 200, displaySize.y));
         ImGui::SetNextWindowSize(ImVec2(displaySize.x - hooksWindowSize.x, 0.0f), ImGuiCond_Always);
-    	
+
         ImGui::Begin("Other", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         const auto otherWindowSize = ImVec2(ImGui::GetWindowSize().x, mainWindowSize.y);
         ImGui::SetWindowSize(otherWindowSize);
@@ -1028,12 +1029,12 @@ void RenderImgui()
         {
             InfoMenu();
         }
-    	
+
         if (ImGui::CollapsingHeader("Controls", ImGuiTreeNodeFlags_DefaultOpen)) // ImGuiTreeNodeFlags_Leaf
         {
             ControlsMenu();
         }
-    	
+
         if (ImGui::CollapsingHeader("Raw Input", ImGuiTreeNodeFlags_DefaultOpen))
         {
             RawInputMenu();
@@ -1053,6 +1054,7 @@ void RenderImgui()
 
     }
     ImGui::End();
+
 }
 DWORD WINAPI GuiThread(LPVOID lpParameter)
 {

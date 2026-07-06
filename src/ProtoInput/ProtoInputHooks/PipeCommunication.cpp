@@ -342,10 +342,10 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				printf("Received message to %s fake cursor\n", body->enable ? "enable" : "disable");
 
 				FakeCursor::EnableDisableFakeCursor(body->enable);
-
+				//MessageBoxA(NULL, "s", "s", MB_OK);
 				break;
 			}
-			case ProtoPipe::PipeMessageType::SetDrawFakeCursorFix:
+			case ProtoPipe::PipeMessageType::SetDrawFakeCursorFix: //does not enable drawing
 			{
 				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetDrawFakeCursorFix*>(messageBuffer);
 
@@ -542,6 +542,15 @@ DWORD WINAPI PipeThread(LPVOID lpParameter)
 				printf("Received PointerInMouse, PointerInMouse enabled = %d\n", body->enabled);
 				Proto::WindowMsgHook::PointerInMouse(body->enabled);
 				RawInput::PointerInMouse = body->enabled; //for runtime GUI
+				break;
+			}
+			case ProtoPipe::PipeMessageType::SetSendMessagesToSubWindows:
+			{
+				const auto body = reinterpret_cast<ProtoPipe::PipeMessageSetSendMessagesToSubWindows*>(messageBuffer);
+
+				printf("Received SendMessagesToSubWindows, MessageAllWindows enabled = %d\n", body->enabled);
+				//MessageBoxA(NULL, "s", "s", MB_OK);
+				RawInput::MessageAllWindows = body->enabled;
 				break;
 			}
 			case ProtoPipe::PipeMessageType::SetShowCursorWhenImageUpdated:

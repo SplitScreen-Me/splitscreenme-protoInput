@@ -28,7 +28,7 @@ BOOL WINAPI Hook_SetCursorPos(int X, int Y)
 			SetCursorPosHook::mousesethere.x = p.x;
 			SetCursorPosHook::mousesethere.y = p.y;
 		}
-		if (!XinputHook::TranslateMKBtoXinput)
+		else
 			FakeMouseKeyboard::SetMousePos(p.x, p.y);
 
 		FakeCursor::NotifyUpdatedCursorPosition();

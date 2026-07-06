@@ -2,6 +2,7 @@
 #include <cstdio>
 #include "HwndSelector.h"
 #include "GetKeyboardStateHook.h"
+#include "SetWindowsHookHook.h"
 
 namespace Proto
 {
@@ -27,11 +28,38 @@ DWORD WINAPI LoopThread(LPVOID lpParameter)
 		const HWND hwnd = (HWND)HwndSelector::GetSelectedHwnd();
 		if (hwnd != nullptr)
 		{
-			if (FocusMessageLoop::messagesToSend.wm_activate) PostMessageW(hwnd, WM_ACTIVATE, WA_CLICKACTIVE, 0);
-			if (FocusMessageLoop::messagesToSend.wm_activateapp) PostMessageW(hwnd, WM_ACTIVATEAPP, TRUE, 0);
-			if (FocusMessageLoop::messagesToSend.wm_ncactivate) PostMessageW(hwnd, WM_NCACTIVATE, TRUE, 0);
-			if (FocusMessageLoop::messagesToSend.wm_setfocus) PostMessageW(hwnd, WM_SETFOCUS, 0, 0);
-			if (FocusMessageLoop::messagesToSend.wm_mouseactivate) PostMessageW(hwnd, WM_MOUSEACTIVATE, HwndSelector::GetSelectedHwnd(), 1);
+			if (FocusMessageLoop::messagesToSend.wm_activate) 
+			{
+				PostMessageW(hwnd, WM_ACTIVATE, WA_CLICKACTIVE, 0);
+				if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+					SetWindowsHookHook::FireFakeGetMessage(WM_ACTIVATE, WA_CLICKACTIVE, 0);
+			}
+			if (FocusMessageLoop::messagesToSend.wm_activateapp) 
+			{
+				PostMessageW(hwnd, WM_ACTIVATEAPP, TRUE, 0);
+				if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+					SetWindowsHookHook::FireFakeGetMessage(WM_ACTIVATEAPP, TRUE, 0);
+			}
+			if (FocusMessageLoop::messagesToSend.wm_ncactivate)
+			{
+				PostMessageW(hwnd, WM_NCACTIVATE, TRUE, 0);
+				if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+					SetWindowsHookHook::FireFakeGetMessage(WM_NCACTIVATE, TRUE, 0);
+			}
+
+			if (FocusMessageLoop::messagesToSend.wm_setfocus)
+			{
+				PostMessageW(hwnd, WM_SETFOCUS, 0, 0);
+				if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+					SetWindowsHookHook::FireFakeGetMessage(WM_SETFOCUS, 0, 0);
+			}
+			
+			if (FocusMessageLoop::messagesToSend.wm_mouseactivate) 
+			{
+				PostMessageW(hwnd, WM_MOUSEACTIVATE, HwndSelector::GetSelectedHwnd(), 1);
+				if (SetWindowsHookHook::Messagehooked && SetWindowsHookHook::gameshookcallMessage != nullptr)
+					SetWindowsHookHook::FireFakeGetMessage(WM_MOUSEACTIVATE, HwndSelector::GetSelectedHwnd(), 1);
+			}
 
 			Sleep(FocusMessageLoop::sleepMilliseconds);
 		}

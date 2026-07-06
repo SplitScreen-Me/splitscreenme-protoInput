@@ -78,6 +78,7 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 	//reregister devices to game after hooking
 	bool Reregisterinput = false;
 	bool PointerInMouse = false;
+	bool SendMessagesToSubWindows = false;
 
 	bool TranslateMKBtoXinput = false;
 	bool TranslateXinputtoMKB = false;
@@ -124,7 +125,7 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 
 	bool showCursorWhenImageUpdated = false;
 
-	bool putMouseInsideWindow = true;
+	bool putMouseInsideWindow = false;
 	
 	bool drawFakeMouseCursor = true;
 	bool drawFakeCursorFix = false;
@@ -162,6 +163,7 @@ struct Profile //Profile::hooks::ProtoHookIDs::RenameHandlesHookID
 
 			cereal::make_nvp("Reregisterinput", Reregisterinput),
 			cereal::make_nvp("PointerInMouse", PointerInMouse),
+			cereal::make_nvp("SendMessagesToSubWindows", SendMessagesToSubWindows),
 
 			cereal::make_nvp("dinputToXinputRedirection", dinputToXinputRedirection),
 			cereal::make_nvp("useOpenXinput", useOpenXinput),

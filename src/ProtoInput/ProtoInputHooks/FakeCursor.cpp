@@ -18,6 +18,28 @@ FakeCursor FakeCursor::state{};
 int FakeCursor::Showmessage = 0;
 bool FakeCursor::DrawFakeCursorFix;
 
+int monitorscale; //100 //125 //150 //200 //300 //400
+
+//now scales if scale changes on HwndSelector::UpdateWindowBounds()
+int cursorWidth = 40; //was constant originally
+int cursorHeight = 40;//was constant originally
+
+void FakeCursor::setmonitorscale(int scale)
+{
+    if (FakeCursor::DrawFakeCursorFix || scale < 25) //another type of scaling there
+        return;
+
+    cursorWidth = 0;
+    cursorHeight = 0;
+    //25 scale = 10. 
+    // 40 size on 100% scale // 80 size on 200
+    while (scale >= 25) 
+    {
+        scale -= 25;
+        cursorWidth += 10;
+        cursorHeight += 10;
+    }
+}
 
 LRESULT WINAPI FakeCursorWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -355,7 +377,7 @@ void FakeCursor::DrawPointsandMessages() //only on Xtranslate
 }
 void FakeCursor::DrawCursor()
 {
-
+    
     POINT pos = { FakeMouseKeyboard::GetMouseState().x,FakeMouseKeyboard::GetMouseState().y };
 
     if (XinputHook::TranslateMKBtoXinput)
@@ -605,6 +627,7 @@ void FakeCursor::StartInternal()
     if (!RegisterClass(&wc))
     {
         fprintf(stderr, "Failed to open fake cursor window\n");
+        MessageBoxA(NULL, "FakeCursor failed RegisterClass. Cursor drawing not possible", "Protoinput Error", MB_OK);
     }
     else
     {
@@ -625,7 +648,7 @@ void FakeCursor::StartInternal()
 
         // ShowWindow(pointerWindow, SW_SHOWDEFAULT);
         // UpdateWindow(pointerWindow);
-        EnableDisableFakeCursor(drawingEnabled);
+        //EnableDisableFakeCursor(drawingEnabled);
 
     	// Over every screen
         EnumDisplayMonitors(nullptr, nullptr, &EnumWindowsProc, 0);
