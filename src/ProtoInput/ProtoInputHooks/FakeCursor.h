@@ -23,9 +23,6 @@ namespace Proto
 
 
 		// DrawFakeCursorFix. cursor offset scan and cursor size fix
-		int cursoroffsetx, cursoroffsety;
-		int offsetSET = 0; //0:sizing 1:scanning 2:done, only drawing until cursor change, or nochange
-		bool nochange = false; //if normal offset was found at first then assume all cursors got same offset
 		HCURSOR oldhCursor = NULL;
 		POINT OldTestpos = { 0,0 };
 
