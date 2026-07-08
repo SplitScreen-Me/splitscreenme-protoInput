@@ -802,6 +802,8 @@ void RawInputMenu()
     {
         FakeCursor::EnableDisableFakeCursor(showFakeCursor);
     }
+    if (showFakeCursor)
+        ImGui::Checkbox("FakeCursor Offset Fix", &FakeCursor::DrawFakeCursorFix);
 
     bool ignoreMouseBounds = FakeMouseKeyboard::GetMouseState().ignoreMouseBounds;
     if (ImGui::Checkbox("Ignore mouse bounds", &ignoreMouseBounds))

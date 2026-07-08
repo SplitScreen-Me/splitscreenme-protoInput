@@ -75,13 +75,13 @@ BOOL CALLBACK EnumWindowsProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
     return true;
 }
 
-    void FakeCursor::GetWindowDimensions(HWND pointerWindow)
+void FakeCursor::GetWindowDimensions(HWND pointerWindow)
 {
 
     HWND tHwnd = (HWND)HwndSelector::GetSelectedHwnd();
     if (pointerWindow == tHwnd)
     {
-        SetWindowPos(pointerWindow, /*HWND_TOP*/HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        SetWindowPos(pointerWindow, /*HWND_TOP*/HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOACTIVATE);
         return;
     }
 
@@ -93,12 +93,27 @@ BOOL CALLBACK EnumWindowsProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
         POINT topLeft = { cRect.left, cRect.top };
         ClientToScreen(tHwnd, &topLeft);
 
+        int targetWidth = cRect.right - cRect.left;
+        int targetHeight = cRect.bottom - cRect.top;
+
+        RECT pRect;
+        GetWindowRect(pointerWindow, &pRect);
+
+        if ((pRect.right - pRect.left) == targetWidth &&
+            (pRect.bottom - pRect.top) == targetHeight &&
+            pRect.left == topLeft.x &&
+            pRect.top == topLeft.y)
+        {
+            SetWindowPos(pointerWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW | SWP_NOACTIVATE);
+            return;
+        }
+
         SetWindowPos(pointerWindow, /*HWND_TOP*/HWND_TOPMOST,
             topLeft.x,
             topLeft.y,
-            cRect.right - cRect.left,
-            cRect.bottom - cRect.top,
-            SWP_NOACTIVATE);
+            targetWidth,
+            targetHeight,
+            SWP_NOACTIVATE); 
     }
 }
 
@@ -375,6 +390,27 @@ void FakeCursor::DrawPointsandMessages() //only on Xtranslate
         DrawMessage(hdc, (HWND)HwndSelector::GetSelectedHwnd(), transparencyBrush, FakeCursor::Showmessage);
 
 }
+
+//Drawfakecursor offset fix, still a work in progress
+int cursoroffsetx, cursoroffsety;
+int offsetSET = 0; //0:sizing 1:scanning 2:done, only drawing until cursor change, or nochange
+bool nochange = false; //if normal offset was found at first then assume all cursors got same offset
+bool symmetricdetected = false;
+bool symmetrysearch = false;
+
+extern "C" void __declspec(dllexport) __stdcall SetCursorOffset(int X, int Y)
+{
+    if (X == 543543) //enable symmetry search
+    { 
+        symmetrysearch = true;
+        nochange = false;
+        return;
+    }
+    cursoroffsetx = X;
+    cursoroffsety = Y;
+    nochange = true;
+}
+
 void FakeCursor::DrawCursor()
 {
     
@@ -410,9 +446,12 @@ void FakeCursor::DrawCursor()
         {
             if (DrawIconEx(hdc, pos.x, pos.y, hCursor, cursorWidth, cursorHeight, 0, transparencyBrush, DI_NORMAL))
             {
-                if (hCursor != oldhCursor && offsetSET > 1 && nochange == false)
+                if (symmetrysearch) //disabled because it broke constant offset on some games
                 {
-                    offsetSET = 0;
+                    if (hCursor != oldhCursor && offsetSET > 1 && nochange == false)
+                    {
+                        offsetSET = 0;
+                    }
                 }
                 if (offsetSET == 1 && hCursor != LoadCursorW(NULL, IDC_ARROW) && IsWindowVisible(pointerWindow)) //offset setting
                 {
@@ -424,7 +463,7 @@ void FakeCursor::DrawCursor()
                     cursoroffsety = -1;
                     int leftcursoroffsetx = 0;
                     int leftcursoroffsety = -1;
-                    int rightcursoroffsetx = 0;
+                    int rightcursoroffsetx = -5;
                     // Scanning
                     for (int y = 0; y < cursorHeight; y++)
                     {
@@ -441,14 +480,16 @@ void FakeCursor::DrawCursor()
                         if (leftcursoroffsetx != -1) break;
                     }
 
-
-                    for (int x = cursorWidth - 1; x >= 0; x--)
-                    {
-                        COLORREF pixelColor = GetPixel(hdcMem, x, leftcursoroffsety); // scan from right
-                        if (pixelColor != transparencyKey)
+                    if (symmetrysearch) //disabled because it broke constant offset on some games
+                    { 
+                        for (int x = cursorWidth - 1; x >= 0; x--)
                         {
-                            rightcursoroffsetx = cursorWidth - x;
-                            break;
+                            COLORREF pixelColor = GetPixel(hdcMem, x, leftcursoroffsety); // scan from right
+                            if (pixelColor != transparencyKey)
+                            {
+                                rightcursoroffsetx = cursorWidth - x;
+                                break;
+                            }
                         }
                     }
                     //Adjusting possible here if symmetric cursor is not found
@@ -456,6 +497,7 @@ void FakeCursor::DrawCursor()
                     {
                         cursoroffsety = cursorHeight / 2;
                         cursoroffsetx = cursorWidth / 2;
+                        symmetricdetected = true;
                     }
                     else if (leftcursoroffsety > 2 || leftcursoroffsetx > 2) //is there any other offsets?
                     {
@@ -463,7 +505,6 @@ void FakeCursor::DrawCursor()
                         cursoroffsety = leftcursoroffsety;
                         nochange = true;
                     }
-
                     else { //no offsets
                         cursoroffsetx = 0;
                         cursoroffsety = 0;
@@ -499,7 +540,7 @@ void FakeCursor::DrawCursor()
                         }
 
                     }
-                    offsetSET++; //size set, doing offset next run
+                    offsetSET++; //size set, doing offset next run                 
                 }
                 oldhCursor = hCursor;
             }
