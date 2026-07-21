@@ -477,7 +477,7 @@ void FakeCursor::DrawCursor()
                                 break;
                             }
                         }
-                        if (leftcursoroffsetx != -1) break;
+                        if (leftcursoroffsety != -1) break;
                     }
 
                     if (symmetrysearch) //disabled because it broke constant offset on some games
