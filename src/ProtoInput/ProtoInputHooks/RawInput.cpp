@@ -124,18 +124,20 @@ void RawInput::SendInputMessages(const RAWMOUSE& data)
 	{
 		if ((data.usButtonFlags & RI_MOUSE_WHEEL) != 0)
 		{
-			//mousewheel messages use screen coordinates instead of client coordinates
-			POINT screen;
-			screen.x = FakeMouseKeyboard::GetMouseState().x;
-			screen.y = FakeMouseKeyboard::GetMouseState().y;
-			ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &screen);
-			LPARAM newmousePoint = MAKELPARAM(screen.x, screen.y);
-
 			const unsigned int wparam = (data.usButtonData << 16)
 				| MouseWheelFilter::protoInputSignature
 				| mouseMkFlags;
-
-			PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MOUSEWHEEL, wparam, newmousePoint);
+			if (rawInputState.sendMouseDblClkMessages)
+			{
+				//mousewheel messages use screen coordinates instead of client coordinates
+				POINT screen;
+				screen.x = FakeMouseKeyboard::GetMouseState().x;
+				screen.y = FakeMouseKeyboard::GetMouseState().y;
+				ClientToScreen((HWND)HwndSelector::GetSelectedHwnd(), &screen);
+				LPARAM newmousePoint = MAKELPARAM(screen.x, screen.y);
+				PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MOUSEWHEEL, wparam, newmousePoint);
+			}
+			else PostMessageW((HWND)HwndSelector::GetSelectedHwnd(), WM_MOUSEWHEEL, wparam, mousePointLparam);
 		}
 	}
 
