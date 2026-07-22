@@ -335,6 +335,8 @@ namespace Proto
         }
 
         //less cpu usage blocking these here i guess as the wndproc is already hooked
+		case WM_POINTERUPDATE: 
+		case WM_POINTERDOWN: 
         case WM_POINTERLEAVE: 
         case WM_POINTERCAPTURECHANGED: //POINTERCAPTURECHANGED is not listed in proto yet
         case WM_MOUSELEAVE:
